@@ -1,0 +1,12 @@
+venv/
+__pycache__/
+*.pyc
+.env
+outputs/logs/
+outputs/patched/
+outputs/reports/
+contracts/vulnerable_bank/target/
+contracts/vulnerable_bank/.anchor/
+rag/vector_db/chroma/
+knowledge_base/raw/
+knowledge_base/processed/

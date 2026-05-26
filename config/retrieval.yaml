@@ -1,0 +1,3 @@
+top_k: 4
+chunk_size: 1200
+similarity_threshold: 0.65
