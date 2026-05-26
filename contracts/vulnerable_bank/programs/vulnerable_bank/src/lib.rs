@@ -44,7 +44,9 @@ pub mod vulnerable_bank {
     ) -> Result<()> {
         let bank = &mut ctx.accounts.bank;
         require!(ctx.accounts.caller.key() == bank.owner, ErrorCode::Unauthorized);
-        bank.balance = 0;
+        // The `close = caller` attribute on the `bank` account in the `CloseAccount` struct
+        // handles the transfer of remaining SOL and closing of the account.
+        // No explicit `bank.balance = 0;` is needed here.
         Ok(())
     }
 }
@@ -82,9 +84,10 @@ pub struct Deposit<'info> {
 
 #[derive(Accounts)]
 pub struct CloseAccount<'info> {
-    #[account(mut)]
+    #[account(mut, close = caller)]
     pub bank: Account<'info, BankAccount>,
 
+    #[account(mut)]
     pub caller: Signer<'info>,
 }
 
