@@ -1,16 +1,21 @@
 import time
 import json
+import shutil
+from pathlib import Path
 from google.api_core.exceptions import ResourceExhausted
 
 from agents.scanner.scanner_agent import scan_contract
 from agents.patcher.patch_agent import patch_contract
 from agents.validator.validator_agent import validate_contract
+from analysis.static_checks.checks import run_all_checks
 from utils.file_writer import save_patched_contract, save_final_report
 
 MAX_ITER = 3
-CONTRACT_PATH = (
-    "contracts/vulnerable_bank/"
-    "programs/vulnerable_bank/src/lib.rs"
+CONTRACT_PATH = Path(
+    "contracts/vulnerable_bank/programs/vulnerable_bank/src/lib.rs"
+)
+ORIGINAL_PATH = Path(
+    "contracts/vulnerable_bank/programs/vulnerable_bank/src/lib_original.rs"
 )
 
 
@@ -26,8 +31,20 @@ def call_with_retry(fn, *args, **kwargs):
 def main():
     print("\n🚀 SOLANA AI SECURITY PIPELINE STARTED\n")
 
+    # Always restore original vulnerable contract before scanning
+    if ORIGINAL_PATH.exists():
+        shutil.copy(ORIGINAL_PATH, CONTRACT_PATH)
+        print("[MAIN] Restored original vulnerable contract\n")
+
     with open(CONTRACT_PATH, "r") as f:
         contract = f.read()
+
+    # Run static checks first — deterministic, no AI needed
+    print("[MAIN] Running static checks...")
+    static_findings = run_all_checks(contract)
+    print(f"[MAIN] Static findings: {len(static_findings)}")
+    for f in static_findings:
+        print(f"  → [{f['severity'].upper()}] {f['type']}: {f['description']}")
 
     errors = ""
     validation = {}
@@ -39,9 +56,16 @@ def main():
         # SCAN
         scan_result = call_with_retry(scan_contract, contract)
         risks = scan_result.get("risks", [])
-        print(f"[MAIN] Risks found: {len(risks)}")
+        print(f"[MAIN] AI risks found: {len(risks)}")
         for r in risks:
             print(f"  → [{r.get('severity','?').upper()}] {r.get('type','?')}: {r.get('reason','?')}")
+
+        # Merge static findings into scan result for patcher context
+        all_findings = risks + [
+            {"type": s["type"], "severity": s["severity"], "reason": s["description"]}
+            for s in static_findings
+        ]
+        scan_result["risks"] = all_findings
 
         # PATCH
         contract = call_with_retry(patch_contract, contract, errors)
@@ -63,7 +87,7 @@ def main():
     else:
         print(f"\n⚠️  Max iterations ({MAX_ITER}) reached\n")
 
-    # SAVE OUTPUTS
+    # Save outputs
     save_patched_contract(contract)
     save_final_report(scan_result, contract, iteration + 1, validation.get("success", False))
 
@@ -71,7 +95,9 @@ def main():
     print(json.dumps({
         "success": validation.get("success", False),
         "iterations": iteration + 1,
-        "vulnerabilities_found": len(scan_result.get("risks", [])),
+        "static_findings": len(static_findings),
+        "ai_findings": len(risks),
+        "total_findings": len(scan_result.get("risks", [])),
         "report": "outputs/reports/final_report.json",
         "patched": "outputs/patched/patched_contract.rs"
     }, indent=2))
