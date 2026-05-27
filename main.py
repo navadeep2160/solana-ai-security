@@ -31,46 +31,46 @@ def call_with_retry(fn, *args, **kwargs):
 def main():
     print("\n🚀 SOLANA AI SECURITY PIPELINE STARTED\n")
 
-    # Always restore original vulnerable contract before scanning
+    # Always restore original vulnerable contract
     if ORIGINAL_PATH.exists():
         shutil.copy(ORIGINAL_PATH, CONTRACT_PATH)
         print("[MAIN] Restored original vulnerable contract\n")
 
     with open(CONTRACT_PATH, "r") as f:
-        contract = f.read()
+        original_contract = f.read()
 
-    # Run static checks first — deterministic, no AI needed
+    # ── PHASE 1: ANALYSIS (run once on original) ──
     print("[MAIN] Running static checks...")
-    static_findings = run_all_checks(contract)
+    static_findings = run_all_checks(original_contract)
     print(f"[MAIN] Static findings: {len(static_findings)}")
     for f in static_findings:
         print(f"  → [{f['severity'].upper()}] {f['type']}: {f['description']}")
 
+    print("\n[MAIN] Running AI scan...")
+    scan_result = call_with_retry(scan_contract, original_contract)
+    ai_risks = scan_result.get("risks", [])
+    print(f"[MAIN] AI findings: {len(ai_risks)}")
+    for r in ai_risks:
+        print(f"  → [{r.get('severity','?').upper()}] {r.get('type','?')}: {r.get('reason','?')}")
+
+    # Merge all findings
+    all_findings = ai_risks + [
+        {"type": s["type"], "severity": s["severity"], "reason": s["description"]}
+        for s in static_findings
+    ]
+    scan_result["risks"] = all_findings
+    print(f"\n[MAIN] Total findings: {len(all_findings)}")
+
+    # ── PHASE 2: PATCH + VALIDATE LOOP ──
+    contract = original_contract
     errors = ""
     validation = {}
-    scan_result = {}
 
     for iteration in range(MAX_ITER):
-        print(f"\n========== ITERATION {iteration + 1} / {MAX_ITER} ==========\n")
+        print(f"\n========== PATCH ITERATION {iteration + 1} / {MAX_ITER} ==========\n")
 
-        # SCAN
-        scan_result = call_with_retry(scan_contract, contract)
-        risks = scan_result.get("risks", [])
-        print(f"[MAIN] AI risks found: {len(risks)}")
-        for r in risks:
-            print(f"  → [{r.get('severity','?').upper()}] {r.get('type','?')}: {r.get('reason','?')}")
-
-        # Merge static findings into scan result for patcher context
-        all_findings = risks + [
-            {"type": s["type"], "severity": s["severity"], "reason": s["description"]}
-            for s in static_findings
-        ]
-        scan_result["risks"] = all_findings
-
-        # PATCH
         contract = call_with_retry(patch_contract, contract, errors)
 
-        # VALIDATE
         validation = validate_contract(contract)
 
         if validation["success"]:
@@ -87,7 +87,7 @@ def main():
     else:
         print(f"\n⚠️  Max iterations ({MAX_ITER}) reached\n")
 
-    # Save outputs
+    # ── PHASE 3: SAVE OUTPUTS ──
     save_patched_contract(contract)
     save_final_report(scan_result, contract, iteration + 1, validation.get("success", False))
 
@@ -96,8 +96,8 @@ def main():
         "success": validation.get("success", False),
         "iterations": iteration + 1,
         "static_findings": len(static_findings),
-        "ai_findings": len(risks),
-        "total_findings": len(scan_result.get("risks", [])),
+        "ai_findings": len(ai_risks),
+        "total_findings": len(all_findings),
         "report": "outputs/reports/final_report.json",
         "patched": "outputs/patched/patched_contract.rs"
     }, indent=2))
