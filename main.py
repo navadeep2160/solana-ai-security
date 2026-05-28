@@ -9,6 +9,7 @@ from agents.patcher.patch_agent import patch_contract
 from agents.validator.validator_agent import validate_contract
 from analysis.static_checks.checks import run_all_checks
 from analysis.ast_parser.rust_ast_parser import parse_rust_ast, format_ast_findings
+from analysis.ast_parser.cfg_builder import analyze_cfg
 from runtime_validator.checker import run_runtime_validation
 from utils.file_writer import save_patched_contract, save_final_report
 
@@ -65,6 +66,21 @@ def main():
         for f in ast_result.findings
     ]
 
+    print("\n[MAIN] Running CFG analysis...")
+    cfg_result = analyze_cfg(original_contract)
+    print(cfg_result["summary"])
+    cfg_findings = [
+        {
+            "type": f["type"],
+            "severity": f["severity"],
+            "reason": f["description"],
+            "line": f.get("line", 0),
+            "source": "cfg"
+        }
+        for f in cfg_result["findings"]
+    ]
+    print(f"[MAIN] CFG findings: {len(cfg_findings)}")
+
     # ── PHASE 2: AI SCAN ──
     print("\n" + "=" * 50)
     print("PHASE 2: AI SCAN")
@@ -76,16 +92,20 @@ def main():
     for r in ai_risks:
         print(f"  → [{r.get('severity','?').upper()}] {r.get('type','?')}: {r.get('reason','?')}")
 
-    all_findings = ai_risks + [
-        {"type": s["type"], "severity": s["severity"],
-         "reason": s["description"], "source": "static"}
-        for s in static_findings
-    ] + ast_findings
+    all_findings = (
+        ai_risks
+        + [{"type": s["type"], "severity": s["severity"],
+            "reason": s["description"], "source": "static"}
+           for s in static_findings]
+        + ast_findings
+        + cfg_findings
+    )
     scan_result["risks"] = all_findings
     scan_result["ast_summary"] = format_ast_findings(ast_result)
+    scan_result["cfg_summary"] = cfg_result["summary"]
 
     print(f"\n[MAIN] Total findings: {len(all_findings)}")
-    print(f"  AI: {len(ai_risks)}  Static: {len(static_findings)}  AST: {len(ast_findings)}")
+    print(f"  AI: {len(ai_risks)}  Static: {len(static_findings)}  AST: {len(ast_findings)}  CFG: {len(cfg_findings)}")
 
     # ── PHASE 3: PATCH + VALIDATE LOOP ──
     print("\n" + "=" * 50)
@@ -126,7 +146,7 @@ def main():
         if runtime_result.get("deploy_success"):
             print("[MAIN] ✅ Contract verified on local Solana validator")
         else:
-            print(f"[MAIN] ⚠️  Runtime validation failed: {runtime_result.get('error')}")
+            print(f"[MAIN] ⚠️  Runtime validation: {runtime_result.get('error')}")
 
     # ── PHASE 5: SAVE OUTPUTS ──
     save_patched_contract(contract)
@@ -142,6 +162,7 @@ def main():
         "findings": {
             "static": len(static_findings),
             "ast": len(ast_findings),
+            "cfg": len(cfg_findings),
             "ai": len(ai_risks),
             "total": len(all_findings)
         },
