@@ -8,6 +8,7 @@ from agents.scanner.scanner_agent import scan_contract
 from agents.patcher.patch_agent import patch_contract
 from agents.validator.validator_agent import validate_contract
 from analysis.static_checks.checks import run_all_checks
+from analysis.ast_parser.rust_ast_parser import parse_rust_ast, format_ast_findings
 from utils.file_writer import save_patched_contract, save_final_report
 
 MAX_ITER = 3
@@ -31,7 +32,7 @@ def call_with_retry(fn, *args, **kwargs):
 def main():
     print("\n🚀 SOLANA AI SECURITY PIPELINE STARTED\n")
 
-    # Always restore original vulnerable contract
+    # Restore original vulnerable contract
     if ORIGINAL_PATH.exists():
         shutil.copy(ORIGINAL_PATH, CONTRACT_PATH)
         print("[MAIN] Restored original vulnerable contract\n")
@@ -39,14 +40,37 @@ def main():
     with open(CONTRACT_PATH, "r") as f:
         original_contract = f.read()
 
-    # ── PHASE 1: ANALYSIS (run once on original) ──
-    print("[MAIN] Running static checks...")
+    # ── PHASE 1: STATIC ANALYSIS ──
+    print("=" * 50)
+    print("PHASE 1: STATIC ANALYSIS")
+    print("=" * 50)
+
+    print("\n[MAIN] Running regex static checks...")
     static_findings = run_all_checks(original_contract)
     print(f"[MAIN] Static findings: {len(static_findings)}")
     for f in static_findings:
         print(f"  → [{f['severity'].upper()}] {f['type']}: {f['description']}")
 
-    print("\n[MAIN] Running AI scan...")
+    print("\n[MAIN] Running AST parser...")
+    ast_result = parse_rust_ast(original_contract)
+    print(format_ast_findings(ast_result))
+    ast_findings = [
+        {
+            "type": f["type"],
+            "severity": f["severity"],
+            "reason": f"{f['description']} (at {f['location']})",
+            "line": f.get("line", 0),
+            "source": "ast"
+        }
+        for f in ast_result.findings
+    ]
+    print(f"\n[MAIN] AST findings: {len(ast_findings)}")
+
+    # ── PHASE 2: AI SCAN ──
+    print("\n" + "=" * 50)
+    print("PHASE 2: AI SCAN")
+    print("=" * 50)
+
     scan_result = call_with_retry(scan_contract, original_contract)
     ai_risks = scan_result.get("risks", [])
     print(f"[MAIN] AI findings: {len(ai_risks)}")
@@ -54,23 +78,31 @@ def main():
         print(f"  → [{r.get('severity','?').upper()}] {r.get('type','?')}: {r.get('reason','?')}")
 
     # Merge all findings
-    all_findings = ai_risks + [
-        {"type": s["type"], "severity": s["severity"], "reason": s["description"]}
+    static_as_risks = [
+        {"type": s["type"], "severity": s["severity"],
+         "reason": s["description"], "source": "static"}
         for s in static_findings
     ]
+    all_findings = ai_risks + static_as_risks + ast_findings
     scan_result["risks"] = all_findings
-    print(f"\n[MAIN] Total findings: {len(all_findings)}")
+    scan_result["ast_summary"] = format_ast_findings(ast_result)
 
-    # ── PHASE 2: PATCH + VALIDATE LOOP ──
+    print(f"\n[MAIN] Total findings: {len(all_findings)}")
+    print(f"  AI: {len(ai_risks)}  Static: {len(static_findings)}  AST: {len(ast_findings)}")
+
+    # ── PHASE 3: PATCH + VALIDATE LOOP ──
+    print("\n" + "=" * 50)
+    print("PHASE 3: PATCH + VALIDATE")
+    print("=" * 50)
+
     contract = original_contract
     errors = ""
     validation = {}
 
     for iteration in range(MAX_ITER):
-        print(f"\n========== PATCH ITERATION {iteration + 1} / {MAX_ITER} ==========\n")
+        print(f"\n--- Patch Iteration {iteration + 1} / {MAX_ITER} ---\n")
 
         contract = call_with_retry(patch_contract, contract, errors)
-
         validation = validate_contract(contract)
 
         if validation["success"]:
@@ -81,23 +113,32 @@ def main():
         errors = validation["stderr"][-1200:]
 
         if iteration < MAX_ITER - 1:
-            print("⏳ Waiting 15s before next iteration...\n")
+            print("⏳ Waiting 15s...\n")
             time.sleep(15)
 
     else:
         print(f"\n⚠️  Max iterations ({MAX_ITER}) reached\n")
 
-    # ── PHASE 3: SAVE OUTPUTS ──
+    # ── PHASE 4: SAVE OUTPUTS ──
     save_patched_contract(contract)
-    save_final_report(scan_result, contract, iteration + 1, validation.get("success", False))
+    save_final_report(
+        scan_result, contract,
+        iteration + 1,
+        validation.get("success", False)
+    )
 
-    print("\n========== FINAL RESULT ==========")
+    print("\n" + "=" * 50)
+    print("FINAL RESULT")
+    print("=" * 50)
     print(json.dumps({
         "success": validation.get("success", False),
         "iterations": iteration + 1,
-        "static_findings": len(static_findings),
-        "ai_findings": len(ai_risks),
-        "total_findings": len(all_findings),
+        "findings": {
+            "static": len(static_findings),
+            "ast": len(ast_findings),
+            "ai": len(ai_risks),
+            "total": len(all_findings)
+        },
         "report": "outputs/reports/final_report.json",
         "patched": "outputs/patched/patched_contract.rs"
     }, indent=2))
