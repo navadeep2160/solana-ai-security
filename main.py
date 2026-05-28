@@ -9,6 +9,7 @@ from agents.patcher.patch_agent import patch_contract
 from agents.validator.validator_agent import validate_contract
 from analysis.static_checks.checks import run_all_checks
 from analysis.ast_parser.rust_ast_parser import parse_rust_ast, format_ast_findings
+from runtime_validator.checker import run_runtime_validation
 from utils.file_writer import save_patched_contract, save_final_report
 
 MAX_ITER = 3
@@ -32,7 +33,6 @@ def call_with_retry(fn, *args, **kwargs):
 def main():
     print("\n🚀 SOLANA AI SECURITY PIPELINE STARTED\n")
 
-    # Restore original vulnerable contract
     if ORIGINAL_PATH.exists():
         shutil.copy(ORIGINAL_PATH, CONTRACT_PATH)
         print("[MAIN] Restored original vulnerable contract\n")
@@ -64,7 +64,6 @@ def main():
         }
         for f in ast_result.findings
     ]
-    print(f"\n[MAIN] AST findings: {len(ast_findings)}")
 
     # ── PHASE 2: AI SCAN ──
     print("\n" + "=" * 50)
@@ -77,13 +76,11 @@ def main():
     for r in ai_risks:
         print(f"  → [{r.get('severity','?').upper()}] {r.get('type','?')}: {r.get('reason','?')}")
 
-    # Merge all findings
-    static_as_risks = [
+    all_findings = ai_risks + [
         {"type": s["type"], "severity": s["severity"],
          "reason": s["description"], "source": "static"}
         for s in static_findings
-    ]
-    all_findings = ai_risks + static_as_risks + ast_findings
+    ] + ast_findings
     scan_result["risks"] = all_findings
     scan_result["ast_summary"] = format_ast_findings(ast_result)
 
@@ -119,19 +116,28 @@ def main():
     else:
         print(f"\n⚠️  Max iterations ({MAX_ITER}) reached\n")
 
-    # ── PHASE 4: SAVE OUTPUTS ──
+    # ── PHASE 4: RUNTIME VALIDATION ──
+    runtime_result = {}
+    if validation.get("success"):
+        print("\n" + "=" * 50)
+        print("PHASE 4: RUNTIME VALIDATION")
+        print("=" * 50)
+        runtime_result = run_runtime_validation(contract)
+        if runtime_result.get("deploy_success"):
+            print("[MAIN] ✅ Contract verified on local Solana validator")
+        else:
+            print(f"[MAIN] ⚠️  Runtime validation failed: {runtime_result.get('error')}")
+
+    # ── PHASE 5: SAVE OUTPUTS ──
     save_patched_contract(contract)
-    save_final_report(
-        scan_result, contract,
-        iteration + 1,
-        validation.get("success", False)
-    )
+    save_final_report(scan_result, contract, iteration + 1, validation.get("success", False))
 
     print("\n" + "=" * 50)
     print("FINAL RESULT")
     print("=" * 50)
     print(json.dumps({
         "success": validation.get("success", False),
+        "runtime_deployed": runtime_result.get("deploy_success", False),
         "iterations": iteration + 1,
         "findings": {
             "static": len(static_findings),
