@@ -21,26 +21,8 @@ pub mod vulnerable_bank {
         amount: u64,
     ) -> Result<()> {
         let bank = &mut ctx.accounts.bank;
-        let owner = &ctx.accounts.owner;
-        let system_program = &ctx.accounts.system_program;
 
-        if amount == 0 {
-            return Err(ErrorCode::WithdrawAmountZero.into());
-        }
-        
-        bank.balance = bank.balance.checked_sub(amount)
-            .ok_or(ErrorCode::InsufficientFunds)?;
-
-        anchor_lang::system_program::transfer(
-            CpiContext::new(
-                system_program.to_account_info(),
-                anchor_lang::system_program::Transfer {
-                    from: bank.to_account_info(),
-                    to: owner.to_account_info(),
-                },
-            ),
-            amount,
-        )?;
+        bank.balance = bank.balance.checked_sub(amount).ok_or(ErrorCode::Underflow)?;
 
         Ok(())
     }
@@ -50,32 +32,12 @@ pub mod vulnerable_bank {
         amount: u64,
     ) -> Result<()> {
         let bank = &mut ctx.accounts.bank;
-        let user = &ctx.accounts.user;
-        let system_program = &ctx.accounts.system_program;
-
-        if amount == 0 {
-            return Err(ErrorCode::DepositAmountZero.into());
-        }
-
-        bank.balance = bank.balance.checked_add(amount)
-            .ok_or(ErrorCode::Overflow)?;
-
-        anchor_lang::system_program::transfer(
-            CpiContext::new(
-                system_program.to_account_info(),
-                anchor_lang::system_program::Transfer {
-                    from: user.to_account_info(),
-                    to: bank.to_account_info(),
-                },
-            ),
-            amount,
-        )?;
-
+        bank.balance = bank.balance.checked_add(amount).ok_or(ErrorCode::Overflow)?;
         Ok(())
     }
 
     pub fn close_account(
-        ctx: Context<CloseAccount>,
+        _ctx: Context<CloseAccount>,
     ) -> Result<()> {
         Ok(())
     }
@@ -98,13 +60,14 @@ pub struct Initialize<'info> {
 
 #[derive(Accounts)]
 pub struct Withdraw<'info> {
-    #[account(mut, has_one = owner)]
+    #[account(
+        mut,
+        constraint = bank.owner == user.key()
+    )]
     pub bank: Account<'info, BankAccount>,
 
     #[account(mut)]
-    pub owner: Signer<'info>,
-
-    pub system_program: Program<'info, System>,
+    pub user: Signer<'info>,
 }
 
 #[derive(Accounts)]
@@ -112,15 +75,16 @@ pub struct Deposit<'info> {
     #[account(mut)]
     pub bank: Account<'info, BankAccount>,
 
-    #[account(mut)]
     pub user: Signer<'info>,
-
-    pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
 pub struct CloseAccount<'info> {
-    #[account(mut, close = owner, has_one = owner)]
+    #[account(
+        mut,
+        constraint = bank.owner == owner.key(),
+        close = owner
+    )]
     pub bank: Account<'info, BankAccount>,
 
     #[account(mut)]
@@ -135,12 +99,8 @@ pub struct BankAccount {
 
 #[error_code]
 pub enum ErrorCode {
-    #[msg("Insufficient funds in the bank account.")]
-    InsufficientFunds,
-    #[msg("Account balance overflowed.")]
+    #[msg("Account balance would underflow.")]
+    Underflow,
+    #[msg("Account balance would overflow.")]
     Overflow,
-    #[msg("Withdraw amount cannot be zero.")]
-    WithdrawAmountZero,
-    #[msg("Deposit amount cannot be zero.")]
-    DepositAmountZero,
 }
