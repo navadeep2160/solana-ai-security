@@ -10,3 +10,8 @@ contracts/vulnerable_bank/.anchor/
 rag/vector_db/chroma/
 knowledge_base/raw/
 knowledge_base/processed/
+test-ledger/
+*.log
+venv/
+__pycache__/
+target/
