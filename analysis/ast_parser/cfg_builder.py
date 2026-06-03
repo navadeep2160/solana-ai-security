@@ -167,7 +167,7 @@ class CFG:
 # Patterns
 # ===========================================================================
 
-_RE_FN_SIG   = re.compile(r'^\s*pub\s+fn\s+(\w+)\s*\(([^)]*)\)')
+_RE_FN_SIG   = re.compile(r'\s*pub\s+fn\s+(\w+)\s*\(')
 _RE_IF       = re.compile(r'\bif\b')
 _RE_ELSE     = re.compile(r'\belse\b')
 _RE_LOOP     = re.compile(r'\b(loop|while|for)\b')
@@ -220,25 +220,31 @@ class CFGBuilder:
         results, lines = [], source.splitlines()
         depth, in_fn   = 0, False
         fn_name = ""; fn_params = []; fn_start = 0; fn_lines: List[str] = []
+        in_sig = False  # True while collecting multi-line signature
 
         for i, raw in enumerate(lines):
             if not in_fn:
-                m = _RE_FN_SIG.match(raw)
-                if m:
-                    fn_name   = m.group(1)
-                    fn_params = [p.strip().split(':')[0].strip()
-                                 for p in m.group(2).split(',') if p.strip()]
-                    fn_start  = i
-                    fn_lines  = [raw]
-                    depth     = raw.count('{') - raw.count('}')
+                m = _RE_FN_SIG.search(raw)
+                if m or in_sig:
+                    if m and not in_sig:
+                        fn_name   = m.group(1)
+                        fn_params = []  # params span multiple lines, extracted separately
+                        fn_start  = i
+                        fn_lines  = [raw]
+                        in_sig    = True
+                    else:
+                        fn_lines.append(raw)
+
+                    depth += raw.count('{') - raw.count('}')
                     if depth > 0:
-                        in_fn = True
+                        in_fn  = True
+                        in_sig = False
             else:
                 fn_lines.append(raw)
                 depth += raw.count('{') - raw.count('}')
                 if depth <= 0:
                     results.append((fn_name, fn_params, fn_start, fn_lines))
-                    in_fn = False; fn_lines = []; depth = 0
+                    in_fn = False; fn_lines = []; depth = 0; in_sig = False
         return results
 
     def _build_function_cfg(self, fn_name, params, fn_lines, offset) -> FunctionCFG:

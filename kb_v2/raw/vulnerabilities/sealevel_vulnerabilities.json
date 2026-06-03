@@ -1,0 +1,51 @@
+[
+  {
+    "vuln_id": "SEA-001",
+    "name": "Missing Signer Authorization",
+    "category": "authentication",
+    "severity": "critical",
+    "source": "Sealevel-Attacks",
+    "folder": "0-signer-authorization",
+    "insecure_pattern": "AccountInfo used without signer validation",
+    "secure_pattern": "Manual is_signer verification",
+    "recommended_pattern": "Signer<'info> account constraint",
+    "description": "Sensitive instruction executes without verifying transaction signer authorization."
+  },
+  {
+    "vuln_id": "SEA-002",
+    "name": "Account Data Matching",
+    "category": "account_validation",
+    "severity": "high",
+    "source": "Sealevel-Attacks",
+    "folder": "1-account-data-matching",
+    "insecure_pattern": "Token account deserialized without verifying owner relationship",
+    "secure_pattern": "Manual owner comparison",
+    "recommended_pattern": "Anchor account constraint validation",
+    "description": "Program accepts account data without validating that the signer owns the supplied account."
+  }
+,
+{
+    "vuln_id": "SEA-003",
+    "name": "Missing Owner Check",
+    "category": "ownership",
+    "severity": "critical",
+    "source": "Sealevel-Attacks",
+    "folder": "2-owner-checks",
+    "insecure_pattern": "Account data trusted without verifying program ownership",
+    "secure_pattern": "Explicit owner validation against SPL Token Program",
+    "recommended_pattern": "Typed Anchor account ownership enforcement",
+    "description": "Program accepts attacker-controlled account data because account ownership is not validated."
+},
+{
+    "vuln_id": "SEA-004",
+    "name": "Type Cosplay",
+    "category": "type_safety",
+    "severity": "high",
+    "source": "Sealevel-Attacks",
+    "folder": "3-type-cosplay",
+    "insecure_pattern": "Account data deserialized into an expected type without verifying account discriminator",
+    "secure_pattern": "Explicit account discriminant validation",
+    "recommended_pattern": "Anchor Account<T> discriminator enforcement",
+    "description": "Attacker supplies a different account type with a compatible memory layout, causing the program to interpret malicious data as a trusted account."
+}
+]

@@ -1,0 +1,92 @@
+[
+  {
+    "source_id":"SRC-001",
+    "title":"VRust Paper",
+    "category":"papers",
+    "priority":"critical",
+    "kb_targets":["vulnerabilities","rules","exploit_patterns"],
+    "status":"pending",
+    "url":"https://dl.acm.org/doi/epdf/10.1145/3548606.3560552"
+  },
+  {
+    "source_id":"SRC-002",
+    "title":"Cantina Solana Security Guide",
+    "category":"docs",
+    "priority":"high",
+    "kb_targets":["vulnerabilities","patch_patterns"],
+    "status":"pending",
+    "url":"https://cantina.xyz/blog/securing-solana-a-developers-guide"
+  },
+  {
+    "source_id":"SRC-003",
+    "title":"Awesome Solana AI",
+    "category":"github",
+    "priority":"low",
+    "kb_targets":["architecture"],
+    "status":"pending",
+    "url":"https://github.com/solana-foundation/awesome-solana-ai"
+  },
+  {
+    "source_id":"SRC-004",
+    "title":"Solana Dev Skill",
+    "category":"github",
+    "priority":"medium",
+    "kb_targets":["architecture"],
+    "status":"pending",
+    "url":"https://github.com/solana-foundation/solana-dev-skill"
+  },
+  {
+    "source_id":"SRC-005",
+    "title":"Devnet Explorer Example",
+    "category":"docs",
+    "priority":"low",
+    "kb_targets":["architecture"],
+    "status":"pending",
+    "url":"https://explorer.solana.com/address/C4zuqqBwS1EdKRH9RiJ6Bm4SBACjwz6ttBBh2aficT5F?cluster=devnet"
+  },
+  {
+    "source_id":"SRC-006",
+    "title":"Anchor Repository",
+    "category":"github",
+    "priority":"critical",
+    "kb_targets":["patch_patterns","architecture"],
+    "status":"pending",
+    "url":"https://github.com/otter-sec/anchor"
+  },
+  {
+    "source_id":"SRC-007",
+    "title":"Solana Core Repository",
+    "category":"github",
+    "priority":"critical",
+    "kb_targets":["architecture","network_kb"],
+    "status":"pending",
+    "url":"https://github.com/solana-labs/solana"
+  },
+  {
+    "source_id":"SRC-008",
+    "title":"SPL Libraries",
+    "category":"github",
+    "priority":"high",
+    "kb_targets":["vulnerabilities","patch_patterns"],
+    "status":"pending",
+    "url":"https://github.com/solana-labs/solana-program-library/tree/master/libraries"
+  },
+  {
+    "source_id":"SRC-009",
+    "title":"Research Paper",
+    "category":"papers",
+    "priority":"medium",
+    "kb_targets":["architecture"],
+    "status":"pending",
+    "url":"https://arxiv.org/pdf/2511.11250"
+  },
+  {
+    "source_id":"SRC-010",
+    "title":"Solana Status",
+    "category":"incidents",
+    "priority":"critical",
+    "kb_targets":["network_kb","incidents"],
+    "status":"pending",
+    "url":"https://status.solana.com/"
+  }
+]

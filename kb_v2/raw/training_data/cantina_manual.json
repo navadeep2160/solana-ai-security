@@ -1,0 +1,19 @@
+{
+  "record_id": "CAN-001",
+  "vulnerability": "Account Reloading",
+  "category": "account_validation",
+  "severity": "high",
+  "bad_code": "rewards_distribution::cpi::update_rewards(cpi_ctx, amount)?; msg!(\"{}\", staking_account.rewards);",
+  "fixed_code": "rewards_distribution::cpi::update_rewards(cpi_ctx, amount)?; staking_account.reload()?;",
+  "explanation": "Anchor does not automatically refresh account state after CPI calls. Reading account fields after a CPI may use stale data unless reload() is called.",
+  "detection_rule": {
+    "pattern_type": "account_reload",
+    "regex": [
+      "cpi::",
+      "reload"
+    ]
+  },
+  "references": [
+    "Cantina Guide"
+  ]
+}

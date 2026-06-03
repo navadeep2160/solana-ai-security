@@ -1,0 +1,12 @@
+[toolchain]
+anchor_version = "0.30.1"
+
+[programs.localnet]
+vulnerable_bank = "7v4a7AxxpkGEs6YX6wefijkD3Qm6K3AjcngGNvkC4VeW"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "anchor test"

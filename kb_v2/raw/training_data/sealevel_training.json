@@ -1,0 +1,33 @@
+[
+  {
+    "record_id": "TRAIN-SEA-001",
+    "vulnerability": "Missing Signer Authorization",
+    "severity": "critical",
+    "category": "authentication",
+
+    "bad_code": "authority: AccountInfo<'info>",
+
+    "fixed_code": "if !ctx.accounts.authority.is_signer { return Err(ProgramError::MissingRequiredSignature); }",
+
+    "recommended_code": "authority: Signer<'info>",
+
+    "explanation": "A sensitive instruction accepts an account without verifying that the transaction was signed by the expected authority. An attacker can supply arbitrary accounts and execute privileged operations.",
+
+    "detection_rule": {
+      "pattern_type": "signer_check",
+      "regex": [
+        "AccountInfo<'info>",
+        "authority"
+      ],
+      "required_fix": [
+        "is_signer",
+        "Signer<'info>"
+      ]
+    },
+
+    "references": [
+      "SRC-001",
+      "Sealevel-Attacks/0-signer-authorization"
+    ]
+  }
+]

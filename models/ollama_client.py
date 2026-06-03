@@ -1,26 +1,17 @@
 import os
 from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI
-
 load_dotenv()
 
-MODELS = {
-    "scan_model":      "gemini-2.5-flash",
-    "patch_model":     "gemini-2.5-flash",
-    "validator_model": "gemini-2.5-flash",
-}
-
-def load_model(model_key: str):
-    model_name = MODELS.get(model_key, "gemini-2.5-flash")
-    api_key = os.getenv("GOOGLE_API_KEY")
+def load_model(model_name: str = "llama-3.3-70b-versatile"):
+    from langchain_groq import ChatGroq
+    api_key = os.environ.get("GROQ_API_KEY", "")
     if not api_key:
-        raise ValueError("GOOGLE_API_KEY not found in .env")
-    print(f"[GEMINI] Loading → {model_name}")
-    llm = ChatGoogleGenerativeAI(
-        model=model_name,
+        raise ValueError("GROQ_API_KEY not set in environment or .env file")
+    print(f"[GROQ] Loading → llama-3.3-70b-versatile")
+    llm = ChatGroq(
+        model="llama-3.3-70b-versatile",
         temperature=0,
-        google_api_key=api_key,
-        request_timeout=120,
+        api_key=api_key,
     )
-    print("[GEMINI] Model loaded successfully")
+    print(f"[GROQ] Model loaded successfully")
     return llm

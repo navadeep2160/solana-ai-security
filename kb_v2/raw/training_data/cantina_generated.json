@@ -1,0 +1,212 @@
+[
+    {
+        "record_id": "CAN-001",
+        "vulnerability": "Account Data Matching",
+        "category": "account_validation",
+        "severity": "high",
+        "explanation": "The Vulnerability Account data matching vulnerabilities occur when developers fail to verify that an account&#x27;s stored data matches expected values. This flaw is particularly dangerous in permission-related operations, where a program might unknowingly process requests from unauthorized accounts. Example Scenario A program allows administrators to update configuration settings. However, the implementation does not validate that the signer matches the stored administrator account: pub fn update_admin_settings ( ctx: Context&lt;UpdateAdminSettings&gt;, new_settings: AdminSettings ) -&gt; Result &lt;()&gt; { ctx.accounts.config_data.settings = new_settings; Ok (()) } #[derive(Accounts)] pub struct UpdateAdminSettings &lt; &#x27;info &gt; { #[account(mut)] pub config_data: Account&lt; &#x27;info , ConfigData&gt;, pub admin: Signer&lt; &#x27;info &gt;, } #[account] pub struct ConfigData { pub admin: Pubkey, pub settings: AdminSettings, } Recommended Mitigation To prevent unauthorized modifications, explicitly verify the administrator\u2019s identity before applying changes: pub fn update_admin_settings ( ctx: Context&lt;UpdateAdminSettings&gt;, new_settings: AdminSettings, ) -&gt; Result &lt;()&gt; { if ctx.accounts.admin.key() != ctx.accounts.config_data.admin { return Err (ProgramError::Unauthorized); } ctx.accounts.config_data.settings = new_settings; Ok (()) } Alternatively, use Anchor\u2019s constraint attribute: #[account( mut, constraint = config_data.admin == admin.key() )]",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-002",
+        "vulnerability": "Account Data Reallocation",
+        "category": "memory_management",
+        "severity": "high",
+        "explanation": "The Vulnerability In Anchor, the realloc function can introduce inefficiencies and expose stale data if not handled correctly. Reallocation is costly, and improper usage can lead to wasted compute units or unintentional exposure of prior data. Example Scenario A program dynamically modifies a to-do list, reallocating memory each time entries are added or removed: pub fn modify_todo_list ( ctx: Context&lt;ModifyTodoList&gt;, modifications: Vec &lt;TodoModification&gt;, ) -&gt; ProgramResult { let required_data_len = calculate_required_data_len(&amp;modifications); ctx.accounts.todo_list_data.realloc(required_data_len, false )?; Ok (()) } Recommended Mitigation Use zero_init appropriately: Set zero_init to true when increasing size after reducing it in the same transaction to prevent stale data exposure. Set zero_init to false when increasing size without a prior decrease, as memory is already zeroed. Use Address Lookup Tables (ALTs) instead of frequent reallocation to optimize memory management.",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-003",
+        "vulnerability": "Account Reloading",
+        "category": "account_validation",
+        "severity": "high",
+        "explanation": "The Vulnerability Anchor does not automatically refresh account states after a Cross-Program Invocation (CPI). If a program relies on data modified by a CPI without reloading the account, it may operate on outdated information. Example Scenario A staking program calculates rewards via a CPI but does not refresh the staking account afterward: pub fn update_rewards (ctx: Context&lt;UpdateStakingRewards&gt;, amount: u64 ) -&gt; Result &lt;()&gt; { rewards_distribution::cpi::update_rewards(cpi_ctx, amount)?; msg!( &quot;Rewards: {}&quot; , ctx.accounts.staking_account.rewards); // Uses stale data Ok (()) } Recommended Mitigation Explicitly reload the account after a CPI: ctx.accounts.staking_account.reload()?;",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-004",
+        "vulnerability": "Arbitrary CPI",
+        "category": "cross_program_invocation",
+        "severity": "critical",
+        "explanation": "The Vulnerability If a program allows arbitrary CPIs without verifying the target program&#x27;s identity, an attacker could trick it into executing a call to a malicious program. Example Scenario A rewards distribution program calls an external ledger program without verifying its identity: invoke( &amp;instruction, &amp;[ ctx.accounts.reward_account.clone(), ctx.accounts.ledger_program.clone(), ], ) Recommended Mitigation Check the program ID before invoking: if ctx.accounts.ledger_program.key() != &amp;custom_ledger_program::ID { return Err (ProgramError::IncorrectProgramId.into()); }",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-005",
+        "vulnerability": "Authority Transfer Functionality",
+        "category": "authorization",
+        "severity": "critical",
+        "explanation": "The Vulnerability Programs often assign specific public keys as authorities for critical functions. However, without a secure way to transfer authority, a compromised or inactive admin key could cause irreparable issues. Example Scenario A program enforces an admin key but lacks the ability to transfer it: require_keys_eq!( ctx.accounts.current_admin.key(), ctx.accounts.global_admin.authority, ); Recommended Mitigation Implement a two-step process for authority transfer: 1. Nominate a new authority: pub fn nominate_new_authority (ctx: Context&lt;NominateAuthority&gt;, new_authority: Pubkey) -&gt; Result &lt;()&gt; { let state = &amp; mut ctx.accounts.state; require_keys_eq!(state.authority, ctx.accounts.current_authority.key()); state.pending_authority = Some (new_authority); Ok (()) } 2. Accept authority transfer: pub fn accept_authority (ctx: Context&lt;AcceptAuthority&gt;) -&gt; Result &lt;()&gt; { let state = &amp; mut ctx.accounts.state; require_keys_eq!( Some (ctx.accounts.new_authority.key()), state.pending_authority); state.authority = ctx.accounts.new_authority.key(); state.pending_authority = None ; Ok (()) } This ensures authority transfers are intentional and verifiable, reducing risks of accidental or malicious transfers.",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-006",
+        "vulnerability": "Bump Seed Canonicalization",
+        "category": "pda",
+        "severity": "high",
+        "explanation": "The Vulnerability Failing to use the canonical bump when deriving Program Derived Addresses (PDAs) can lead to inconsistencies and potential attacks. Example Scenario A user-provided bump is used to derive a PDA: pub fn create_profile (ctx: Context&lt;CreateProfile&gt;, user_id: u64 , bump: u8 ) -&gt; Result &lt;()&gt; { let seeds: &amp;[&amp;[ u8 ]] = &amp;[ b&quot;profile&quot; , &amp;user_id.to_le_bytes(), &amp;[bump]]; let (derived_address, _) = Pubkey::create_program_address(seeds, &amp;ctx.program_id)?; if derived_address != ctx.accounts.profile.key() { return Err (ProgramError::InvalidSeeds); } Ok (()) } Recommended Mitigation Using find_program_address ensures the canonical bump is used: pub fn create_profile (ctx: Context&lt;CreateProfile&gt;, user_id: u64 ) -&gt; Result &lt;()&gt; { let seeds: &amp;[&amp;[ u8 ]] = &amp;[ b&quot;profile&quot; , user_id.to_le_bytes()]; let (derived_address, bump) = Pubkey::find_program_address(seeds, &amp;ctx.program_id); let profile_pda = &amp; mut ctx.accounts.profile; profile_pda.bump = bump; Ok (()) }",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-007",
+        "vulnerability": "Closing Accounts Securely",
+        "category": "account_lifecycle",
+        "severity": "medium",
+        "explanation": "The Vulnerability Improperly closed accounts can be reused for malicious purposes. Example Scenario A program transfers out an account\u2019s lamports but does not properly close it: pub fn close_account (ctx: Context&lt;CloseAccount&gt;) -&gt; ProgramResult { let account = ctx.accounts.data_account.to_account_info(); let destination = ctx.accounts.destination.to_account_info(); **destination.lamports.borrow_mut() += account.lamports(); **account.lamports.borrow_mut() = 0 ; Ok (()) } Recommended Mitigation Zeroing out the account data and adding a closed account discriminator prevents misuse: use anchor_lang::__private::CLOSED_ACCOUNT_DISCRIMINATOR; pub fn close_account (ctx: Context&lt;CloseAccount&gt;) -&gt; ProgramResult { let account = ctx.accounts.data_account.to_account_info(); let destination = ctx.accounts.destination.to_account_info(); **destination.lamports.borrow_mut() += account.lamports(); **account.lamports.borrow_mut() = 0 ; let mut data = account.try_borrow_mut_data()?; for byte in data.iter_mut() { *byte = 0 ; } data[.. 8 ].copy_from_slice(&amp;CLOSED_ACCOUNT_DISCRIMINATOR); Ok (()) }",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-008",
+        "vulnerability": "Duplicate Mutable Accounts",
+        "category": "account_aliasing",
+        "severity": "high",
+        "explanation": "The Vulnerability A malicious actor could pass the same account twice to an instruction expecting different accounts. Example Scenario A rewards program updates two accounts: pub fn distribute_rewards (ctx: Context&lt;DistributeRewards&gt;, reward_amount: u64 , bonus_amount: u64 ) -&gt; Result &lt;()&gt; { let reward_account = &amp; mut ctx.accounts.reward_account; let bonus_reward = &amp; mut ctx.accounts.bonus_account; reward_account.balance += reward_amount; bonus_reward.balance += bonus_amount; Ok (()) } Recommended Mitigation Ensure accounts are unique: #[derive(Accounts)] pub struct DistributeRewards &lt; &#x27;info &gt; { #[account(mut, constraint = reward_account.key() != bonus_account.key())] pub reward_account: Account&lt; &#x27;info , RewardAccount&gt;, #[account(mut)] pub bonus_account: Account&lt; &#x27;info , RewardAccount&gt;, }",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-009",
+        "vulnerability": "Frontrunning",
+        "category": "transaction_ordering",
+        "severity": "high",
+        "explanation": "The Vulnerability A seller could frontrun a buyer&#x27;s transaction by changing the sale price before the transaction executes. Example Scenario A seller updates a product\u2019s sale price: pub fn change_sale_price (ctx: Context&lt;ChangeSalePrice&gt;, new_price: u64 ) -&gt; Result &lt;()&gt; { ctx.accounts.product_listing.sale_price = new_price; Ok (()) } A buyer\u2019s transaction does not check for price changes. Recommended Mitigation Include an expected price check in the purchase function:",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-010",
+        "vulnerability": "Insecure Initialization",
+        "category": "initialization",
+        "severity": "critical",
+        "explanation": "The Vulnerability Unlike Ethereum\u2019s EVM, where contracts are deployed with constructors that automatically set state variables, Solana programs require manual initialization through a function (often named initialize). If not secured properly, an attacker can frontrun the initialization function and take control of the program. Example Scenario pub fn initialize (ctx: Context&lt;Initialize&gt;) -&gt; Result &lt;()&gt; { ctx.accounts.central_state.authority = authority.key(); // ... } #[derive(Accounts)] pub struct Initialize &lt; &#x27;info &gt; { pub authority: Signer&lt; &#x27;info &gt;, #[account( mut, init, payer = authority, space = CentralState::SIZE, seeds = [b &quot;central_state&quot; ] , bump )] pub central_state: Account&lt; &#x27;info , CentralState&gt;, } Recommended Mitigation A safer approach ensures that only the program\u2019s upgrade_authority can call the initialize function: #[account(constraint = program_data.upgrade_authority_address == Some(authority.key()))] pub program_data: Account&lt; &#x27;info , ProgramData&gt;;",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-011",
+        "vulnerability": "Loss of Precision",
+        "category": "precision",
+        "severity": "medium",
+        "explanation": "The Vulnerability Precision loss in arithmetic operations can lead to incorrect calculations, arbitrage opportunities, and unintended program behavior. Solana programs should use fixed-point arithmetic instead of floating points due to the limited subset of float operations available in Rust. Multiplication After Division Performing division before multiplication can cause precision loss due to rounding errors. To mitigate this, always multiply first: let result = (a * b) / c; Saturating Arithmetic Using saturating_* functions can lead to precision loss if the cap is unexpectedly reached: pub fn calculate_reward (transaction_amount: u64 , reward_multiplier: u64 ) -&gt; u64 { transaction_amount.saturating_mul(reward_multiplier) } Instead, implement logic to handle edge cases explicitly. Rounding Errors Rounding operations like try_round_u64() can artificially inflate values and lead to arbitrage attacks. Instead, use try_floor_u64() to round down: Decimal::from(collateral_amount).try_div( self . 0 )?.try_floor_u64()",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-012",
+        "vulnerability": "Missing Ownership Check",
+        "category": "ownership",
+        "severity": "critical",
+        "explanation": "The Vulnerability Ownership checks verify that a program owns an account before modifying it. Without this validation, unauthorized fund transfers or privileged operations can occur. Example Scenario pub fn admin_token_withdraw( program_id: &amp;Pubkey, accounts: &amp;[AccountInfo], amount: u64) -&gt; ProgramResult { if config.admin != admin.pubkey() { return Err(ProgramError::InvalidAdminAccount); } } Recommended Mitigation Verify the ownership of the account: if config.owner != program_id { return Err (ProgramError::InvalidConfigAccount); }",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-013",
+        "vulnerability": "Missing Signer Check",
+        "category": "authentication",
+        "severity": "critical",
+        "explanation": "The Vulnerability Transactions require signatures from the sender\u2019s private key for authentication. Without a signer check, any account can execute a transaction by supplying the correct parameters. Example Scenario if admin.pubkey() != config.admin { return Err (ProgramError::InvalidAdminAccount); } Recommended Mitigation Ensure that the signer flag is set: if !admin.is_signer { return Err (ProgramError::NotSigner); }",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-014",
+        "vulnerability": "Overflow and Underflow",
+        "category": "arithmetic",
+        "severity": "high",
+        "explanation": "The Vulnerability Rust integers have fixed sizes. If a value exceeds its maximum or minimum limit, an overflow or underflow occurs. While Rust checks for these issues in debug mode, it does not in release mode, which Solana uses by default. Example Scenario let mut balance: u8 = account.data.borrow()[ 0 ]; balance = balance - tokens_to_subtract; If tokens_to_subtract is greater than balance, an underflow occurs, increasing the balance instead of decreasing it. Recommended Mitigation Enable overflow checks in Cargo.toml: [profile.release] overflow-checks = true Alternatively, use Rust\u2019s checked arithmetic functions: let balance = balance.checked_sub(tokens_to_subtract).ok_or(ProgramError::InvalidInstructionData)?;",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-015",
+        "vulnerability": "Casting Vulnerabilities",
+        "category": "type_safety",
+        "severity": "high",
+        "explanation": "The Vulnerability Casting between integer types using the as keyword without proper checks can lead to integer overflow or underflow vulnerabilities. Rust truncates or extends values when converting between types, which can introduce unintended behavior. For example, when casting from u64 to u32, any value exceeding 4,294,967,295 will be truncated, potentially leading to unexpected results.",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-016",
+        "vulnerability": "PDA Sharing",
+        "category": "pda",
+        "severity": "high",
+        "explanation": "The Vulnerability Program Derived Addresses (PDAs) can introduce security risks if shared across multiple authority domains without proper access controls. Using a static seed to derive PDAs for different functionalities (e.g., staking and withdrawing rewards) can allow unauthorized access or fund manipulation.",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-017",
+        "vulnerability": "Remaining Accounts",
+        "category": "account_validation",
+        "severity": "high",
+        "explanation": "The Vulnerability The ctx.remaining_accounts parameter allows passing additional accounts dynamically but does not validate them. A malicious actor could exploit this by injecting unintended accounts, leading to unauthorized actions.",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-018",
+        "vulnerability": "Unsafe Rust",
+        "category": "memory_safety",
+        "severity": "critical",
+        "explanation": "The Vulnerability Rust\u2019s unsafe keyword bypasses its memory safety guarantees, allowing direct memory access, calling unsafe functions, or modifying mutable static variables. Improper use can lead to memory corruption, undefined behavior, or security vulnerabilities.",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-019",
+        "vulnerability": "Panics and Error Management",
+        "category": "error_handling",
+        "severity": "medium",
+        "explanation": "The Vulnerability A Rust panic occurs when an unrecoverable error happens. In Solana programs, panics can lead to unexpected behavior, stack unwinding, and even information leakage through error messages.",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-020",
+        "vulnerability": "Seed Collisions",
+        "category": "pda",
+        "severity": "high",
+        "explanation": "The Vulnerability PDAs are derived using seeds, and if two different inputs produce the same PDA, unintended behaviors such as fund loss or denial of service can occur.",
+        "references": [
+            "Cantina Guide"
+        ]
+    },
+    {
+        "record_id": "CAN-021",
+        "vulnerability": "Type Cosplay",
+        "category": "type_safety",
+        "severity": "high",
+        "explanation": "The Vulnerability Type cosplay occurs when an account type is misrepresented as another due to missing type checks during deserialization. This can allow unauthorized actions or data corruption.",
+        "references": [
+            "Cantina Guide"
+        ]
+    }
+]

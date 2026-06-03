@@ -1,0 +1,23 @@
+{
+  "0-signer-authorization": "The program accepts an account without verifying that it signed the transaction. Attackers can invoke privileged instructions using arbitrary accounts.",
+
+  "1-account-data-matching": "The program trusts account data without validating that the supplied account belongs to the expected authority. Attackers may substitute accounts they do not own.",
+
+  "10-sysvar-address-checking": "The program accepts a sysvar account without verifying its address. An attacker may provide a fake account that mimics the expected sysvar.",
+
+  "2-owner-checks": "The program deserializes and trusts account data without verifying ownership. Malicious users can provide attacker-controlled accounts with forged data.",
+
+  "3-type-cosplay": "Different account types can share compatible memory layouts. Without discriminator validation, an attacker can make one account type impersonate another.",
+
+  "4-initialization": "The program allows account initialization without enforcing proper initialization checks, enabling account takeover or state corruption.",
+
+  "5-arbitrary-cpi": "The program performs cross-program invocations without validating the target program. Attackers may redirect execution to malicious programs.",
+
+  "6-duplicate-mutable-accounts": "The same mutable account may be supplied multiple times, causing unexpected state updates and logic manipulation.",
+
+  "7-bump-seed-canonicalization": "Using non-canonical PDA bumps can allow attackers to generate alternative valid PDAs and bypass expected validation rules.",
+
+  "8-pda-sharing": "A PDA reused across multiple trust domains can allow one workflow to interfere with another, leading to privilege escalation or data corruption.",
+
+  "9-closing-accounts": "Improper account closure can leave reusable account state or permit account revival attacks after funds have been reclaimed."
+}

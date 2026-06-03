@@ -794,6 +794,23 @@ async def fuzz_async(program_id_str):
 
 
 def run_fuzzing(contract_code: str) -> dict:
+    # Always restore original vulnerable contract before fuzzing
+    import shutil, subprocess as sp
+    orig = "contracts/vulnerable_bank/programs/vulnerable_bank/src/lib_original.rs"
+    dest = "contracts/vulnerable_bank/programs/vulnerable_bank/src/lib.rs"
+    if os.path.exists(orig):
+        shutil.copy(orig, dest)
+        print("[FUZZER] Restored original vulnerable contract")
+        # Rebuild .so from original
+        build = sp.run(
+            ["cargo", "build-sbf"],
+            cwd="contracts/vulnerable_bank/programs/vulnerable_bank",
+            capture_output=True, text=True
+        )
+        if build.returncode == 0:
+            print("[FUZZER] ✅ Rebuilt .so from original contract")
+        else:
+            print(f"[FUZZER] ⚠️  Build failed: {build.stderr[:100]}")
     output = {
         "total_cases": 0, "passed": 0, "failed": 0,
         "findings": [], "cases": [],

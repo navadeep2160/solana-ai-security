@@ -16,29 +16,36 @@ pub mod vulnerable_bank {
         Ok(())
     }
 
+    // VULNERABILITY 1: No signer check — anyone can withdraw
     pub fn withdraw(
         ctx: Context<Withdraw>,
         amount: u64,
     ) -> Result<()> {
         let bank = &mut ctx.accounts.bank;
 
-        bank.balance = bank.balance.checked_sub(amount).ok_or(ErrorCode::Underflow)?;
+        // VULNERABILITY 2: No owner verification
+        // VULNERABILITY 3: No underflow check
+        bank.balance -= amount;
 
         Ok(())
     }
 
+    // VULNERABILITY 4: No overflow check on deposit
     pub fn deposit(
         ctx: Context<Deposit>,
         amount: u64,
     ) -> Result<()> {
         let bank = &mut ctx.accounts.bank;
-        bank.balance = bank.balance.checked_add(amount).ok_or(ErrorCode::Overflow)?;
+        bank.balance += amount;
         Ok(())
     }
 
+    // VULNERABILITY 5: Admin function with no authority check
     pub fn close_account(
-        _ctx: Context<CloseAccount>,
+        ctx: Context<CloseAccount>,
     ) -> Result<()> {
+        let bank = &mut ctx.accounts.bank;
+        bank.balance = 0;
         Ok(())
     }
 }
@@ -60,14 +67,12 @@ pub struct Initialize<'info> {
 
 #[derive(Accounts)]
 pub struct Withdraw<'info> {
-    #[account(
-        mut,
-        constraint = bank.owner == user.key()
-    )]
+    #[account(mut)]
     pub bank: Account<'info, BankAccount>,
 
-    #[account(mut)]
-    pub user: Signer<'info>,
+    // VULNERABILITY: user is not a Signer
+    /// CHECK: unsafe, no validation
+    pub user: AccountInfo<'info>,
 }
 
 #[derive(Accounts)]
@@ -80,27 +85,16 @@ pub struct Deposit<'info> {
 
 #[derive(Accounts)]
 pub struct CloseAccount<'info> {
-    #[account(
-        mut,
-        constraint = bank.owner == owner.key(),
-        close = owner
-    )]
+    #[account(mut)]
     pub bank: Account<'info, BankAccount>,
 
-    #[account(mut)]
-    pub owner: Signer<'info>,
+    // VULNERABILITY: no constraint that caller is owner
+    /// CHECK: unsafe, no authority check
+    pub caller: AccountInfo<'info>,
 }
 
 #[account]
 pub struct BankAccount {
     pub owner: Pubkey,
     pub balance: u64,
-}
-
-#[error_code]
-pub enum ErrorCode {
-    #[msg("Account balance would underflow.")]
-    Underflow,
-    #[msg("Account balance would overflow.")]
-    Overflow,
 }

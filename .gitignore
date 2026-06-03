@@ -1,17 +1,35 @@
+# Python
 venv/
 __pycache__/
 *.pyc
+
+# Environment
+
 .env
+# Outputs
 outputs/logs/
 outputs/patched/
 outputs/reports/
+
+# Anchor / Solana
 contracts/vulnerable_bank/target/
 contracts/vulnerable_bank/.anchor/
+target/
+test-ledger/
+
+# Knowledge Base Generated Data
 rag/vector_db/chroma/
 knowledge_base/raw/
 knowledge_base/processed/
-test-ledger/
+
+# Logs
 *.log
-venv/
-__pycache__/
-target/
+
+# OS / Editor
+.DS_Store
+.vscode/
+.idea/
+.env
+.env
+.env
+.env

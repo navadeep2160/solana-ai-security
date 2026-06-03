@@ -22,13 +22,16 @@ ORIGINAL_PATH = Path(
 )
 
 
-def call_with_retry(fn, *args, **kwargs):
-    while True:
+def call_with_retry(fn, *args, max_retries=5, **kwargs):
+    for attempt in range(max_retries):
         try:
             return fn(*args, **kwargs)
         except ResourceExhausted:
-            print("\n⏳ Rate limited — waiting 65s before retry...\n")
-            time.sleep(65)
+            wait = 65 * (attempt + 1)
+            print(f"\n⏳ Rate limited (attempt {attempt+1}/{max_retries}) — waiting {wait}s...\n")
+            time.sleep(wait)
+    print("\n❌ Max retries reached — skipping this step\n")
+    return None
 
 
 def main():
@@ -80,6 +83,13 @@ def main():
         for f in cfg_result["findings"]
     ]
     print(f"[MAIN] CFG findings: {len(cfg_findings)}")
+    for finding in cfg_findings:
+        sev = finding.get("severity","?").upper()
+        ftype = finding.get("type","")
+        desc = finding.get("description", ftype)
+        line = finding.get("line","")
+        desc = f"{desc} (line {line})" if line else desc
+        print(f"  → [{sev}] {desc}")
 
     # ── PHASE 2: AI SCAN ──
     print("\n" + "=" * 50)
@@ -119,8 +129,15 @@ def main():
     for iteration in range(MAX_ITER):
         print(f"\n--- Patch Iteration {iteration + 1} / {MAX_ITER} ---\n")
 
-        contract = call_with_retry(patch_contract, contract, errors)
+        patched = call_with_retry(patch_contract, contract, errors)
+        if patched is None:
+            print("[MAIN] ⚠️  Patcher returned None — skipping validation")
+            continue
+        contract = patched
         validation = validate_contract(contract)
+        if validation is None:
+            print("[MAIN] ⚠️  Validator returned None")
+            continue
 
         if validation["success"]:
             print("\n✅ CONTRACT COMPILED SUCCESSFULLY\n")

@@ -1,0 +1,86 @@
+{
+  "Account Data Matching": {
+    "category": "account_validation",
+    "severity": "high"
+  },
+  "Account Data Reallocation": {
+    "category": "memory_management",
+    "severity": "high"
+  },
+  "Account Reloading": {
+    "category": "account_validation",
+    "severity": "high"
+  },
+  "Arbitrary CPI": {
+    "category": "cross_program_invocation",
+    "severity": "critical"
+  },
+  "Authority Transfer Functionality": {
+    "category": "authorization",
+    "severity": "critical"
+  },
+  "Bump Seed Canonicalization": {
+    "category": "pda",
+    "severity": "high"
+  },
+  "Closing Accounts Securely": {
+    "category": "account_lifecycle",
+    "severity": "medium"
+  },
+  "Duplicate Mutable Accounts": {
+    "category": "account_aliasing",
+    "severity": "high"
+  },
+  "Frontrunning": {
+    "category": "transaction_ordering",
+    "severity": "high"
+  },
+  "Insecure Initialization": {
+    "category": "initialization",
+    "severity": "critical"
+  },
+  "Loss of Precision": {
+    "category": "precision",
+    "severity": "medium"
+  },
+  "Missing Ownership Check": {
+    "category": "ownership",
+    "severity": "critical"
+  },
+  "Missing Signer Check": {
+    "category": "authentication",
+    "severity": "critical"
+  },
+  "Overflow and Underflow": {
+    "category": "arithmetic",
+    "severity": "high"
+  },
+  "Casting Vulnerabilities": {
+    "category": "type_safety",
+    "severity": "high"
+  },
+  "PDA Sharing": {
+    "category": "pda",
+    "severity": "high"
+  },
+  "Remaining Accounts": {
+    "category": "account_validation",
+    "severity": "high"
+  },
+  "Unsafe Rust": {
+    "category": "memory_safety",
+    "severity": "critical"
+  },
+  "Panics and Error Management": {
+    "category": "error_handling",
+    "severity": "medium"
+  },
+  "Seed Collisions": {
+    "category": "pda",
+    "severity": "high"
+  },
+  "Type Cosplay": {
+    "category": "type_safety",
+    "severity": "high"
+  }
+}
