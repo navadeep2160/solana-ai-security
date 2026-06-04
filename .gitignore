@@ -38,3 +38,6 @@ Thumbs.db
 
 # Keypairs (never commit)
 /tmp/fuzz_payer.json
+*.tar.bz2
+*.zip
+*.gz
