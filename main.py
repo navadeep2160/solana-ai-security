@@ -165,6 +165,23 @@ def main():
         else:
             print(f"[MAIN] ⚠️  Runtime validation: {runtime_result.get('error')}")
 
+    # ── PHASE 4b: DEVNET VALIDATION ──
+    devnet_result = {}
+    if validation.get("success"):
+        print("\n" + "=" * 50)
+        print("PHASE 4b: DEVNET VALIDATION")
+        print("=" * 50)
+        from runtime_validator.devnet_checker import run_devnet_validation
+        # Copy patched contract and rebuild for devnet
+        patched_path = "contracts/vulnerable_bank/programs/vulnerable_bank/src/lib.rs"
+        open(patched_path, "w").write(contract)
+        devnet_result = run_devnet_validation(contract, rebuild=True)
+        if devnet_result.get("deploy_success"):
+            print(f"[MAIN] ✅ Patched contract verified on Solana Devnet")
+            print(f"[MAIN] Explorer: {devnet_result.get('explorer_url')}")
+        else:
+            print(f"[MAIN] ⚠️  Devnet: {devnet_result.get('error')}")
+
     # ── PHASE 5: SAVE OUTPUTS ──
     save_patched_contract(contract)
     save_final_report(scan_result, contract, iteration + 1, validation.get("success", False))

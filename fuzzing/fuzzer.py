@@ -11,11 +11,11 @@ from utils.logger import write_log
 
 RPC_URL        = "http://127.0.0.1:8899"
 PROGRAM_DIR    = Path("contracts/vulnerable_bank/programs/vulnerable_bank")
-SO_PATH        = PROGRAM_DIR / "target/deploy/vulnerable_bank.so"
+SO_PATH        = Path("contracts/vulnerable_bank/target/deploy/vulnerable_bank.so")
 DEPLOY_KEYPAIR = os.path.expanduser("~/.config/solana/id.json")
 FUZZ_KEYPAIR   = "/tmp/fuzz_payer.json"
 FUZZ_LEDGER    = "/tmp/fuzz-ledger"
-PROG_KEYPAIR   = "contracts/vulnerable_bank/target/deploy/vulnerable_bank-keypair.json"
+PROG_KEYPAIR   = None  # use default deploy
 
 INIT_DISC     = bytes([175, 175, 109, 31, 13, 152, 155, 237])
 DEPOSIT_DISC  = bytes([242,  35, 198, 137,  82, 225, 242, 182])
@@ -101,8 +101,7 @@ def deploy():
     time.sleep(5)
     r = subprocess.run(
         ["solana", "program", "deploy", str(SO_PATH),
-         "--url", RPC_URL, "--keypair", DEPLOY_KEYPAIR,
-         "--program-id", PROG_KEYPAIR],
+         "--url", RPC_URL, "--keypair", DEPLOY_KEYPAIR],
         capture_output=True, text=True
     )
     if r.returncode == 0:

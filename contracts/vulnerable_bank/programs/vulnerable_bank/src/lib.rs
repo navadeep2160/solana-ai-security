@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-declare_id!("7v4a7AxxpkGEs6YX6wefijkD3Qm6K3AjcngGNvkC4VeW");
+declare_id!("Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL");
 
 #[program]
 pub mod vulnerable_bank {
@@ -16,31 +16,24 @@ pub mod vulnerable_bank {
         Ok(())
     }
 
-    // VULNERABILITY 1: No signer check — anyone can withdraw
     pub fn withdraw(
         ctx: Context<Withdraw>,
         amount: u64,
     ) -> Result<()> {
         let bank = &mut ctx.accounts.bank;
-
-        // VULNERABILITY 2: No owner verification
-        // VULNERABILITY 3: No underflow check
-        bank.balance -= amount;
-
+        bank.balance = bank.balance.checked_sub(amount).ok_or(ErrorCode::Underflow)?;
         Ok(())
     }
 
-    // VULNERABILITY 4: No overflow check on deposit
     pub fn deposit(
         ctx: Context<Deposit>,
         amount: u64,
     ) -> Result<()> {
         let bank = &mut ctx.accounts.bank;
-        bank.balance += amount;
+        bank.balance = bank.balance.checked_add(amount).ok_or(ErrorCode::Overflow)?;
         Ok(())
     }
 
-    // VULNERABILITY 5: Admin function with no authority check
     pub fn close_account(
         ctx: Context<CloseAccount>,
     ) -> Result<()> {
@@ -67,12 +60,10 @@ pub struct Initialize<'info> {
 
 #[derive(Accounts)]
 pub struct Withdraw<'info> {
-    #[account(mut)]
+    #[account(mut, has_one = owner)]
     pub bank: Account<'info, BankAccount>,
 
-    // VULNERABILITY: user is not a Signer
-    /// CHECK: unsafe, no validation
-    pub user: AccountInfo<'info>,
+    pub owner: Signer<'info>,
 }
 
 #[derive(Accounts)]
@@ -85,16 +76,25 @@ pub struct Deposit<'info> {
 
 #[derive(Accounts)]
 pub struct CloseAccount<'info> {
-    #[account(mut)]
+    #[account(mut, has_one = owner)]
     pub bank: Account<'info, BankAccount>,
 
-    // VULNERABILITY: no constraint that caller is owner
-    /// CHECK: unsafe, no authority check
-    pub caller: AccountInfo<'info>,
+    pub owner: Signer<'info>,
 }
 
 #[account]
 pub struct BankAccount {
     pub owner: Pubkey,
     pub balance: u64,
+}
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Insufficient funds")]
+    InsufficientFunds,
+    #[msg("Arithmetic overflow")]
+    Overflow,
+    #[msg("Unauthorized")]
+    Unauthorized,
+    #[msg("Underflow")]
+    Underflow,
 }

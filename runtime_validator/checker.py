@@ -10,8 +10,8 @@ PROGRAM_DIR = PROJECT_DIR / "programs/vulnerable_bank"
 
 # Find the correct .so path
 SO_PATHS = [
-    PROGRAM_DIR / "target/deploy/vulnerable_bank.so",
-    PROGRAM_DIR / "target/sbpf-solana-solana/release/vulnerable_bank.so",
+    PROJECT_DIR / "target/deploy/vulnerable_bank.so",
+    PROJECT_DIR / "target/sbpf-solana-solana/release/vulnerable_bank.so",
 ]
 
 
