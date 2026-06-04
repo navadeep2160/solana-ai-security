@@ -1,24 +1,29 @@
 # Python
 venv/
+venv_new/
 __pycache__/
 *.pyc
+*.pyo
+.Python
 
 # Environment
-
 .env
+
 # Outputs
 outputs/logs/
 outputs/patched/
 outputs/reports/
 
 # Anchor / Solana
-contracts/vulnerable_bank/target/
-contracts/vulnerable_bank/.anchor/
+contracts/*/target/
+contracts/*/.anchor/
 target/
 test-ledger/
+/tmp/fuzz-ledger/
 
 # Knowledge Base Generated Data
-rag/vector_db/chroma/
+rag/vector_db/
+kb/chroma_unified/
 knowledge_base/raw/
 knowledge_base/processed/
 
@@ -27,9 +32,9 @@ knowledge_base/processed/
 
 # OS / Editor
 .DS_Store
+Thumbs.db
 .vscode/
 .idea/
-.env
-.env
-.env
-.env
+
+# Keypairs (never commit)
+/tmp/fuzz_payer.json
