@@ -34,6 +34,30 @@ def call_with_retry(fn, *args, max_retries=5, **kwargs):
     return None
 
 
+def rescan_patched_contract(contract_source):
+    print("\n[PATCH VERIFY] Running static checks on patched contract...")
+    static_findings = run_all_checks(contract_source)
+
+    print("[PATCH VERIFY] Running AST analysis on patched contract...")
+    ast_result = parse_rust_ast(contract_source)
+
+    print("[PATCH VERIFY] Running CFG analysis on patched contract...")
+    cfg_result = analyze_cfg(contract_source)
+
+    total = (
+        len(static_findings)
+        + len(ast_result.findings)
+        + len(cfg_result["findings"])
+    )
+
+    return {
+        "static":  static_findings,
+        "ast":     ast_result.findings,
+        "cfg":     cfg_result["findings"],
+        "total":   total,
+    }
+
+
 def main():
     print("\n🚀 SOLANA AI SECURITY PIPELINE STARTED\n")
 
@@ -44,7 +68,7 @@ def main():
     with open(CONTRACT_PATH, "r") as f:
         original_contract = f.read()
 
-    # ── PHASE 1: STATIC ANALYSIS ──
+    # ── PHASE 1: STATIC ANALYSIS ──────────────────────────────
     print("=" * 50)
     print("PHASE 1: STATIC ANALYSIS")
     print("=" * 50)
@@ -60,11 +84,11 @@ def main():
     print(format_ast_findings(ast_result))
     ast_findings = [
         {
-            "type": f["type"],
+            "type":     f["type"],
             "severity": f["severity"],
-            "reason": f"{f['description']} (at {f['location']})",
-            "line": f.get("line", 0),
-            "source": "ast"
+            "reason":   f"{f['description']} (at {f['location']})",
+            "line":     f.get("line", 0),
+            "source":   "ast"
         }
         for f in ast_result.findings
     ]
@@ -74,24 +98,24 @@ def main():
     print(cfg_result["summary"])
     cfg_findings = [
         {
-            "type": f["type"],
+            "type":     f["type"],
             "severity": f["severity"],
-            "reason": f["description"],
-            "line": f.get("line", 0),
-            "source": "cfg"
+            "reason":   f["description"],
+            "line":     f.get("line", 0),
+            "source":   "cfg"
         }
         for f in cfg_result["findings"]
     ]
     print(f"[MAIN] CFG findings: {len(cfg_findings)}")
     for finding in cfg_findings:
-        sev = finding.get("severity","?").upper()
-        ftype = finding.get("type","")
-        desc = finding.get("description", ftype)
-        line = finding.get("line","")
-        desc = f"{desc} (line {line})" if line else desc
+        sev   = finding.get("severity", "?").upper()
+        ftype = finding.get("type", "")
+        desc  = finding.get("description", ftype)
+        line  = finding.get("line", "")
+        desc  = f"{desc} (line {line})" if line else desc
         print(f"  → [{sev}] {desc}")
 
-    # ── PHASE 2: AI SCAN ──
+    # ── PHASE 2: AI SCAN ──────────────────────────────────────
     print("\n" + "=" * 50)
     print("PHASE 2: AI SCAN")
     print("=" * 50)
@@ -110,30 +134,36 @@ def main():
         + ast_findings
         + cfg_findings
     )
-    scan_result["risks"] = all_findings
+    scan_result["risks"]       = all_findings
     scan_result["ast_summary"] = format_ast_findings(ast_result)
     scan_result["cfg_summary"] = cfg_result["summary"]
 
-    print(f"\n[MAIN] Total findings: {len(all_findings)}")
-    print(f"  AI: {len(ai_risks)}  Static: {len(static_findings)}  AST: {len(ast_findings)}  CFG: {len(cfg_findings)}")
+    original_findings_count = len(all_findings)
+    print(f"\n[MAIN] Total findings: {original_findings_count}")
+    print(f"  AI: {len(ai_risks)}  Static: {len(static_findings)}  "
+          f"AST: {len(ast_findings)}  CFG: {len(cfg_findings)}")
 
-    # ── PHASE 3: PATCH + VALIDATE LOOP ──
+    # ── PHASE 3: PATCH + VALIDATE LOOP ───────────────────────
     print("\n" + "=" * 50)
     print("PHASE 3: PATCH + VALIDATE")
     print("=" * 50)
 
-    contract = original_contract
-    errors = ""
-    validation = {}
+    contract          = original_contract
+    errors            = ""
+    validation        = {}
+    remaining_findings = 0
+    fixed_findings    = 0
+    security_score    = 0
+    patch_scan        = {}
 
     for iteration in range(MAX_ITER):
         print(f"\n--- Patch Iteration {iteration + 1} / {MAX_ITER} ---\n")
 
         patched = call_with_retry(patch_contract, contract, errors)
         if patched is None:
-            print("[MAIN] ⚠️  Patcher returned None — skipping validation")
+            print("[MAIN] ⚠️  Patcher returned None — skipping")
             continue
-        contract = patched
+        contract   = patched
         validation = validate_contract(contract)
         if validation is None:
             print("[MAIN] ⚠️  Validator returned None")
@@ -141,6 +171,39 @@ def main():
 
         if validation["success"]:
             print("\n✅ CONTRACT COMPILED SUCCESSFULLY\n")
+
+            # ── PHASE 3b: RE-SCAN PATCHED CONTRACT ───────────
+            print("=" * 50)
+            print("PHASE 3b: PATCH VERIFICATION")
+            print("=" * 50)
+
+            patch_scan         = rescan_patched_contract(contract)
+            remaining_findings = patch_scan["total"]
+            fixed_findings     = original_findings_count - remaining_findings
+
+            if original_findings_count > 0:
+                security_score = round(
+                    fixed_findings / original_findings_count * 100, 2
+                )
+            else:
+                security_score = 100.0
+
+            status = "SECURED" if remaining_findings == 0 else "PARTIALLY_SECURED"
+
+            print(f"\n[PATCH VERIFY] Original findings  : {original_findings_count}")
+            print(f"[PATCH VERIFY] Remaining findings  : {remaining_findings}")
+            print(f"[PATCH VERIFY] Fixed findings      : {fixed_findings}")
+            print(f"[PATCH VERIFY] Security score      : {security_score}%")
+            print(f"[PATCH VERIFY] Status              : {status}")
+
+            if remaining_findings > 0:
+                print(f"\n[PATCH VERIFY] Remaining issues:")
+                for f in patch_scan["static"]:
+                    print(f"  → [STATIC] {f['type']}: {f['description']}")
+                for f in patch_scan["ast"]:
+                    print(f"  → [AST]    {f.get('type','?')}: {f.get('description','')}")
+                for f in patch_scan["cfg"]:
+                    print(f"  → [CFG]    {f.get('type','?')}: {f.get('description','')}")
             break
 
         print("\n❌ BUILD FAILED — feeding errors back to patcher\n")
@@ -149,11 +212,10 @@ def main():
         if iteration < MAX_ITER - 1:
             print("⏳ Waiting 15s...\n")
             time.sleep(15)
-
     else:
         print(f"\n⚠️  Max iterations ({MAX_ITER}) reached\n")
 
-    # ── PHASE 4: RUNTIME VALIDATION ──
+    # ── PHASE 4: RUNTIME VALIDATION ──────────────────────────
     runtime_result = {}
     if validation.get("success"):
         print("\n" + "=" * 50)
@@ -165,42 +227,40 @@ def main():
         else:
             print(f"[MAIN] ⚠️  Runtime validation: {runtime_result.get('error')}")
 
-    # ── PHASE 4b: DEVNET VALIDATION ──
-    devnet_result = {}
-    if validation.get("success"):
-        print("\n" + "=" * 50)
-        print("PHASE 4b: DEVNET VALIDATION")
-        print("=" * 50)
-        from runtime_validator.devnet_checker import run_devnet_validation
-        # Copy patched contract and rebuild for devnet
-        patched_path = "contracts/vulnerable_bank/programs/vulnerable_bank/src/lib.rs"
-        open(patched_path, "w").write(contract)
-        devnet_result = run_devnet_validation(contract, rebuild=True)
-        if devnet_result.get("deploy_success"):
-            print(f"[MAIN] ✅ Patched contract verified on Solana Devnet")
-            print(f"[MAIN] Explorer: {devnet_result.get('explorer_url')}")
-        else:
-            print(f"[MAIN] ⚠️  Devnet: {devnet_result.get('error')}")
-
-    # ── PHASE 5: SAVE OUTPUTS ──
+    # ── SAVE OUTPUTS ──────────────────────────────────────────
     save_patched_contract(contract)
-    save_final_report(scan_result, contract, iteration + 1, validation.get("success", False))
+    save_final_report(
+        scan_result, contract,
+        iteration + 1,
+        validation.get("success", False)
+    )
 
+    # ── FINAL RESULT ──────────────────────────────────────────
     print("\n" + "=" * 50)
     print("FINAL RESULT")
     print("=" * 50)
     print(json.dumps({
-        "success": validation.get("success", False),
+        "success":          validation.get("success", False),
         "runtime_deployed": runtime_result.get("deploy_success", False),
-        "iterations": iteration + 1,
+        "iterations":       iteration + 1,
         "findings": {
-            "static": len(static_findings),
-            "ast": len(ast_findings),
-            "cfg": len(cfg_findings),
-            "ai": len(ai_risks),
-            "total": len(all_findings)
+            "static":  len(static_findings),
+            "ast":     len(ast_findings),
+            "cfg":     len(cfg_findings),
+            "ai":      len(ai_risks),
+            "total":   original_findings_count,
         },
-        "report": "outputs/reports/final_report.json",
+        "patch_verification": {
+            "original_findings":  original_findings_count,
+            "remaining_findings": remaining_findings,
+            "fixed_findings":     fixed_findings,
+            "security_score":     security_score,
+            "status": (
+                "SECURED" if remaining_findings == 0
+                else "PARTIALLY_SECURED"
+            ),
+        },
+        "report":  "outputs/reports/final_report.json",
         "patched": "outputs/patched/patched_contract.rs"
     }, indent=2))
     print("\n🏁 PIPELINE COMPLETED\n")

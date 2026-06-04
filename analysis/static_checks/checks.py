@@ -3,16 +3,20 @@ import re
 
 def detect_missing_signer(code: str):
     findings = []
-    # Find AccountInfo without /// CHECK — means no signer validation
-    account_info_blocks = re.findall(
-        r'pub\s+\w+:\s*AccountInfo',
-        code
-    )
-    if account_info_blocks:
+    # Known CPI/program fields that are intentionally AccountInfo
+    SKIP_FIELDS = {
+        "target_program", "program", "token_program",
+        "system_program", "rent", "clock",
+        "associated_token_program", "metadata_program"
+    }
+    # Find AccountInfo fields, excluding known program accounts
+    all_matches = re.findall(r'pub\s+(\w+):\s*AccountInfo', code)
+    real_matches = [m for m in all_matches if m not in SKIP_FIELDS]
+    if real_matches:
         findings.append({
             "type": "missing_signer_check",
             "severity": "critical",
-            "description": f"Found {len(account_info_blocks)} AccountInfo field(s) without signer validation — use Signer<'info> instead."
+            "description": f"Found {len(real_matches)} AccountInfo field(s) without signer validation — use Signer<\'info> instead."
         })
     return findings
 

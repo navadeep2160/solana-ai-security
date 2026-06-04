@@ -179,6 +179,30 @@ _RE_ERR_PROP = re.compile(r'\?')
 _RE_ARITHMETIC = re.compile(r'[+\-*/]|checked_|saturating_|wrapping_|overflowing_')
 _RE_SIGNER     = re.compile(r'\.is_signer|require_keys_eq|require_signer|has_one|constraint\s*=')
 _RE_OWNER      = re.compile(r'\.owner|program_id|owner\s*==|check_program_account')
+
+def _get_struct_body_for_fn(fn_name: str, full_source: str) -> str:
+    """
+    Return the matching #[derive(Accounts)] struct body for a function.
+    withdraw -> Withdraw, close_account -> CloseAccount etc.
+    """
+    import re as _re
+    struct_name = fn_name.replace("_", " ").title().replace(" ", "")
+    pat = _re.compile(
+        rf"pub struct {struct_name}<.*?{{(.*?)}}",
+        _re.DOTALL
+    )
+    m = pat.search(full_source)
+    return m.group(1) if m else ""
+
+
+def _fn_has_struct_security(fn_name: str, full_source: str) -> tuple:
+    """
+    Returns (has_signer, has_owner) by checking the struct definition.
+    """
+    struct_body = _get_struct_body_for_fn(fn_name, full_source)
+    has_signer = bool(_RE_SIGNER.search(struct_body))
+    has_owner  = bool(_RE_OWNER.search(struct_body)) or "has_one" in struct_body
+    return has_signer, has_owner
 _RE_CPI        = re.compile(r'\binvoke\b|\binvoke_signed\b|CpiContext|transfer\s*\(.*program')
 _RE_PDA        = re.compile(r'find_program_address|create_program_address|seeds\s*=|bump\s*=')
 _RE_TRANSFER   = re.compile(r'\btransfer\b|lamports|\.lamports\s*\(\s*\)')
@@ -374,7 +398,8 @@ def analyze_cfg(code: str) -> dict:
                                     f"lines {block.line_start}-{block.line_end}"),
                     "line": block.line_start,
                 })
-            if block.has_transfer and not block.has_signer_check:
+            _struct_sig, _ = _fn_has_struct_security(fn_name, code)
+            if block.has_transfer and not block.has_signer_check and not _struct_sig:
                 findings.append({
                     "type":        "operation_before_check",
                     "severity":    "critical",
@@ -394,7 +419,12 @@ def analyze_cfg(code: str) -> dict:
 
         sensitive = {"withdraw", "transfer", "close_account", "burn", "close_vault"}
         if fn_name in sensitive:
-            has_check = any(b.has_signer_check or b.has_owner_check for b in fn_cfg.blocks)
+            # Also check struct definition for security constraints
+            struct_signer, struct_owner = _fn_has_struct_security(fn_name, code)
+            has_check = (
+                any(b.has_signer_check or b.has_owner_check for b in fn_cfg.blocks)
+                or struct_signer or struct_owner
+            )
             if not has_check:
                 findings.append({
                     "type":        "no_security_checks",

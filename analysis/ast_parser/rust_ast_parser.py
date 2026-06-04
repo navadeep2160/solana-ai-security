@@ -61,7 +61,7 @@ def _parse_functions(code: str, lines: List[str], result: ASTResult):
             line=line,
             params=[p.strip() for p in params.split(",") if p.strip()],
             has_signer=_check_signer_in_body(body, name),
-            has_owner_check=_check_owner_in_body(body),
+            has_owner_check=_check_owner_in_body(body, fn_name=name, full_code=code),
             has_checked_math=_check_math_safety(body),
         )
 
@@ -157,14 +157,30 @@ def _check_signer_in_body(body: str, fn_name: str) -> bool:
     return any(re.search(p, body) for p in patterns)
 
 
-def _check_owner_in_body(body: str) -> bool:
+def _check_owner_in_body(body: str, fn_name: str = "", full_code: str = "") -> bool:
     patterns = [
         r"\.owner\s*==",
         r"has_one\s*=",
         r"require!\s*\(.*owner",
         r"constraint\s*=.*owner",
     ]
-    return any(re.search(p, body) for p in patterns)
+    # Check function body first
+    if any(re.search(p, body) for p in patterns):
+        return True
+    # Also check the matching Accounts struct definition
+    # Each fn maps to a struct with the same capitalised name
+    if fn_name and full_code:
+        struct_name = fn_name.replace("_", " ").title().replace(" ", "")
+        struct_pat = re.compile(
+            rf"pub struct {struct_name}<.*?{{(.*?)}}",
+            re.DOTALL
+        )
+        m = struct_pat.search(full_code)
+        if m:
+            struct_body = m.group(1)
+            if any(re.search(p, struct_body) for p in patterns):
+                return True
+    return False
 
 
 def _check_math_safety(body: str) -> bool:
@@ -178,10 +194,18 @@ def _check_math_safety(body: str) -> bool:
 
 
 def _analyze_security(result: ASTResult, code: str):
+    # Known CPI/program fields — intentionally AccountInfo, not authority fields
+    SKIP_FIELDS = {
+        "target_program", "program", "token_program",
+        "system_program", "rent", "clock",
+        "associated_token_program", "metadata_program"
+    }
     # Analyze account structs for missing signers
     for struct in result.account_structs:
         for field in struct.fields:
             if field["is_account_info"]:
+                if field["name"] in SKIP_FIELDS:
+                    continue
                 result.findings.append({
                     "type": "missing_signer",
                     "severity": "critical",

@@ -11,19 +11,40 @@ PROMPT = ChatPromptTemplate.from_template("""
 You are a Solana Rust security patching engine.
 Return ONLY valid Rust code. No explanations. No markdown. No fences.
 
-STRICT RULES:
-- Output raw Rust source only — no fences, no comments, no explanations
-- Keep EXACT same imports — do NOT add any new use statements
-- Keep EXACT same declare_id! value unchanged
-- Keep EXACT same account structs — do NOT add fields, PDAs, or system_program
-- Keep EXACT same error codes — do NOT add new ErrorCode variants
-- Only change function bodies to fix vulnerabilities:
-  * Replace -= with .checked_sub(x).ok_or(ErrorCode::Underflow)?
-  * Replace += with .checked_add(x).ok_or(ErrorCode::Overflow)?
-  * Replace AccountInfo<'info> with Signer<'info> for authority fields
-  * Add has_one = owner constraint to Withdraw and CloseAccount structs
-- Do NOT add CPI transfers, PDA seeds, bumps, or system_program fields
-- Must compile with: cargo check
+RULES:
+- Raw Rust only — no fences, no comments, no explanations
+- Keep EXACT same declare_id! value
+- Keep EXACT same imports
+- Must compile with cargo check
+
+SECURITY FIXES — apply ALL of these:
+
+1. ARITHMETIC — replace unsafe += and -= everywhere:
+   x -= y  →  x = x.checked_sub(y).ok_or(ErrorCode::Underflow)?
+   x += y  →  x = x.checked_add(y).ok_or(ErrorCode::Overflow)?
+
+2. SIGNER CHECKS — in account structs replace AccountInfo with Signer for authority fields:
+   pub user: AccountInfo<'info>    →  pub user: Signer<'info>
+   pub caller: AccountInfo<'info>  →  pub caller: Signer<'info>
+
+3. CPI TARGET PROGRAM — keep as AccountInfo but add executable constraint:
+   pub target_program: AccountInfo<'info>
+   →  #[account(executable)]
+      pub target_program: AccountInfo<'info>
+
+4. OWNER CHECKS — add has_one constraint to fund-modifying structs:
+   Withdraw struct bank account   →  #[account(mut, has_one = owner)]
+                                     rename user field to: pub owner: Signer<'info>
+   CloseAccount struct bank       →  #[account(mut, has_one = owner, close = owner)]
+                                     rename caller field to: pub owner: Signer<'info>
+   Transfer struct from account   →  #[account(mut, has_one = owner)]
+   Transfer struct to account     →  #[account(mut, constraint = to.key() != from.key() @ ErrorCode::Unauthorized)]
+
+5. REINITIALIZE — add admin constraint:
+   Reinitialize struct bank  →  #[account(mut, constraint = bank.admin == caller.key() @ ErrorCode::Unauthorized)]
+
+6. SET_LOCKED — add admin constraint:
+   SetLocked struct bank  →  #[account(mut, constraint = bank.admin == caller.key() @ ErrorCode::Unauthorized)]
 
 COMPILER ERRORS (fix these if present):
 {errors}
@@ -31,7 +52,7 @@ COMPILER ERRORS (fix these if present):
 SECURITY CONTEXT:
 {context}
 
-ORIGINAL CONTRACT (apply minimal fixes only):
+CONTRACT TO PATCH (apply ALL fixes above):
 {contract}
 """)
 
