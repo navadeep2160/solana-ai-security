@@ -1,0 +1,11 @@
+{
+  "id": "ddos_spam_acm_ccs_2024",
+  "title": "DDoS Spam Attack Solana ACM CCS 2024",
+  "url": "internal://research",
+  "type": "manual",
+  "collection": "network_kb",
+  "status": "OK",
+  "char_count": 1109,
+  "text": "\nDDoS and Spam Attacks on Solana - ACM CCS 2024\n\nAttack patterns identified:\n- Low-fee transaction flooding overwhelms leader TPU\n- Spam bursts of 100k+ TPS degrade network to <1k real TPS  \n- QUIC stream exhaustion blocks legitimate clients\n- Vote transaction spam disrupts consensus timing\n- Failed transaction spam wastes validator compute\n\nTechnical details:\n- Solana processes transactions via QUIC protocol on TPU port\n- Attackers open max QUIC streams without sending valid transactions\n- UDP-based gossip susceptible to amplification attacks\n- Leader rotation predictable 4 slots ahead - enables targeted attacks\n\nImpact observed:\n- September 2021: NFT mint caused 17-hour outage\n- April 2022: NFT bot spam caused network halt\n- June 2022: Concentrated spam caused validator restart\n- Network degraded to <100 TPS during attacks\n\nMitigations:\n- Stake-weighted QoS: validators prioritize high-stake transaction senders\n- Priority fees: economic cost to spam\n- QUIC connection limits per IP\n- Local fee markets per compute unit\n- Jito Solana client modifications for spam filtering\nSource: ACM CCS 2024\n",
+  "error": ""
+}

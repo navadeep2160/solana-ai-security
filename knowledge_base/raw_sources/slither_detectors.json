@@ -1,0 +1,11 @@
+{
+  "id": "slither_detectors",
+  "title": "Slither Detectors EVM pattern reference",
+  "url": "https://github.com/crytic/slither/tree/master/slither/detectors",
+  "type": "github",
+  "collection": "audit_findings",
+  "status": "OK",
+  "char_count": 830,
+  "text": "Repository contents of https://github.com/crytic/slither/tree/master/slither/detectors:\n- __init__.py: slither/detectors/__init__.py\n- abstract_detector.py: slither/detectors/abstract_detector.py\n- all_detectors.py: slither/detectors/all_detectors.py\n- assembly: slither/detectors/assembly\n- attributes: slither/detectors/attributes\n- compiler_bugs: slither/detectors/compiler_bugs\n- erc: slither/detectors/erc\n- examples: slither/detectors/examples\n- functions: slither/detectors/functions\n- naming_convention: slither/detectors/naming_convention\n- operations: slither/detectors/operations\n- reentrancy: slither/detectors/reentrancy\n- shadowing: slither/detectors/shadowing\n- slither: slither/detectors/slither\n- source: slither/detectors/source\n- statements: slither/detectors/statements\n- variables: slither/detectors/variables",
+  "error": ""
+}

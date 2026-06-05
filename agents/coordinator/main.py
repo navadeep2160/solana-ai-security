@@ -12,7 +12,7 @@ from analysis.ast_parser.rust_ast_parser import parse_rust_ast, format_ast_findi
 from analysis.ast_parser.cfg_builder import analyze_cfg
 from runtime_validator.checker import run_runtime_validation
 from agents.exploit.exploit_agent import run_exploit_agent
-from agents.scorer.scoring_engine import score_exploit_results
+from agents.scorer.scoring_engine import run_scoring as score_exploit_results
 from utils.file_writer import save_patched_contract, save_final_report
 
 MAX_ITER = 3
@@ -185,7 +185,7 @@ def main():
     print("PHASE 6: RISK SCORING")
     print("=" * 50)
     try:
-        score_result = score_exploit_results(exploit_result)
+        score_result = score_exploit_results(all_findings, exploit_result)
     except Exception as e:
         print(f"[MAIN] ⚠️  Scorer error: {e}")
         score_result = {"total": 0, "findings": [], "error_msg": str(e)}

@@ -2,28 +2,35 @@
 kb/kb_router.py
 ---------------
 Routes agent queries to correct ChromaDB collection.
-Used by: scanner, exploit agent, patcher, scorer
+Points to knowledge_base/chromadb built from 38 sources.
 """
-import os
+import os, warnings
+os.environ["ANONYMIZED_TELEMETRY"] = "False"
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+warnings.filterwarnings("ignore")
+
 import chromadb
 from pathlib import Path
 from sentence_transformers import SentenceTransformer
 
-os.environ["TRANSFORMERS_OFFLINE"] = "1"
-os.environ["HF_DATASETS_OFFLINE"] = "1"
+# Point to our new KB built from 38 sources
+CHROMA_DIR = Path("knowledge_base/chromadb")
 
-CHROMA_DIR = Path("kb/chroma_unified")
-_client    = None
-_embedder  = None
+_client   = None
+_embedder = None
 
-COLLECTIONS = {
-    "sc_rules":            "Smart contract vulnerability rules",
-    "audit_findings":      "Real audit findings from OtterSec, Neodyme, ToB",
-    "network_incidents":   "Solana network outages and exploits",
-    "validator_baselines": "Normal validator metric ranges",
-    "research_knowledge":  "Academic research on Solana security",
+# Map old collection names → new collection names
+COLLECTION_MAP = {
+    "sc_rules":            "vulnerabilities",
+    "audit_findings":      "audit_findings",
+    "network_incidents":   "network_kb",
+    "validator_baselines": "network_kb",
+    "research_knowledge":  "vulnerabilities",
+    # new names work directly too
+    "vulnerabilities":     "vulnerabilities",
+    "network_kb":          "network_kb",
+    "architecture":        "architecture",
 }
-
 
 def _get_client():
     global _client
@@ -31,13 +38,11 @@ def _get_client():
         _client = chromadb.PersistentClient(path=str(CHROMA_DIR))
     return _client
 
-
 def _get_embedder():
     global _embedder
     if _embedder is None:
         _embedder = SentenceTransformer("all-MiniLM-L6-v2")
     return _embedder
-
 
 def query(
     text: str,
@@ -46,48 +51,35 @@ def query(
     severity: str = None,
     tags: list = None,
 ) -> list:
-    """
-    Query a KB collection by semantic similarity.
-    
-    Args:
-        text:       Query text
-        collection: One of COLLECTIONS keys or "all"
-        n_results:  Number of results per collection
-        severity:   Filter by severity (optional)
-        tags:       Filter by tags in metadata (optional)
-    
-    Returns:
-        List of dicts with keys: content, metadata, distance, collection
-    """
     client   = _get_client()
     embedder = _get_embedder()
     vector   = embedder.encode(text).tolist()
 
-    collections_to_query = (
-        list(COLLECTIONS.keys()) if collection == "all"
-        else [collection]
-    )
+    # Resolve collection name
+    if collection == "all":
+        collections_to_query = ["vulnerabilities", "audit_findings",
+                                 "architecture", "network_kb"]
+    else:
+        resolved = COLLECTION_MAP.get(collection, "vulnerabilities")
+        collections_to_query = [resolved]
 
     results = []
     for col_name in collections_to_query:
         try:
             col = client.get_collection(col_name)
-            where = {}
-            if severity:
-                where["severity"] = severity
-            
             res = col.query(
                 query_embeddings=[vector],
                 n_results=min(n_results, col.count()),
-                where=where if where else None,
                 include=["documents", "metadatas", "distances"],
             )
-
             for doc, meta, dist in zip(
                 res["documents"][0],
                 res["metadatas"][0],
                 res["distances"][0],
             ):
+                # skip garbage
+                if "signed in with another tab" in doc or len(doc) < 80:
+                    continue
                 results.append({
                     "content":    doc,
                     "metadata":   meta,
@@ -98,38 +90,33 @@ def query(
         except Exception as e:
             pass
 
-    # Sort by relevance
     results.sort(key=lambda x: x["relevance"], reverse=True)
-    return results[:n_results * len(collections_to_query)]
+    return results[:n_results]
 
+# ── Convenience helpers used by agents ──────────────────────
+
+def query_sc_rules(text: str, top_k: int = 3) -> list:
+    return query(text, collection="sc_rules", n_results=top_k)
+
+def query_audit_findings(text: str, top_k: int = 3) -> list:
+    return query(text, collection="audit_findings", n_results=top_k)
+
+def query_network(text: str, top_k: int = 3) -> list:
+    return query(text, collection="network_kb", n_results=top_k)
 
 def query_for_exploit(vuln_type: str) -> dict:
-    """
-    Get exploit strategy for a vulnerability type.
-    Returns the most relevant rule with exploit_class.
-    """
-    results = query(vuln_type, collection="sc_rules", n_results=3)
-    if results:
-        return results[0]
-    return {}
-
+    results = query_sc_rules(vuln_type, top_k=3)
+    return results[0] if results else {}
 
 def query_for_patch(vuln_type: str, n: int = 3) -> str:
-    """Get fix patterns for patcher prompt."""
-    results = query(vuln_type, collection="sc_rules", n_results=n)
-    fixes = []
-    for r in results:
-        meta = r["metadata"]
-        if "fix" in meta:
-            fixes.append(f"[{meta.get('rule_id','?')}] {meta.get('name','')}: {meta['fix']}")
-    return "\n".join(fixes)
-
+    results = query_sc_rules(vuln_type, top_k=n)
+    return "\n".join(r["content"][:300] for r in results)
 
 def stats() -> dict:
     client = _get_client()
     out = {}
     total = 0
-    for col_name in COLLECTIONS:
+    for col_name in ["vulnerabilities", "audit_findings", "architecture", "network_kb"]:
         try:
             col = client.get_collection(col_name)
             count = col.count()
@@ -140,17 +127,12 @@ def stats() -> dict:
     out["total"] = total
     return out
 
-
 if __name__ == "__main__":
     import json
     print("KB Stats:", json.dumps(stats(), indent=2))
-    print("\nQuery: 'missing signer check withdraw'")
-    results = query("missing signer check withdraw", collection="sc_rules", n_results=3)
-    for r in results:
-        print(f"  [{r['relevance']}] {r['metadata'].get('rule_id','?')} — {r['metadata'].get('name','?')}")
-    print("\nQuery: 'overflow underflow arithmetic'")
-    results = query("overflow underflow arithmetic", collection="sc_rules", n_results=3)
-    for r in results:
-        print(f"  [{r['relevance']}] {r['metadata'].get('rule_id','?')} — {r['metadata'].get('name','?')}")
-    print("\nPatch context for 'missing signer':")
-    print(query_for_patch("missing signer"))
+    print("\nQuery: missing signer check")
+    for r in query_sc_rules("missing signer check withdraw", top_k=2):
+        print(f"  [{r['relevance']}] {r['content'][:100]}")
+    print("\nQuery: overflow underflow")
+    for r in query_sc_rules("overflow underflow arithmetic", top_k=2):
+        print(f"  [{r['relevance']}] {r['content'][:100]}")

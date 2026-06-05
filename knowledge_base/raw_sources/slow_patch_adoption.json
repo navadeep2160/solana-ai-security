@@ -1,0 +1,11 @@
+{
+  "id": "slow_patch_adoption",
+  "title": "Slow Patch Adoption Risk Anza Report 2026",
+  "url": "internal://research",
+  "type": "manual",
+  "collection": "network_kb",
+  "status": "OK",
+  "char_count": 1132,
+  "text": "\nSlow Patch Adoption Vulnerability - Anza Report 2026\n\nRisk description:\n- Solana validators adopt security patches slowly\n- Window between patch release and full adoption exploitable\n- Validators running old versions remain vulnerable\n- Coordinated attacks possible during patch rollout period\n\nStatistics:\n- Average time for 80% validator adoption: 2-4 weeks\n- Some validators run versions 6+ months behind\n- Critical CVE patches take 1-2 weeks for majority adoption\n- Superminority validators sometimes slow to update\n\nKnown incidents:\n- CVE-2024-54134: validators slow to patch supply chain vuln\n- Multiple RPC exploits during partial patch adoption windows\n- Fee market bypass during version fragmentation periods\n\nAttack window:\n- Attacker identifies unpatched validators (version visible in gossip)\n- Targets unpatched validators with specific exploit\n- Exits before patched majority can respond\n\nMitigations:\n- Automated update mechanisms\n- Stake-weighted patch adoption incentives\n- Critical CVE fast-track process\n- Version gating for consensus participation\n- Validator operator SLA requirements\nSource: Anza Report 2026\n",
+  "error": ""
+}

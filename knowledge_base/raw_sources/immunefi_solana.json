@@ -1,0 +1,11 @@
+{
+  "id": "immunefi_solana",
+  "title": "Immunefi Solana Bug Bounties",
+  "url": "https://immunefi.com/bug-bounty/?filter=solana",
+  "type": "web",
+  "collection": "audit_findings",
+  "status": "OK",
+  "char_count": 1817,
+  "text": "# Explore: Bug Bounties\n\nMetrics are updated daily, with a 2-week delay after reports are resolved to\nmaintain confidentiality. Last updated on Jun 4th 2026 at 16:00 UTC\n\nBounties\n\nAudit CompetitionsCompetitions\n\nI'm feeling luckyRoll the dice\n\n* * *\n\nAll\n\nShow All Filters\n\nAll\n\n##### Filter By\n\nGeneral\n\nArbitration\n\nImmunefi Standard\n\nKYC Not Required\n\nKYC Required\n\nPaid Submissions\n\nPoC Not Required\n\nPoC Required\n\nPremium Program\n\nPrimacy of Impact\n\nSafe Harbor\n\nTriaged by Immunefi\n\nVaults\n\nTrending\n\nProduct Type\n\nEcosystem\n\nProgram Type\n\nProject Type\n\nLanguage\n\n##### Select to limit results\n\nClear FiltersView 214 Bounties\n\nArbitration\n\nImmunefi Standard\n\nKYC Not Required\n\nKYC Required\n\nPaid Submissions\n\nPoC Not Required\n\nPoC Required\n\nPremium Program\n\nPrimacy of Impact\n\nSafe Harbor\n\nTriaged by Immunefi\n\nVaults\n\nClear FiltersView 214 Bounties\n\nShowing 214 bounty programs that match filtering criteria\n\nNAME| VAULT TVL| MAX BOUNTY| TOTAL PAID| MED. RESOLUTION TIME| LAST UPDATED | \n---|---|---|---|---|---|--- \nSSV Network| $313.4k| $250k| Private| Private| 9/4/2026| View bounty \nDeXe Protocol| $155.8k| $500k| Private| Private| 13/11/2024| View bounty \nENSTriaged by Immunefi| $129.9k| $250k| Private| Private| 1/6/2026| View\nbounty \nThe GraphTriaged by Immunefi| $69.5k| $50k| $1.5M| 1 day| 28/5/2026| View\nbounty \nLombard FinanceTriaged by Immunefi| $39.9k| $250k| Private| Private|\n18/5/2026| View bounty \nHederaTriaged by Immunefi| $14.1k| $30k| Private| Private| 28/5/2026| View\nbounty \nEthenaTriaged by Immunefi| $12.4k| $3M| Private| Private| 28/5/2026| View\nbounty \nImmunefiTriaged by Immunefi| $4.5k| $50k| $68.9k| 9 hours| 17/11/2025| View\nbounty \nStackingDAO| $2.7k| $100k| Private| Private| 16/7/2025| View bounty \nZest Protocol V2| $649.76| $100k| Private| Private| 27/4/2026| View bounty",
+  "error": ""
+}

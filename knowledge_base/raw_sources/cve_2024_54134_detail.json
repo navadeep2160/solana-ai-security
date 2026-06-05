@@ -1,0 +1,11 @@
+{
+  "id": "cve_2024_54134_detail",
+  "title": "CVE-2024-54134 Solana Supply Chain Vulnerability",
+  "url": "internal://research",
+  "type": "manual",
+  "collection": "network_kb",
+  "status": "OK",
+  "char_count": 1174,
+  "text": "\nCVE-2024-54134 - Solana Supply Chain Vulnerability\n\nCVE Details:\n- ID: CVE-2024-54134\n- Affected: solana-web3.js JavaScript SDK\n- Type: Supply chain attack via compromised npm package\n- Severity: Critical\n- Published: December 2024\n\nAttack description:\n- Attacker compromised maintainer account of @solana/web3.js\n- Published malicious versions 1.95.7 and 1.95.8 to npm\n- Malicious code exfiltrated private keys from browser wallets\n- Targeted dApps using affected SDK versions\n- Private keys sent to attacker-controlled server\n\nImpact:\n- Any dApp using web3.js 1.95.7 or 1.95.8 affected\n- Browser wallet private key exposure\n- Estimated $160,000 in losses before detection\n- Affected major Solana dApps temporarily\n\nDetection method:\n- Unexpected network requests to external domains\n- Obfuscated code in npm package diff\n- Hash mismatch with expected package content\n\nMitigations:\n- Pin exact package versions in package-lock.json\n- Verify package integrity hashes\n- Use hardware wallets (keys never exposed to JS)\n- Monitor npm package changes\n- Enable 2FA on all package maintainer accounts\n- Use Snyk/Dependabot for supply chain monitoring\nSource: CVE-2024-54134, NVD\n",
+  "error": ""
+}

@@ -1,0 +1,11 @@
+{
+  "id": "cve_solana",
+  "title": "CVE Records for Solana",
+  "url": "https://www.cve.org/CVERecord/SearchResults?query=solana",
+  "type": "web",
+  "collection": "audit_findings",
+  "status": "OK",
+  "char_count": 161,
+  "text": "# Common vulnerabilities and Exposures (CVE)\n\n**We're sorry but the CVE Website doesn't work properly without JavaScript\nenabled. Please enable it to continue.**",
+  "error": ""
+}

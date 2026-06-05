@@ -2,7 +2,7 @@
 name = "vulnerable_bank"
 version = "0.1.0"
 edition = "2021"
-
+resolver = "2"
 [lib]
 crate-type = ["cdylib", "lib"]
 

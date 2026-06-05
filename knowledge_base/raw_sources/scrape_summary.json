@@ -1,0 +1,165 @@
+{
+  "vulnerabilities": [
+    {
+      "id": "vrust_paper",
+      "status": "OK",
+      "chars": 106206
+    },
+    {
+      "id": "fuzzdelsel_paper",
+      "status": "OK",
+      "chars": 47799
+    },
+    {
+      "id": "acm_2022",
+      "status": "OK",
+      "chars": 106206
+    },
+    {
+      "id": "acm_2025",
+      "status": "OK",
+      "chars": 19251
+    },
+    {
+      "id": "solana_program_arxiv",
+      "status": "OK",
+      "chars": 134132
+    },
+    {
+      "id": "sealevel_attacks",
+      "status": "OK",
+      "chars": 312
+    },
+    {
+      "id": "swc_registry",
+      "status": "OK",
+      "chars": 4505
+    },
+    {
+      "id": "neodyme_pitfalls",
+      "status": "OK",
+      "chars": 22407
+    },
+    {
+      "id": "sec3_spl",
+      "status": "OK",
+      "chars": 5046
+    },
+    {
+      "id": "otter_anchor_security",
+      "status": "OK",
+      "chars": 8761
+    }
+  ],
+  "audit_findings": [
+    {
+      "id": "neodyme_reports",
+      "status": "OK",
+      "chars": 6665
+    },
+    {
+      "id": "neodyme_anker",
+      "status": "OK",
+      "chars": 12336
+    },
+    {
+      "id": "ottersec_reports",
+      "status": "OK",
+      "chars": 89
+    },
+    {
+      "id": "trailofbits_solana",
+      "status": "OK",
+      "chars": 59447
+    },
+    {
+      "id": "cantina_guide",
+      "status": "OK",
+      "chars": 29269
+    },
+    {
+      "id": "cve_solana",
+      "status": "OK",
+      "chars": 161
+    },
+    {
+      "id": "immunefi_solana",
+      "status": "OK",
+      "chars": 1817
+    },
+    {
+      "id": "slither_detectors",
+      "status": "OK",
+      "chars": 830
+    }
+  ],
+  "architecture": [
+    {
+      "id": "solana_whitepaper",
+      "status": "OK",
+      "chars": 46026
+    },
+    {
+      "id": "solana_github",
+      "status": "OK",
+      "chars": 6152
+    },
+    {
+      "id": "spl_security",
+      "status": "OK",
+      "chars": 1287
+    },
+    {
+      "id": "solana_simds",
+      "status": "OK",
+      "chars": 2753
+    },
+    {
+      "id": "helius_docs",
+      "status": "OK",
+      "chars": 4686
+    },
+    {
+      "id": "eclipse_attack",
+      "status": "OK",
+      "chars": 81194
+    }
+  ],
+  "network_kb": [
+    {
+      "id": "solana_status",
+      "status": "OK",
+      "chars": 5659
+    },
+    {
+      "id": "validators_app",
+      "status": "OK",
+      "chars": 6723
+    },
+    {
+      "id": "helium_hip",
+      "status": "OK",
+      "chars": 67519
+    },
+    {
+      "id": "helium_sharing",
+      "status": "ERROR",
+      "chars": 195
+    },
+    {
+      "id": "lorawan_helium",
+      "status": "ERROR",
+      "chars": 159
+    },
+    {
+      "id": "developer_status",
+      "status": "OK",
+      "chars": 212408
+    },
+    {
+      "id": "otter_sec_anchor",
+      "status": "OK",
+      "chars": 6538
+    }
+  ]
+}

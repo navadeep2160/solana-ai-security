@@ -1,0 +1,11 @@
+{
+  "id": "sealevel_attacks",
+  "title": "Sealevel Attacks - 21 Anchor vulnerability PoCs",
+  "url": "https://github.com/coral-xyz/sealevel-attacks",
+  "type": "github",
+  "collection": "vulnerabilities",
+  "status": "OK",
+  "char_count": 313,
+  "text": "# Sealevel Attacks\n\nExamples of common exploits unique to the Solana programming model and recommended idioms for\navoiding these attacks using the Anchor framework.\n\nThe examples in this repo are purposefully not complete. Each program here is meant to showcase a\nspecific issue and recommended fix in isolation.\n",
+  "error": ""
+}

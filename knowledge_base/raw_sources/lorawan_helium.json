@@ -1,0 +1,11 @@
+{
+  "id": "lorawan_helium",
+  "title": "LoRaWAN Helium Military IoT Study",
+  "url": "https://researchgate.net",
+  "type": "manual",
+  "collection": "network_kb",
+  "status": "OK",
+  "char_count": 766,
+  "text": "\nLoRaWAN and Helium Blockchain for Military IoT Deployment Security Study.\nKey protocol vulnerabilities in LoRaWAN + Helium stack:\n- LoRaWAN replay attacks: reuse of captured join request frames\n- Join server compromise: root key exposure leads to full network breach\n- Network session key exposure: MIC bypass attacks\n- Packet forwarder MITM: intercepting gateway-to-server UDP traffic\n- Helium validator eclipse attacks: isolating validators from network\n- Data integrity failures: unsigned sensor payloads\n- Physical layer attacks: jamming, signal manipulation on LoRa frequencies\n- Blockchain finality delays exploited for double-spend on IoT payments\nMitigations: frame counter enforcement, mutual TLS, hardware security modules.\nSource: ResearchGate 368903469\n",
+  "error": ""
+}

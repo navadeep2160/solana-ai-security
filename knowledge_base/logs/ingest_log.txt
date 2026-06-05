@@ -1,0 +1,68 @@
+/home/navadeep2160/solana-ai-security/venv/lib/python3.12/site-packages/transformers/tokenization_utils_base.py:1601: FutureWarning: `clean_up_tokenization_spaces` was not set. It will be set to `True` by default. This behavior will be depracted in transformers v4.45, and will be then set to `False` by default. For more details check this issue: https://github.com/huggingface/transformers/issues/31884
+  warnings.warn(
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+Loading embedding model (one time)...
+Model loaded.
+
+
+=== Ingesting: vulnerabilities ===
+vulnerabilities:   0%|          | 0/10 [00:00<?, ?it/s]vulnerabilities:  10%|█         | 1/10 [00:01<00:12,  1.44s/it]vulnerabilities:  20%|██        | 2/10 [00:01<00:05,  1.49it/s]vulnerabilities:  40%|████      | 4/10 [00:01<00:01,  3.47it/s]vulnerabilities:  60%|██████    | 6/10 [00:01<00:00,  5.38it/s]vulnerabilities: 100%|██████████| 10/10 [00:01<00:00,  5.26it/s]
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+  vrust_paper: 37 chunks
+  fuzzdelsel_paper: 16 chunks
+  acm_2022: 37 chunks
+  acm_2025: 6 chunks
+  solana_program_arxiv: 42 chunks
+  sealevel_attacks: 1 chunks
+  swc_registry: 2 chunks
+  neodyme_pitfalls: 7 chunks
+  sec3_spl: 2 chunks
+  otter_anchor_security: 4 chunks
+  → vulnerabilities total: 154 chunks
+
+=== Ingesting: audit_findings ===
+audit_findings:   0%|          | 0/8 [00:00<?, ?it/s]audit_findings:  50%|█████     | 4/8 [00:00<00:00, 37.09it/s]audit_findings: 100%|██████████| 8/8 [00:00<00:00, 48.32it/s]
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+  neodyme_reports: 2 chunks
+  neodyme_anker: 5 chunks
+  trailofbits_solana: 26 chunks
+  cantina_guide: 9 chunks
+  cve_solana: 1 chunks
+  immunefi_solana: 1 chunks
+  slither_detectors: 1 chunks
+  → audit_findings total: 45 chunks
+
+=== Ingesting: architecture ===
+architecture:   0%|          | 0/6 [00:00<?, ?it/s]architecture: 100%|██████████| 6/6 [00:00<00:00, 34.38it/s]architecture: 100%|██████████| 6/6 [00:00<00:00, 34.36it/s]
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+  solana_whitepaper: 18 chunks
+  solana_github: 2 chunks
+  spl_security: 1 chunks
+  solana_simds: 1 chunks
+  helius_docs: 2 chunks
+  eclipse_attack: 30 chunks
+  → architecture total: 54 chunks
+
+=== Ingesting: network_kb ===
+network_kb:   0%|          | 0/7 [00:00<?, ?it/s]network_kb:  57%|█████▋    | 4/7 [00:00<00:00, 38.22it/s]network_kb: 100%|██████████| 7/7 [00:00<00:00, 24.68it/s]
+  solana_status: 2 chunks
+  validators_app: 3 chunks
+  helium_hip: 4 chunks
+  helium_sharing: 1 chunks
+  lorawan_helium: 1 chunks
+  developer_status: 57 chunks
+  otter_sec_anchor: 2 chunks
+  → network_kb total: 70 chunks
+
+========================================
+INGESTION COMPLETE
+Total chunks in ChromaDB: 323
+DB saved at: /home/navadeep2160/solana-ai-security/knowledge_base/chromadb
+========================================
+
+=== COLLECTION SIZES ===
+  vulnerabilities: 154 chunks
+  audit_findings: 45 chunks
+  architecture: 54 chunks
+  network_kb: 70 chunks

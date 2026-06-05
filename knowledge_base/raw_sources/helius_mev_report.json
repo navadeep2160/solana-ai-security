@@ -1,0 +1,11 @@
+{
+  "id": "helius_mev_report",
+  "title": "Helius MEV Centralization Report 2025",
+  "url": "https://helius.dev/blog",
+  "type": "manual",
+  "collection": "network_kb",
+  "status": "OK",
+  "char_count": 995,
+  "text": "\nHelius MEV Report 2025 - Centralization Risk on Solana\n\nKey findings on MEV and centralization:\n- Jito block engine processes ~60% of Solana transactions\n- MEV extraction concentrated among top 5 validators\n- Sandwich attacks extracted $30M+ in 2024\n- Stake concentration: top 20 validators control >33% stake\n- Nakamoto coefficient fluctuates between 19-25\n- Jito tips create validator revenue concentration\n- Private mempool via Jito bundles bypasses public ordering\n- MEV bots front-run DEX trades on Raydium, Orca, Jupiter\n\nAttack vectors identified:\n- Sandwich: buy before, sell after large swaps\n- Arbitrage: cross-DEX price discrepancy exploitation  \n- Liquidation MEV: front-run liquidation transactions\n- Backrunning: insert profitable trade after large swap\n\nMitigations:\n- Slippage protection in DEX transactions\n- Private RPC with transaction privacy\n- Jito bundles for atomic execution\n- Anti-sandwich DEX designs\n- Stake decentralization incentives\nSource: Helius MEV Report 2025\n",
+  "error": ""
+}

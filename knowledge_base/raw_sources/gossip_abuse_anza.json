@@ -1,0 +1,11 @@
+{
+  "id": "gossip_abuse_anza",
+  "title": "Gossip Protocol Abuse Anza Technical Report 2026",
+  "url": "internal://research",
+  "type": "manual",
+  "collection": "network_kb",
+  "status": "OK",
+  "char_count": 1174,
+  "text": "\nGossip Protocol Abuse on Solana - Anza Technical Report 2026\n\nGossip protocol vulnerabilities:\n- CrdsData flooding: send excessive gossip entries to exhaust CPU\n- Fake peer injection: advertise non-existent validators\n- Stale data poisoning: broadcast outdated contact info\n- Bandwidth exhaustion via gossip amplification\n\nProtocol details:\n- Solana gossip runs on UDP port 8001\n- Each validator maintains CrdsTable of network state\n- Push/Pull messages propagate data to all peers\n- No rate limiting on gossip message ingestion\n\nAttack scenarios:\n- Flood gossip with invalid signatures to exhaust verification CPU\n- Inject fake validator entries to pollute routing tables\n- Partition network by advertising wrong contact info for validators\n- Amplify gossip by triggering pull responses from many peers\n\nDetection:\n- gossip_packet_rate > 10000/sec from single source\n- CPU usage spike on gossip thread\n- CrdsTable size growing unexpectedly\n- Peer connection churn rate elevated\n\nMitigations:\n- Gossip rate limiting per peer (implemented in v1.18)\n- Signature verification caching\n- Peer reputation scoring\n- Gossip message deduplication\nSource: Anza Technical Report 2026\n",
+  "error": ""
+}

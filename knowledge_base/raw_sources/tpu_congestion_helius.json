@@ -1,0 +1,11 @@
+{
+  "id": "tpu_congestion_helius",
+  "title": "TPU Congestion Helius Outage History 2025",
+  "url": "internal://research",
+  "type": "manual",
+  "collection": "network_kb",
+  "status": "OK",
+  "char_count": 1071,
+  "text": "\nTPU Congestion and Network Outages - Helius 2025\n\nTransaction Processing Unit (TPU) congestion patterns:\n\nMajor outage causes:\n1. NFT mint congestion (2021-2022): mint bots overwhelm TPU\n2. QUIC transition issues (2022): protocol migration bugs\n3. Duplicate block bug (2022): caused network halt 4.5 hours  \n4. BPF loader congestion (2023): program deployment spam\n5. Token-2022 launch congestion (2023): new token standard adoption\n6. Validator client bugs (2024): Agave/Firedancer transition\n\nTPU pipeline stages vulnerable to congestion:\n- Fetch stage: receives UDP/QUIC packets\n- Sigverify stage: signature verification bottleneck\n- Banking stage: transaction execution bottleneck  \n- Broadcast stage: block propagation bottleneck\n\nCongestion indicators:\n- transaction_drop_rate > 20%\n- banking_stage_queue > 50000\n- sigverify_stage_backlog > 10000\n- block_production_delay > 600ms\n\nRecovery mechanisms:\n- Restart coordinator among validators\n- QUIC backpressure signals\n- Priority fee market adjustment\n- Leader schedule rotation\nSource: Helius Outage History 2025\n",
+  "error": ""
+}

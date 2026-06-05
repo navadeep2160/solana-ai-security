@@ -1,0 +1,115 @@
+
+Scraping 31 sources...
+
+
+--- Collection: vulnerabilities ---
+vulnerabilities:   0%|          | 0/10 [00:00<?, ?it/s]vulnerabilities:  10%|█         | 1/10 [00:00<00:03,  2.63it/s]vulnerabilities:  20%|██        | 2/10 [00:01<00:07,  1.12it/s]vulnerabilities:  30%|███       | 3/10 [00:03<00:07,  1.14s/it]vulnerabilities:  40%|████      | 4/10 [00:06<00:12,  2.16s/it]vulnerabilities:  50%|█████     | 5/10 [00:08<00:09,  1.92s/it]vulnerabilities:  60%|██████    | 6/10 [00:10<00:07,  1.98s/it]vulnerabilities:  70%|███████   | 7/10 [00:12<00:05,  1.93s/it]vulnerabilities:  80%|████████  | 8/10 [00:14<00:03,  1.99s/it]vulnerabilities:  90%|█████████ | 9/10 [00:15<00:01,  1.79s/it]vulnerabilities: 100%|██████████| 10/10 [00:17<00:00,  1.85s/it]vulnerabilities: 100%|██████████| 10/10 [00:17<00:00,  1.77s/it]
+
+  Scraping: VRust - 8 MIR-based vulnerability types
+  Status: OK | Chars: 106,206
+
+  Scraping: FuzzDelSol - Solana fuzzing research
+  Status: OK | Chars: 47,799
+
+  Scraping: Solana Smart Contract Vulnerability Analysis ACM 2022
+  Status: OK | Chars: 106,206
+
+  Scraping: Solana Security Analysis ACM 2025
+  Status: OK | Chars: 19,251
+
+  Scraping: Solana Program Analysis arxiv 2026
+  Status: OK | Chars: 134,132
+
+  Scraping: Sealevel Attacks - 21 Anchor vulnerability PoCs
+  Status: OK | Chars: 312
+
+  Scraping: SWC Registry - Smart Contract Weakness
+  Status: OK | Chars: 4,505
+
+  Scraping: Neodyme - Solana Common Pitfalls
+  Status: OK | Chars: 22,407
+
+  Scraping: Sec3 - Two Caveats SPL
+  Status: OK | Chars: 5,046
+
+  Scraping: OtterSec Anchor Security
+  Status: OK | Chars: 8,761
+
+--- Collection: audit_findings ---
+audit_findings:   0%|          | 0/8 [00:00<?, ?it/s]audit_findings:  12%|█▎        | 1/8 [00:01<00:13,  1.93s/it]audit_findings:  25%|██▌       | 2/8 [00:04<00:12,  2.14s/it]audit_findings:  38%|███▊      | 3/8 [00:05<00:09,  1.87s/it]audit_findings:  50%|█████     | 4/8 [00:08<00:08,  2.09s/it]audit_findings:  62%|██████▎   | 5/8 [00:09<00:05,  1.87s/it]audit_findings:  75%|███████▌  | 6/8 [00:11<00:03,  1.99s/it]audit_findings:  88%|████████▊ | 7/8 [00:13<00:02,  2.00s/it]audit_findings: 100%|██████████| 8/8 [00:15<00:00,  1.83s/it]audit_findings: 100%|██████████| 8/8 [00:15<00:00,  1.92s/it]
+
+  Scraping: Neodyme Public Audit Reports
+  Status: OK | Chars: 6,665
+
+  Scraping: Neodyme Anker Audit Report
+  Status: OK | Chars: 12,336
+
+  Scraping: OtterSec Sampled Public Audit Reports
+  Status: OK | Chars: 89
+
+  Scraping: Trail of Bits Solana Publications
+  Status: OK | Chars: 59,447
+
+  Scraping: Cantina Securing Solana Developer Guide
+  Status: OK | Chars: 29,269
+
+  Scraping: CVE Records for Solana
+  Status: OK | Chars: 161
+
+  Scraping: Immunefi Solana Bug Bounties
+  Status: OK | Chars: 1,817
+
+  Scraping: Slither Detectors EVM pattern reference
+  Status: OK | Chars: 830
+
+--- Collection: architecture ---
+architecture:   0%|          | 0/6 [00:00<?, ?it/s]architecture:  17%|█▋        | 1/6 [00:01<00:07,  1.42s/it]architecture:  33%|███▎      | 2/6 [00:03<00:06,  1.65s/it]architecture:  50%|█████     | 3/6 [00:05<00:05,  1.73s/it]architecture:  67%|██████▋   | 4/6 [00:06<00:03,  1.67s/it]architecture:  83%|████████▎ | 5/6 [00:08<00:01,  1.60s/it]architecture: 100%|██████████| 6/6 [00:12<00:00,  2.57s/it]architecture: 100%|██████████| 6/6 [00:12<00:00,  2.09s/it]
+
+  Scraping: Solana Whitepaper
+  Status: OK | Chars: 46,026
+
+  Scraping: Solana GitHub
+  Status: OK | Chars: 6,152
+
+  Scraping: SPL Security Policy
+  Status: OK | Chars: 1,287
+
+  Scraping: SIMD Proposals
+  Status: OK | Chars: 2,753
+
+  Scraping: Helius API Documentation
+  Status: OK | Chars: 4,686
+
+  Scraping: Eclipse Attack on Bitcoin P2P USENIX
+  Status: OK | Chars: 81,194
+
+--- Collection: network_kb ---
+network_kb:   0%|          | 0/7 [00:00<?, ?it/s]network_kb:  29%|██▊       | 2/7 [00:02<00:06,  1.21s/it]network_kb:  43%|████▎     | 3/7 [00:04<00:06,  1.57s/it]network_kb:  57%|█████▋    | 4/7 [00:05<00:04,  1.42s/it]network_kb:  71%|███████▏  | 5/7 [00:06<00:02,  1.32s/it]network_kb:  86%|████████▌ | 6/7 [00:09<00:01,  1.72s/it]network_kb: 100%|██████████| 7/7 [00:11<00:00,  1.76s/it]network_kb: 100%|██████████| 7/7 [00:11<00:00,  1.59s/it]
+
+  Scraping: Solana Network Status
+  Status: OK | Chars: 5,659
+
+  Scraping: Validators.app Validator Performance
+  Status: OK | Chars: 6,723
+
+  Scraping: Helium Improvement Proposals
+  Status: OK | Chars: 67,519
+
+  Scraping: Reimagining Sharing Economy via Helium Blockchain
+  Status: ERROR | Chars: 195
+
+  Scraping: LoRaWAN Helium Military IoT Study
+  Status: ERROR | Chars: 159
+
+  Scraping: Developer Status Page
+  Status: OK | Chars: 212,408
+
+  Scraping: OtterSec Anchor Repository
+  Status: OK | Chars: 6,538
+
+
+=== SCRAPE SUMMARY ===
+vulnerabilities: 10/10 succeeded
+audit_findings: 8/8 succeeded
+architecture: 6/6 succeeded
+network_kb: 5/7 succeeded

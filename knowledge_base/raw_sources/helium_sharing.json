@@ -1,0 +1,11 @@
+{
+  "id": "helium_sharing",
+  "title": "Reimagining Sharing Economy via Helium Blockchain",
+  "url": "https://researchgate.net",
+  "type": "manual",
+  "collection": "network_kb",
+  "status": "OK",
+  "char_count": 694,
+  "text": "\nReimagining the Sharing Economy through Blockchain: Helium Decentralized Wireless Network.\nHelium uses Proof of Coverage (PoC) consensus for IoT hotspot validation.\nSecurity vulnerabilities identified:\n- Sybil attacks: fake hotspots submitting false coverage proofs\n- GPS spoofing: manipulating location data to fake coverage\n- Oracle price manipulation: attacking HNT/USD price feeds\n- Hotspot firmware vulnerabilities: remote code execution risks\n- Eclipse attacks on peer discovery\n- Coverage gaming: coordinated fake witness attacks\n- Network congestion via spam challenges\nMitigation: cryptographic coverage proofs, geographic verification, stake slashing.\nSource: ResearchGate 388772635\n",
+  "error": ""
+}

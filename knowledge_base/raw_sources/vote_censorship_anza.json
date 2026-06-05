@@ -1,0 +1,11 @@
+{
+  "id": "vote_censorship_anza",
+  "title": "Vote Censorship Anza Technical Report 2026",
+  "url": "internal://research",
+  "type": "manual",
+  "collection": "network_kb",
+  "status": "OK",
+  "char_count": 1104,
+  "text": "\nVote Censorship Attack on Solana - Anza Technical Report 2026\n\nAttack description:\n- Malicious leader excludes vote transactions from specific validators\n- Targeted validators accumulate delinquent votes\n- Stake-weighted voting disrupted for censored validators\n- Can be used to selectively exclude validators from consensus\n\nTechnical mechanism:\n- Leader controls transaction inclusion during their 4-slot window\n- Vote transactions have no special protection from censorship\n- Censored validator loses vote credits, affecting stake rewards\n- Sustained censorship can cause validator delinquency\n\nDetection indicators:\n- Specific validator vote success rate drops while others stable\n- Vote transactions confirmed for all validators except target\n- Pattern of missed votes correlating with specific leaders\n- Validator delinquency without local performance issues\n\nMitigations:\n- Vote transaction encryption proposals (SIMD-pending)\n- Multiple vote submission paths\n- Validator reputation scoring\n- Leader accountability mechanisms\n- Slashing for provable censorship\nSource: Anza Technical Report 2026\n",
+  "error": ""
+}

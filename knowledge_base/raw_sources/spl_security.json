@@ -1,0 +1,11 @@
+{
+  "id": "spl_security",
+  "title": "SPL Security Policy",
+  "url": "https://github.com/solana-labs/solana-program-library/blob/master/SECURITY.md",
+  "type": "web",
+  "collection": "architecture",
+  "status": "OK",
+  "char_count": 1287,
+  "text": "Skip to content\n\nYou signed in with another tab or window. Reload to refresh your session. You\nsigned out in another tab or window. Reload to refresh your session. You\nswitched accounts on another tab or window. Reload to refresh your session.\nDismiss alert\n\n{{ message }}\n\nThis repository was archived by the owner on Mar 11, 2025. It is now read-\nonly.\n\nsolana-labs / **solana-program-library ** Public archive\n\n * Notifications You must be signed in to change notification settings\n * Fork 2.4k\n * Star 4.2k\n\n## FilesExpand file tree\n\nmaster\n\n/\n\n# SECURITY.md\n\nCopy path\n\nBlame\n\nMore file actions\n\nBlame\n\nMore file actions\n\n## Latest commit\n\n## History\n\nHistory\n\nHistory\n\n13 lines (12 loc)   791 Bytes\n\nmaster\n\n/\n\n# SECURITY.md\n\nTop\n\n## File metadata and controls\n\n * Preview\n\n * Code\n\n * Blame\n\n13 lines (12 loc)   791 Bytes\n\nRaw\n\nCopy raw file\n\nDownload raw file\n\nEdit and raw actions\n\n## This repo will be archived soon\n\nActive development in this repo is ending 2024-03-02. Anza is continuing\ndevelopment in program-specific repos under the solana-program organization.\nPlease refer to the security policy in individual repos:\n\n * associated-token-account\n * feature-proposal\n * memo\n * single-pool\n * stake-pool\n * token\n * token-2022\n\nYou can t perform that action at this time.",
+  "error": ""
+}
