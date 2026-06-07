@@ -4,7 +4,7 @@ from models.ollama_client import load_model
 from rag.retrieval.retriever import retrieve
 from utils.logger import write_log
 
-llm = load_model("scan_model")
+llm = load_model()
 
 PROMPT = ChatPromptTemplate.from_template("""
 You are a Solana smart contract security scanner.

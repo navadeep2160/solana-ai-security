@@ -1,5 +1,34 @@
 {
   "dependencies": {
-    "docx": "^9.7.1"
+    "@solana/web3.js": "^1.98.4",
+    "docx": "^9.7.1",
+    "uuid": "^8.3.2"
+  },
+  "name": "solana-ai-security",
+  "description": "An AI-powered pipeline that automatically detects vulnerabilities in Solana Anchor smart contracts, generates secure patches, validates compilation, deploys on a local validator, and runs fuzz tests — all in one automated loop.",
+  "version": "1.0.0",
+  "main": "devnet_proof_report.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/navadeep2160/solana-ai-security.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/navadeep2160/solana-ai-security/issues"
+  },
+  "homepage": "https://github.com/navadeep2160/solana-ai-security#readme",
+  "devDependencies": {
+    "@types/node": "^25.9.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
   }
 }

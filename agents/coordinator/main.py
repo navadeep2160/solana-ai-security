@@ -5,12 +5,14 @@ from pathlib import Path
 from google.api_core.exceptions import ResourceExhausted
 
 from agents.scanner.scanner_agent import scan_contract
+from agents.scanner.scanner_v3 import scan_contract_v3
 from agents.patcher.patch_agent import patch_contract
 from agents.validator.validator_agent import validate_contract
 from analysis.static_checks.checks import run_all_checks
 from analysis.ast_parser.rust_ast_parser import parse_rust_ast, format_ast_findings
 from analysis.ast_parser.cfg_builder import analyze_cfg
 from runtime_validator.checker import run_runtime_validation
+from analysis.ast_parser.kb_ast_analyzer import analyze_ast_with_kb, analyze_cfg_with_kb
 from agents.exploit.exploit_agent import run_exploit_agent
 from agents.scorer.scoring_engine import run_scoring as score_exploit_results
 from utils.file_writer import save_patched_contract, save_final_report
@@ -104,8 +106,16 @@ def main():
     for r in ai_risks:
         print(f"  → [{r.get('severity','?').upper()}] {r.get('type','?')}: {r.get('reason','?')}")
 
+    print("\n[MAIN] Running V3 KB-driven scanner...")
+    v3_result = scan_contract_v3(original_contract)
+    v3_risks  = v3_result.get("risks", [])
+    print(f"[MAIN] V3 findings: {len(v3_risks)}")
+    for r in v3_risks:
+        print(f"  → [{r.get('severity','?').upper()}] {r.get('type','?')}: {r.get('reason','?')[:60]}")
+
     all_findings = (
         ai_risks
+        + v3_risks
         + [{"type": s["type"], "severity": s["severity"],
             "reason": s["description"], "source": "static"}
            for s in static_findings]
@@ -117,7 +127,7 @@ def main():
     scan_result["cfg_summary"] = cfg_result["summary"]
 
     print(f"\n[MAIN] Total findings: {len(all_findings)}")
-    print(f"  AI: {len(ai_risks)}  Static: {len(static_findings)}  "
+    print(f"  AI: {len(ai_risks)}  V3: {len(v3_risks)}  Static: {len(static_findings)}  "
           f"AST: {len(ast_findings)}  CFG: {len(cfg_findings)}")
 
     # ── PHASE 3: PATCH + VALIDATE LOOP ───────────────────────
@@ -126,6 +136,7 @@ def main():
     print("=" * 50)
 
     contract   = original_contract
+    last_patched = original_contract
     errors     = ""
     validation = {}
 
@@ -137,6 +148,7 @@ def main():
             print("[MAIN] ⚠️  Patcher returned None — skipping validation")
             continue
         contract   = patched
+        last_patched = patched
         validation = validate_contract(contract)
         if validation is None:
             print("[MAIN] ⚠️  Validator returned None")
@@ -152,6 +164,9 @@ def main():
         if iteration < MAX_ITER - 1:
             print("⏳ Waiting 15s...\n")
             time.sleep(15)
+    # If loop ended with success, ensure validation reflects it
+    if contract != original_contract and not validation.get('success'):
+        validation = validate_contract(contract)
     else:
         print(f"\n⚠️  Max iterations ({MAX_ITER}) reached\n")
 

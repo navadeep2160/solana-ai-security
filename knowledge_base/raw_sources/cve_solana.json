@@ -1,11 +1,11 @@
 {
   "id": "cve_solana",
-  "title": "CVE Records for Solana",
+  "title": "CVE Records Solana Vulnerabilities",
   "url": "https://www.cve.org/CVERecord/SearchResults?query=solana",
   "type": "web",
   "collection": "audit_findings",
   "status": "OK",
-  "char_count": 161,
-  "text": "# Common vulnerabilities and Exposures (CVE)\n\n**We're sorry but the CVE Website doesn't work properly without JavaScript\nenabled. Please enable it to continue.**",
+  "char_count": 1057,
+  "text": "\nCVE Records for Solana\n\nCVE-2022-21449: Solana validator memory corruption\nCVE-2022-31016: Solana Labs validator RPC DoS vulnerability\nCVE-2023-36829: solana-web3.js prototype pollution\nCVE-2024-54134: solana-web3.js supply chain attack (npm package compromise)\n  - Malicious versions 1.95.7 and 1.95.8 published\n  - Private key exfiltration from browser wallets\n  - $160,000 in losses\n\nSolana Program Vulnerabilities (non-CVE):\n- Wormhole bridge: missing guardian verification (Feb 2022, $320M)\n- Cashio: infinite mint via fake collateral accounts (Mar 2022, $48M)\n- Mango Markets: oracle price manipulation (Oct 2022, $114M)\n- Crema Finance: flash loan tick account manipulation (Jul 2022, $9M)\n- Nirvana Finance: flash loan AMM manipulation (Jul 2022, $3.5M)\n\nCommon vulnerability classes in CVEs:\n- Memory safety issues in validator code (C/Rust unsafe)\n- Integer overflow in financial calculations\n- Missing authentication on privileged operations\n- Supply chain attacks on JavaScript SDKs\n- Oracle manipulation in DeFi protocols\nSource: cve.org, NVD\n",
   "error": ""
 }

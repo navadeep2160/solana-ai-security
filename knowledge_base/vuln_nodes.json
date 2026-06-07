@@ -1,0 +1,1068 @@
+{
+  "total": 63,
+  "nodes": [
+    {
+      "name": "Missing ownership check",
+      "category": "account",
+      "severity": "critical",
+      "description": "Always check the `AccountInfo::owner` field of accounts that aren't supposed to be fully user-controlled.",
+      "preconditions": [
+        "Untrusted AccountInfo without owner check"
+      ],
+      "ast_patterns": [
+        "AccountInfo without Signer"
+      ],
+      "cfg_patterns": [
+        "transfer without owner_check"
+      ],
+      "fix": "Create a helper function that takes an untrusted `AccountInfo`, checks the owner and returns an object of a different, trusted type.",
+      "source": "neodyme_pitfalls",
+      "vuln_id": "SOL-001",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Setting Associated Token Account as Owner",
+      "category": "account",
+      "severity": "critical",
+      "description": "Setting an associated token account as the owner of a token account by mistake can lead to loss of control over the account.",
+      "preconditions": [
+        "Passing an associated token account (ATA) as the owner when creating a new account"
+      ],
+      "ast_patterns": [
+        "create_account with ATA as owner"
+      ],
+      "cfg_patterns": [
+        "create_account without proper owner validation"
+      ],
+      "fix": "Do not set an associated token account as the owner of another token account.",
+      "source": "sec3_spl",
+      "vuln_id": "SOL-002",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Improper Validation of Associated Token Account",
+      "category": "account",
+      "severity": "high",
+      "description": "Validating an associated token account only by its owner and mint is insufficient, as it may allow unexpected token accounts to pass.",
+      "preconditions": [
+        "Using constraints like `vault_ata.owner == vault.key()` and `vault_ata.mint == vault.mint` without using `get_associated_token_address`"
+      ],
+      "ast_patterns": [
+        "Account validation without get_associated_token_address"
+      ],
+      "cfg_patterns": [
+        "Validation without checking if the account is an ATA"
+      ],
+      "fix": "Use `get_associated_token_address` for validating associated token accounts.",
+      "source": "sec3_spl",
+      "vuln_id": "SOL-003",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Sandwiching attacks",
+      "category": "network",
+      "severity": "high",
+      "description": "An attacker observes a pending transaction, quickly buys the target cryptocurrency, lets the transaction go through, and then immediately sells it for a profit, skimming that profit from the user who submitted the transaction.",
+      "preconditions": [
+        "Pending transactions are observable"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "acm_2025",
+      "vuln_id": "SOL-004",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "spam MEV",
+      "category": "network",
+      "severity": "medium",
+      "description": "Searchers submit large volumes of speculative transactions, whose profitability is resolved only at execution time.",
+      "preconditions": [
+        "High-throughput, low-fee blockchains"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "solana_program_arxiv",
+      "vuln_id": "SOL-005",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Missing Token Program validation in SellRewards",
+      "category": "token",
+      "severity": "critical",
+      "description": "The SellRewards function does not validate the token program.",
+      "preconditions": [
+        "SellRewards function"
+      ],
+      "ast_patterns": [
+        "missing token program validation"
+      ],
+      "cfg_patterns": [],
+      "fix": "Resolved by adding token program validation.",
+      "source": "neodyme_anker",
+      "vuln_id": "SOL-006",
+      "collection": "audit_findings"
+    },
+    {
+      "name": "Sandwiching issue in SellRewards",
+      "category": "arithmetic",
+      "severity": "high",
+      "description": "The SellRewards function is susceptible to sandwich attacks.",
+      "preconditions": [
+        "SellRewards function"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [
+        "sandwich attack pattern"
+      ],
+      "fix": "Resolved by implementing protection against sandwich attacks.",
+      "source": "neodyme_anker",
+      "vuln_id": "SOL-007",
+      "collection": "audit_findings"
+    },
+    {
+      "name": "Missing Ownership Checks",
+      "category": "account",
+      "severity": "high",
+      "description": "If a program does not properly validate the account owner, an attacker could substitute their own account, gaining unauthorized access to privileged functionality.",
+      "preconditions": [
+        "Programs not validating account ownership"
+      ],
+      "ast_patterns": [
+        "AccountInfo without owner_check"
+      ],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "cantina_guide",
+      "vuln_id": "SOL-008",
+      "collection": "audit_findings"
+    },
+    {
+      "name": "Account Confusion",
+      "category": "account",
+      "severity": "high",
+      "description": "If a smart contract does not verify that an account contains the expected data type, an attacker could manipulate this oversight to exploit the system.",
+      "preconditions": [
+        "Programs not verifying account data types"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "cantina_guide",
+      "vuln_id": "SOL-009",
+      "collection": "audit_findings"
+    },
+    {
+      "name": "Missing Signer Checks",
+      "category": "account",
+      "severity": "high",
+      "description": "When executing certain instructions, it's crucial to ensure that only authorized accounts can initiate.",
+      "preconditions": [
+        "Programs not checking for authorized signers"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "cantina_guide",
+      "vuln_id": "SOL-010",
+      "collection": "audit_findings"
+    },
+    {
+      "name": "Eclipse Attack",
+      "category": "network",
+      "severity": "critical",
+      "description": "An eclipse attack occurs when malicious actors isolate blockchain users, disrupting their ability to reach consensus with the broader network.",
+      "preconditions": [
+        "Malicious actors controlling a significant number of incoming connections from a victim user"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "Implement a non-parametric change detection algorithm to identify changes in the Fr\u00e9chet mean and variance within blockchain communication networks.",
+      "source": "eclipse_attack_arxiv",
+      "vuln_id": "SOL-011",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Low-fee transaction flooding",
+      "category": "network",
+      "severity": "high",
+      "description": "Overwhelms leader TPU with low-fee transactions.",
+      "preconditions": [
+        "TPU port processing transactions"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "ddos_spam_acm_ccs_2024",
+      "vuln_id": "SOL-012",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Spam bursts",
+      "category": "network",
+      "severity": "critical",
+      "description": "Bursts of 100k+ TPS degrade network to <1k real TPS.",
+      "preconditions": [
+        "TPU port processing transactions"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "ddos_spam_acm_ccs_2024",
+      "vuln_id": "SOL-013",
+      "collection": "network_kb"
+    },
+    {
+      "name": "QUIC stream exhaustion",
+      "category": "network",
+      "severity": "high",
+      "description": "Blocks legitimate clients by exhausting QUIC streams.",
+      "preconditions": [
+        "QUIC protocol on TPU port"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "ddos_spam_acm_ccs_2024",
+      "vuln_id": "SOL-014",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Vote transaction spam",
+      "category": "consensus",
+      "severity": "high",
+      "description": "Disrupts consensus timing with vote transaction spam.",
+      "preconditions": [
+        "Consensus mechanism involving vote transactions"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "ddos_spam_acm_ccs_2024",
+      "vuln_id": "SOL-015",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Failed transaction spam",
+      "category": "network",
+      "severity": "medium",
+      "description": "Wastes validator compute with failed transactions.",
+      "preconditions": [
+        "Transaction processing on validators"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "ddos_spam_acm_ccs_2024",
+      "vuln_id": "SOL-016",
+      "collection": "network_kb"
+    },
+    {
+      "name": "UDP-based gossip amplification",
+      "category": "network",
+      "severity": "high",
+      "description": "Susceptible to amplification attacks via UDP-based gossip.",
+      "preconditions": [
+        "Gossip protocol using UDP"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "ddos_spam_acm_ccs_2024",
+      "vuln_id": "SOL-017",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Leader rotation predictability",
+      "category": "network",
+      "severity": "high",
+      "description": "Predictable leader rotation 4 slots ahead enables targeted attacks.",
+      "preconditions": [
+        "Leader rotation mechanism"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "ddos_spam_acm_ccs_2024",
+      "vuln_id": "SOL-018",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Vote Censorship Attack",
+      "category": "network",
+      "severity": "critical",
+      "description": "Malicious leader excludes vote transactions from specific validators, disrupting stake-weighted voting.",
+      "preconditions": [
+        "Leader controls transaction inclusion during their 4-slot window"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "Vote transaction encryption proposals (SIMD-pending)",
+      "source": "vote_censorship_anza",
+      "vuln_id": "SOL-019",
+      "collection": "network_kb"
+    },
+    {
+      "name": "CrdsData flooding",
+      "category": "network",
+      "severity": "high",
+      "description": "send excessive gossip entries to exhaust CPU",
+      "preconditions": [
+        "No rate limiting on gossip message ingestion"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "Gossip rate limiting per peer (implemented in v1.18)",
+      "source": "gossip_abuse_anza",
+      "vuln_id": "SOL-020",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Fake peer injection",
+      "category": "network",
+      "severity": "high",
+      "description": "advertise non-existent validators",
+      "preconditions": [],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "Peer reputation scoring",
+      "source": "gossip_abuse_anza",
+      "vuln_id": "SOL-021",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Stale data poisoning",
+      "category": "network",
+      "severity": "medium",
+      "description": "broadcast outdated contact info",
+      "preconditions": [],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "Gossip message deduplication",
+      "source": "gossip_abuse_anza",
+      "vuln_id": "SOL-022",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Bandwidth exhaustion via gossip amplification",
+      "category": "network",
+      "severity": "high",
+      "description": "amplify gossip by triggering pull responses from many peers",
+      "preconditions": [],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "Gossip rate limiting per peer (implemented in v1.18)",
+      "source": "gossip_abuse_anza",
+      "vuln_id": "SOL-023",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Sandwich attacks",
+      "category": "network",
+      "severity": "high",
+      "description": "buy before, sell after large swaps",
+      "preconditions": [
+        "large swaps occurring"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "Anti-sandwich DEX designs",
+      "source": "helius_mev_report",
+      "vuln_id": "SOL-024",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Arbitrage",
+      "category": "network",
+      "severity": "medium",
+      "description": "cross-DEX price discrepancy exploitation",
+      "preconditions": [
+        "price discrepancies between DEXs"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "helius_mev_report",
+      "vuln_id": "SOL-025",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Liquidation MEV",
+      "category": "network",
+      "severity": "high",
+      "description": "front-run liquidation transactions",
+      "preconditions": [
+        "liquidation transactions"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "helius_mev_report",
+      "vuln_id": "SOL-026",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Backrunning",
+      "category": "network",
+      "severity": "medium",
+      "description": "insert profitable trade after large swap",
+      "preconditions": [
+        "large swaps occurring"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "helius_mev_report",
+      "vuln_id": "SOL-027",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Client bugs",
+      "category": "network",
+      "severity": "high",
+      "description": "Five outages were caused by client bugs.",
+      "preconditions": [
+        "Implementation flaws or obscure edge cases in client software"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "Not explicitly mentioned, but likely involves fixing the underlying implementation issues.",
+      "source": "helius_outage_history",
+      "vuln_id": "SOL-028",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Transaction spam",
+      "category": "network",
+      "severity": "high",
+      "description": "Two outages were caused by the network's inability to handle floods of transaction spam.",
+      "preconditions": [
+        "Lack of congestion-management mechanisms like priority fees and local fee markets"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "Implementing key congestion-management mechanisms such as priority fees and local fee markets.",
+      "source": "helius_outage_history",
+      "vuln_id": "SOL-029",
+      "collection": "network_kb"
+    },
+    {
+      "name": "NFT mint congestion",
+      "category": "network",
+      "severity": "critical",
+      "description": "mint bots overwhelm TPU",
+      "preconditions": [
+        "high demand for NFT mints"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "tpu_congestion_helius",
+      "vuln_id": "SOL-030",
+      "collection": "network_kb"
+    },
+    {
+      "name": "QUIC transition issues",
+      "category": "network",
+      "severity": "high",
+      "description": "protocol migration bugs",
+      "preconditions": [
+        "transition to QUIC protocol"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "tpu_congestion_helius",
+      "vuln_id": "SOL-031",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Duplicate block bug",
+      "category": "network",
+      "severity": "critical",
+      "description": "caused network halt 4.5 hours",
+      "preconditions": [
+        "duplicate blocks in the network"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "tpu_congestion_helius",
+      "vuln_id": "SOL-032",
+      "collection": "network_kb"
+    },
+    {
+      "name": "BPF loader congestion",
+      "category": "network",
+      "severity": "high",
+      "description": "program deployment spam",
+      "preconditions": [
+        "spam of program deployments"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "tpu_congestion_helius",
+      "vuln_id": "SOL-033",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Token-2022 launch congestion",
+      "category": "network",
+      "severity": "high",
+      "description": "new token standard adoption",
+      "preconditions": [
+        "adoption of new token standard"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "tpu_congestion_helius",
+      "vuln_id": "SOL-034",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Validator client bugs",
+      "category": "network",
+      "severity": "high",
+      "description": "Agave/Firedancer transition TPU pipeline stages vulnerable to congestion",
+      "preconditions": [
+        "transition between Agave and Firedancer validator clients"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "tpu_congestion_helius",
+      "vuln_id": "SOL-035",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Supply chain attack via compromised npm package",
+      "category": "supply_chain",
+      "severity": "critical",
+      "description": "Attacker compromised maintainer account of @solana/web3.js and published malicious versions to npm.",
+      "preconditions": [
+        "Maintainer account compromise",
+        "Publishing malicious versions to npm"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "Pin exact package versions in package-lock.json, Verify package integrity hashes",
+      "source": "cve_2024_54134_detail",
+      "vuln_id": "SOL-036",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Slow Patch Adoption Vulnerability",
+      "category": "network",
+      "severity": "high",
+      "description": "Solana validators adopt security patches slowly, creating a window between patch release and full adoption that is exploitable.",
+      "preconditions": [
+        "Validators running old versions remain vulnerable"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "Automated update mechanisms, Stake-weighted patch adoption incentives, Critical CVE fast-track process",
+      "source": "slow_patch_adoption",
+      "vuln_id": "SOL-037",
+      "collection": "network_kb"
+    },
+    {
+      "name": "CVE-2024-54134",
+      "category": "supply_chain",
+      "severity": "critical",
+      "description": "Validators slow to patch supply chain vulnerability.",
+      "preconditions": [
+        "Validators running old versions"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "slow_patch_adoption",
+      "vuln_id": "SOL-038",
+      "collection": "network_kb"
+    },
+    {
+      "name": "RPC exploits",
+      "category": "network",
+      "severity": "high",
+      "description": "Multiple RPC exploits during partial patch adoption windows.",
+      "preconditions": [
+        "Validators running old versions"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "slow_patch_adoption",
+      "vuln_id": "SOL-039",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Fee market bypass",
+      "category": "network",
+      "severity": "high",
+      "description": "Fee market bypass during version fragmentation periods.",
+      "preconditions": [
+        "Validators running old versions"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "slow_patch_adoption",
+      "vuln_id": "SOL-040",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Gossip and Vote Processing",
+      "category": "network",
+      "severity": "critical",
+      "description": "Two critical potential security vulnerabilities were responsibly disclosed to Anza via GitHub security advisories in December 2025.",
+      "preconditions": [
+        "specific condition in code/network that enables this"
+      ],
+      "ast_patterns": [],
+      "cfg_patterns": [],
+      "fix": "",
+      "source": "anza_tech_report",
+      "vuln_id": "SOL-041",
+      "collection": "network_kb"
+    },
+    {
+      "name": "Missing Signer Check",
+      "category": "auth",
+      "severity": "high",
+      "description": "The insecure version of the program does not check if the authority account is a signer, allowing unauthorized accounts to execute the log_message instruction.",
+      "preconditions": [
+        "The authority account in the LogMessage context is not checked for being a signer."
+      ],
+      "ast_patterns": [
+        "AccountInfo without Signer"
+      ],
+      "cfg_patterns": [
+        "log_message function without signer_check"
+      ],
+      "insecure_pattern": "pub fn log_message(ctx: Context<LogMessage>) -> ProgramResult { msg!(\"GM {}\", ctx.accounts.authority.key().to_string()); Ok(()) }",
+      "fix": "pub fn log_message(ctx: Context<LogMessage>) -> ProgramResult { if !ctx.accounts.authority.is_signer { return Err(ProgramError::MissingRequiredSignature); } msg!(\"GM {}\", ctx.accounts.authority.key().to_string()); Ok(()) }",
+      "source": "sealevel_attacks",
+      "vuln_id": "SOL-042",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Account Data Matching Vulnerability",
+      "category": "account",
+      "severity": "high",
+      "description": "The insecure version of the program does not verify that the authority matches the owner of the token account, allowing unauthorized access to the account balance.",
+      "preconditions": [
+        "The `authority` is not checked against the `owner` of the `token` account."
+      ],
+      "ast_patterns": [
+        "AccountInfo without Signer check"
+      ],
+      "cfg_patterns": [
+        "log_message function without authority validation"
+      ],
+      "insecure_pattern": "let token = SplTokenAccount::unpack(&ctx.accounts.token.data.borrow())?;",
+      "fix": "if ctx.accounts.authority.key != &token.owner { return Err(ProgramError::InvalidAccountData); }",
+      "source": "sealevel_attacks",
+      "vuln_id": "SOL-043",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Incorrect Authority Check",
+      "category": "auth",
+      "severity": "high",
+      "description": "The insecure version of the program does not properly verify that the token account is owned by the SPL Token program.",
+      "preconditions": [
+        "The `token` account is not checked to ensure it is owned by the SPL Token program."
+      ],
+      "ast_patterns": [
+        "AccountInfo without Signer"
+      ],
+      "cfg_patterns": [
+        "transfer without signer_check"
+      ],
+      "insecure_pattern": "if ctx.accounts.authority.key != &token.owner {",
+      "fix": "if ctx.accounts.token.owner != &spl_token::ID {",
+      "source": "sealevel_attacks",
+      "vuln_id": "SOL-044",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Missing Discriminant Check",
+      "category": "account",
+      "severity": "high",
+      "description": "The insecure version of the program does not check if the account data has a valid discriminant, which could lead to unauthorized access or manipulation.",
+      "preconditions": [
+        "The `user` account is not checked for its discriminant."
+      ],
+      "ast_patterns": [
+        "AccountInfo without discriminant check"
+      ],
+      "cfg_patterns": [
+        "update_user function without discriminant validation"
+      ],
+      "insecure_pattern": "let user = User::try_from_slice(&ctx.accounts.user.data.borrow()).unwrap();",
+      "fix": "if user.discriminant != AccountDiscriminant::User { return Err(ProgramError::InvalidAccountData); }",
+      "source": "sealevel_attacks",
+      "vuln_id": "SOL-045",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Reinitialization Vulnerability",
+      "category": "account",
+      "severity": "critical",
+      "description": "The insecure version allows reinitialization of an already initialized account without checking if the account is already initialized.",
+      "preconditions": [
+        "The `user` account has been previously initialized."
+      ],
+      "ast_patterns": [
+        "AccountInfo without initialization check"
+      ],
+      "cfg_patterns": [
+        "Serialization without discriminator check"
+      ],
+      "insecure_pattern": "let mut user = User::try_from_slice(&ctx.accounts.user.data.borrow()).unwrap();",
+      "fix": "if !user.discriminator { return Err(ProgramError::InvalidAccountData); }",
+      "source": "sealevel_attacks",
+      "vuln_id": "SOL-046",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Arbitrary CPI to SPL Token Program",
+      "category": "cpi",
+      "severity": "critical",
+      "description": "The insecure version of the program allows arbitrary cross-program invocations (CPI) to the SPL Token program without verifying that the provided token_program account is indeed the SPL Token program. This can lead to unauthorized operations if a malicious actor provides an incorrect or spoofed token_program account.",
+      "preconditions": [
+        "The `token_program` account in the context is not verified against the known SPL Token program ID."
+      ],
+      "ast_patterns": [
+        "solana_program::program::invoke without checking the program ID of the invoked program"
+      ],
+      "cfg_patterns": [
+        "transfer instruction called on an unverified token_program account"
+      ],
+      "insecure_pattern": "solana_program::program::invoke(..., &[ctx.accounts.source.clone(), ctx.accounts.destination.clone(), ctx.accounts.authority.clone()]);",
+      "fix": "if &spl_token::ID != ctx.accounts.token_program.key { return Err(ProgramError::IncorrectProgramId); }",
+      "source": "sealevel_attacks",
+      "vuln_id": "SOL-047",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Duplicate Mutable Accounts",
+      "category": "account",
+      "severity": "critical",
+      "description": "The insecure version allows the same account to be passed twice as mutable, leading to potential unintended side effects or vulnerabilities.",
+      "preconditions": [
+        "Same account is passed for both user_a and user_b"
+      ],
+      "ast_patterns": [
+        "Account<'info, User> without unique key constraint"
+      ],
+      "cfg_patterns": [
+        "update function without checking if user_a and user_b are the same"
+      ],
+      "insecure_pattern": "let user_a = &mut ctx.accounts.user_a; let user_b = &mut ctx.accounts.user_b;",
+      "fix": "Add a check to ensure user_a and user_b have different keys.",
+      "source": "sealevel_attacks",
+      "vuln_id": "SOL-048",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Bump Seed Canonicalization Vulnerability",
+      "category": "account",
+      "severity": "high",
+      "description": "The insecure version of the program does not properly validate the bump seed, allowing an attacker to manipulate the derived address and potentially bypass intended access controls.",
+      "preconditions": [
+        "The `set_value` function in the insecure version does not check if the provided bump matches the expected bump."
+      ],
+      "ast_patterns": [
+        "Pubkey::create_program_address(&[key.to_le_bytes().as_ref(), &[bump]], ctx.program_id)"
+      ],
+      "cfg_patterns": [
+        "address != ctx.accounts.data.key()"
+      ],
+      "insecure_pattern": "let address = Pubkey::create_program_address(&[key.to_le_bytes().as_ref(), &[bump]], ctx.program_id)?;",
+      "fix": "let (address, expected_bump) = Pubkey::find_program_address(&[key.to_le_bytes().as_ref()], ctx.program_id);",
+      "source": "sealevel_attacks",
+      "vuln_id": "SOL-049",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Incorrect PDA Seeds in WithdrawTokens",
+      "category": "account",
+      "severity": "critical",
+      "description": "The insecure version uses incorrect seeds for generating the Program Derived Address (PDA) when transferring tokens, which can lead to unauthorized token withdrawals.",
+      "preconditions": [
+        "The `withdraw_tokens` function is called with an incorrect PDA seed."
+      ],
+      "ast_patterns": [
+        "Incorrect seeds used in the `with_signer` method call."
+      ],
+      "cfg_patterns": [
+        "Token transfer without proper signer check due to incorrect PDA seeds."
+      ],
+      "insecure_pattern": "let seeds = &[ctx.accounts.pool.mint.as_ref(), &[ctx.accounts.pool.bump]];",
+      "fix": "let seeds = &[ctx.accounts.pool.withdraw_destination.as_ref(), &[ctx.accounts.pool.bump]];",
+      "source": "sealevel_attacks",
+      "vuln_id": "SOL-050",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Account Data Not Zeroed Out",
+      "category": "account",
+      "severity": "high",
+      "description": "The insecure version of the program does not zero out the account data when closing it, which can lead to sensitive information being left in the account's memory.",
+      "preconditions": [
+        "The `close` function is called without zeroing out the account data."
+      ],
+      "ast_patterns": [
+        "AccountInfo without explicit data zeroing"
+      ],
+      "cfg_patterns": [
+        "Lamports transfer without data clearing"
+      ],
+      "insecure_pattern": "**ctx.accounts.account.to_account_info().lamports.borrow_mut() = 0;",
+      "fix": "Zero out the account data before closing it.",
+      "source": "sealevel_attacks",
+      "vuln_id": "SOL-051",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Sysvar Address Checking Vulnerability",
+      "category": "auth",
+      "severity": "high",
+      "description": "The insecure version of the program does not verify that the provided account is indeed a Rent sysvar, allowing an attacker to pass any arbitrary account and potentially bypass intended checks.",
+      "preconditions": [
+        "The `rent` account in the context is not verified against the known Rent sysvar address."
+      ],
+      "ast_patterns": [
+        "AccountInfo without explicit verification of sysvar ID"
+      ],
+      "cfg_patterns": [
+        "Function call to check_sysvar_address without sysvar address validation"
+      ],
+      "insecure_pattern": "rent: AccountInfo<'info>,",
+      "fix": "rent: Sysvar<'info, Rent>,",
+      "source": "sealevel_attacks",
+      "vuln_id": "SOL-052",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Reentrancy",
+      "category": "cpi",
+      "severity": "critical",
+      "description": "A malicious contract can repeatedly call a vulnerable function to drain funds.",
+      "preconditions": [
+        "Function modifies state and transfers value"
+      ],
+      "ast_patterns": [
+        "Function calls within loops or recursive calls"
+      ],
+      "cfg_patterns": [
+        "Multiple entry points for the same function"
+      ],
+      "fix": "Use checks-effects-interactions pattern; ensure proper reentrancy guards",
+      "source": "vrust_paper",
+      "vuln_id": "SOL-053",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Unchecked External Calls",
+      "category": "cpi",
+      "severity": "high",
+      "description": "A contract makes external calls without checking the return value.",
+      "preconditions": [
+        "External function call"
+      ],
+      "ast_patterns": [
+        "Function calls without error handling"
+      ],
+      "cfg_patterns": [
+        "No conditional checks after external calls"
+      ],
+      "fix": "Always check the return values of external calls",
+      "source": "vrust_paper",
+      "vuln_id": "SOL-054",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Integer Overflow/Underflow",
+      "category": "arithmetic",
+      "severity": "critical",
+      "description": "Arithmetic operations can lead to unexpected results due to overflow or underflow.",
+      "preconditions": [
+        "Arithmetic operations on integers"
+      ],
+      "ast_patterns": [
+        "Operations without overflow checks"
+      ],
+      "cfg_patterns": [
+        "No conditional checks for overflow/underflow"
+      ],
+      "fix": "Use safe arithmetic libraries; ensure proper bounds checking",
+      "source": "vrust_paper",
+      "vuln_id": "SOL-055",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Race Conditions",
+      "category": "account",
+      "severity": "high",
+      "description": "Multiple transactions can interfere with each other, leading to unexpected behavior.",
+      "preconditions": [
+        "State changes based on external inputs"
+      ],
+      "ast_patterns": [
+        "Concurrent state modifications"
+      ],
+      "cfg_patterns": [
+        "Interleaved execution paths"
+      ],
+      "fix": "Use atomic operations; ensure proper synchronization",
+      "source": "vrust_paper",
+      "vuln_id": "SOL-056",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Uninitialized Variables",
+      "category": "account",
+      "severity": "high",
+      "description": "Variables are used before being initialized, leading to undefined behavior.",
+      "preconditions": [
+        "Variable declaration without initialization"
+      ],
+      "ast_patterns": [
+        "Use of uninitialized variables"
+      ],
+      "cfg_patterns": [
+        "No assignment before use"
+      ],
+      "fix": "Initialize all variables before use; ensure proper variable scoping",
+      "source": "vrust_paper",
+      "vuln_id": "SOL-057",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Access Control Issues",
+      "category": "auth",
+      "severity": "critical",
+      "description": "Functions can be called by unauthorized users, leading to potential security breaches.",
+      "preconditions": [
+        "Function with restricted access"
+      ],
+      "ast_patterns": [
+        "Lack of proper authentication checks"
+      ],
+      "cfg_patterns": [
+        "No conditional checks for caller permissions"
+      ],
+      "fix": "Implement proper access control mechanisms; ensure only authorized users can call functions",
+      "source": "vrust_paper",
+      "vuln_id": "SOL-058",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Denial of Service (DoS)",
+      "category": "network",
+      "severity": "high",
+      "description": "A contract can be made unusable by consuming excessive resources.",
+      "preconditions": [
+        "Resource-intensive operations"
+      ],
+      "ast_patterns": [
+        "Infinite loops or recursive calls"
+      ],
+      "cfg_patterns": [
+        "No exit conditions for loops"
+      ],
+      "fix": "Implement proper resource limits; ensure functions have reasonable execution time",
+      "source": "vrust_paper",
+      "vuln_id": "SOL-059",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Incorrect Error Handling",
+      "category": "other",
+      "severity": "medium",
+      "description": "Error handling is implemented incorrectly, leading to potential vulnerabilities.",
+      "preconditions": [
+        "Error handling logic"
+      ],
+      "ast_patterns": [
+        "Improper error checking or propagation"
+      ],
+      "cfg_patterns": [
+        "No fallback paths for errors"
+      ],
+      "fix": "Ensure proper error handling; provide fallback mechanisms",
+      "source": "vrust_paper",
+      "vuln_id": "SOL-060",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Integer Overflows & Underflows",
+      "category": "arithmetic",
+      "severity": "high",
+      "description": "Rust, Solana's primary development language, prevents overflows in debug mode but defaults to two's complement wrapping in release mode. If developers do not proactively manage integer boundaries, this can lead to unintended behavior.",
+      "preconditions": [
+        "Integer overflow/underflow is not handled"
+      ],
+      "ast_patterns": [
+        "checked_add",
+        "checked_sub",
+        "checked_mul",
+        "checked_div"
+      ],
+      "cfg_patterns": [
+        "Use checked arithmetic operations to prevent overflows and underflows"
+      ],
+      "insecure_pattern": "let result = a + b;",
+      "fix": "let result = a.checked_add(b).ok_or(ErrorCode::ArithmeticOverflow)?;",
+      "source": "cantina_guide",
+      "vuln_id": "SOL-061",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Precision Loss in Arithmetic Operations",
+      "category": "arithmetic",
+      "severity": "medium",
+      "description": "Incorrect handling of decimal precision can result in rounding errors, affecting token balances or financial calculations. Developers should use fixed-point arithmetic where possible to minimize these issues.",
+      "preconditions": [
+        "Decimal precision is not handled correctly"
+      ],
+      "ast_patterns": [
+        "fixed_point_arithmetic"
+      ],
+      "cfg_patterns": [
+        "Use fixed-point arithmetic for precise calculations"
+      ],
+      "insecure_pattern": "let result = a / b;",
+      "fix": "let result = (a * PRECISION) / b;",
+      "source": "cantina_guide",
+      "vuln_id": "SOL-062",
+      "collection": "vulnerabilities"
+    },
+    {
+      "name": "Arbitrary Cross-Program Invocation (CPI) Risks",
+      "category": "cpi",
+      "severity": "high",
+      "description": "Solana allows smart contracts to call other contracts, but failing to verify the target contract before invoking it can enable unauthorized operations.",
+      "preconditions": [
+        "Target contract is not verified"
+      ],
+      "ast_patterns": [
+        "if (target_program == expectedProgram) { ... }"
+      ],
+      "cfg_patterns": [
+        "Verify the target program before invoking CPI"
+      ],
+      "insecure_pattern": "invoke(&instruction, &accounts)?;",
+      "fix": "if (target_program != expectedProgram) { return Err(ErrorCode::UnauthorizedCPI); }\ninvoke(&instruction, &accounts)?;",
+      "source": "cantina_guide",
+      "vuln_id": "SOL-063",
+      "collection": "vulnerabilities"
+    }
+  ]
+}

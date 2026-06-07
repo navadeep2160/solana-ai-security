@@ -136,3 +136,40 @@ if __name__ == "__main__":
     print("\nQuery: overflow underflow")
     for r in query_sc_rules("overflow underflow arithmetic", top_k=2):
         print(f"  [{r['relevance']}] {r['content'][:100]}")
+
+def query_vuln_nodes(text: str, top_k: int = 5, category: str = None) -> list:
+    """
+    Query structured vulnerability nodes.
+    Returns nodes with name, severity, fix, preconditions.
+    Used by V3 scanner for node matching.
+    """
+    client   = _get_client()
+    embedder = _get_embedder()
+    vector   = embedder.encode(text).tolist()
+    try:
+        col   = client.get_collection("vuln_nodes")
+        where = {"category": category} if category else None
+        res   = col.query(
+            query_embeddings=[vector],
+            n_results=min(top_k, col.count()),
+            where=where,
+            include=["documents","metadatas","distances"],
+        )
+        results = []
+        for doc, meta, dist in zip(
+            res["documents"][0],
+            res["metadatas"][0],
+            res["distances"][0],
+        ):
+            results.append({
+                "content":   doc,
+                "name":      meta["name"],
+                "category":  meta["category"],
+                "severity":  meta["severity"],
+                "fix":       meta["fix"],
+                "source":    meta["source"],
+                "relevance": round(1 - dist, 3),
+            })
+        return results
+    except Exception as e:
+        return []

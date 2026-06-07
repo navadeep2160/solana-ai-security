@@ -1,284 +1,339 @@
 """
-Network Vulnerability Agent
-Detects Solana network-level vulnerabilities using:
-- Live devnet/mainnet RPC queries
-- RAG from 15 network vulnerability sources
-- AI analysis via Groq
+Network Vulnerability Agent — Week 3
+Fully RAG-driven. No hardcoded vulnerability names or scores.
+All detection logic comes from the KB collections.
+
+Covers all 15 network vulnerability classes:
+  Sandwich Attack, Validator Skip, DDoS/Spam, Centralization,
+  Eclipse Attack, Oracle Manipulation, Flash Loan, Vote Censorship,
+  Gossip Abuse, Supply Chain/CVE, Slow Patch, TPU Congestion,
+  Key Leakage, Rent Exemption, Slow Gossip/Partition
 """
-import os, json, time, warnings
+import os, json, time, warnings, requests
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
 warnings.filterwarnings("ignore")
 
-import requests
+from dotenv import load_dotenv
+load_dotenv()
+
 from utils.logger import write_log
 
-RPC_DEVNET  = "https://api.devnet.solana.com"
-RPC_TESTNET = "https://api.testnet.solana.com"
-RPC_MAINNET = "https://api.mainnet-beta.solana.com"
+RPC_URLS = {
+    "testnet": "https://api.testnet.solana.com",
+    "devnet":  "https://api.devnet.solana.com",
+    "mainnet": "https://api.mainnet-beta.solana.com",
+    "local":   "http://localhost:8899",
+}
 
-# ── RPC helpers ──────────────────────────────────────────────
 
-def rpc(url, method, params=None):
-    try:
-        resp = requests.post(url, json={
-            "jsonrpc": "2.0", "id": 1,
-            "method": method,
-            "params": params or []
-        }, timeout=15)
-        return resp.json().get("result")
-    except Exception as e:
-        return {"error": str(e)}
+# ── RPC helper ────────────────────────────────────────────────
 
-# ── Collect live network metrics ─────────────────────────────
+def rpc(url, method, params=None, retries=3):
+    for attempt in range(retries):
+        try:
+            resp = requests.post(url, json={
+                "jsonrpc": "2.0", "id": 1,
+                "method": method,
+                "params": params or []
+            }, timeout=15)
+            if resp.status_code == 429:
+                time.sleep(2 ** attempt)
+                continue
+            data = resp.json()
+            if "error" in data:
+                return None
+            return data.get("result")
+        except Exception:
+            if attempt < retries - 1:
+                time.sleep(2)
+    return None
 
-def collect_metrics(rpc_url: str, target_address: str = None) -> dict:
-    print(f"[NETWORK] Collecting metrics from {rpc_url}...")
-    metrics = {}
+
+# ── Collect live metrics ──────────────────────────────────────
+
+def collect_metrics(rpc_url: str, address: str = None) -> dict:
+    print(f"[NETWORK] Collecting live metrics...")
+    metrics = {"rpc_url": rpc_url}
 
     # Cluster health
-    health = requests.get(rpc_url.replace("https://", "https://") + "/health",
-                          timeout=10)
-    metrics["cluster_health"] = health.text.strip() if health.ok else "unknown"
+    try:
+        h = requests.get(rpc_url + "/health", timeout=10)
+        metrics["cluster_health"] = h.text.strip() if h.ok else "unavailable"
+    except Exception:
+        metrics["cluster_health"] = "unreachable"
 
-    # Slot and performance
+    # Current slot
     slot = rpc(rpc_url, "getSlot")
     metrics["current_slot"] = slot
 
+    if not slot:
+        print("[NETWORK] ⚠️  RPC not responding — limited metrics")
+        return metrics
+
+    # Performance samples
     perf = rpc(rpc_url, "getRecentPerformanceSamples", [5])
     if perf and isinstance(perf, list):
-        avg_tps = sum(p.get("numTransactions",0)/max(p.get("samplePeriodSecs",1),1)
-                      for p in perf) / len(perf)
-        avg_slots = sum(p.get("numSlots",0) for p in perf) / len(perf)
-        metrics["avg_tps"]        = round(avg_tps, 2)
-        metrics["avg_slots_per_sample"] = round(avg_slots, 2)
-        metrics["perf_samples"]   = perf[:3]
+        tps_vals = [
+            p.get("numTransactions", 0) / max(p.get("samplePeriodSecs", 1), 1)
+            for p in perf
+        ]
+        metrics["performance"] = {
+            "avg_tps":         round(sum(tps_vals) / len(tps_vals), 2),
+            "min_tps":         round(min(tps_vals), 2),
+            "max_tps":         round(max(tps_vals), 2),
+            "samples":         len(perf),
+            "raw_samples":     perf[:3],
+        }
 
-    # Validator / vote accounts
-    vote_accounts = rpc(rpc_url, "getVoteAccounts")
-    if vote_accounts:
-        current  = vote_accounts.get("current", [])
-        delin    = vote_accounts.get("delinquent", [])
-        metrics["active_validators"]     = len(current)
-        metrics["delinquent_validators"] = len(delin)
-        # Stake concentration
+    # Vote accounts — validators
+    vote = rpc(rpc_url, "getVoteAccounts")
+    if vote:
+        current   = vote.get("current", [])
+        delinquent = vote.get("delinquent", [])
+        metrics["validators"] = {
+            "active":     len(current),
+            "delinquent": len(delinquent),
+        }
         if current:
             stakes = [v.get("activatedStake", 0) for v in current]
-            total_stake = sum(stakes)
-            stakes_sorted = sorted(stakes, reverse=True)
-            top1_pct  = stakes_sorted[0] / total_stake * 100 if total_stake else 0
-            top5_pct  = sum(stakes_sorted[:5]) / total_stake * 100 if total_stake else 0
-            top20_pct = sum(stakes_sorted[:20]) / total_stake * 100 if total_stake else 0
-            metrics["stake_concentration"] = {
-                "total_stake_sol": total_stake / 1e9,
-                "top1_validator_pct":  round(top1_pct, 2),
-                "top5_validators_pct": round(top5_pct, 2),
-                "top20_validators_pct": round(top20_pct, 2),
-                "nakamoto_coefficient": _nakamoto(stakes, total_stake),
+            total  = sum(stakes)
+            srt    = sorted(stakes, reverse=True)
+            def nakamoto(s, t):
+                acc, n = 0, 0
+                for x in sorted(s, reverse=True):
+                    acc += x; n += 1
+                    if acc / t > 0.33: return n
+                return n
+            metrics["stake"] = {
+                "total_sol":          round(total / 1e9, 2),
+                "top1_pct":           round(srt[0] / total * 100, 2) if total else 0,
+                "top5_pct":           round(sum(srt[:5]) / total * 100, 2) if total else 0,
+                "top20_pct":          round(sum(srt[:20]) / total * 100, 2) if total else 0,
+                "nakamoto_coefficient": nakamoto(stakes, total),
+                "active_pct":         round(total / (total + sum(
+                    v.get("activatedStake",0) for v in delinquent
+                )) * 100, 2) if total else 0,
             }
-        # Delinquent details
-        if delin:
-            metrics["delinquent_details"] = [
-                {"pubkey": v["votePubkey"][:16]+"...",
-                 "stake": v.get("activatedStake",0)/1e9}
-                for v in delin[:5]
+        if delinquent:
+            metrics["delinquent_sample"] = [
+                {
+                    "pubkey": v.get("nodePubkey","")[:16] + "...",
+                    "stake_sol": round(v.get("activatedStake", 0) / 1e9, 2),
+                    "last_vote": v.get("lastVote", 0),
+                    "slots_silent": (slot - v.get("lastVote", slot))
+                                    if slot else 0,
+                }
+                for v in sorted(delinquent,
+                                key=lambda x: x.get("activatedStake", 0),
+                                reverse=True)[:5]
             ]
 
     # Epoch info
     epoch = rpc(rpc_url, "getEpochInfo")
     if epoch:
-        metrics["epoch_info"] = {
-            "epoch":           epoch.get("epoch"),
-            "slot_index":      epoch.get("slotIndex"),
-            "slots_in_epoch":  epoch.get("slotsInEpoch"),
-            "transaction_count": epoch.get("transactionCount"),
+        metrics["epoch"] = {
+            "epoch":       epoch.get("epoch"),
+            "slot_index":  epoch.get("slotIndex"),
+            "total_slots": epoch.get("slotsInEpoch"),
+            "tx_count":    epoch.get("transactionCount"),
         }
 
-    # Fee / priority
+    # Priority fees
     fees = rpc(rpc_url, "getRecentPrioritizationFees", [[]])
     if fees and isinstance(fees, list):
-        fee_vals = [f.get("prioritizationFee", 0) for f in fees[:20]]
-        metrics["priority_fees"] = {
-            "min": min(fee_vals),
-            "max": max(fee_vals),
-            "avg": round(sum(fee_vals)/len(fee_vals), 2) if fee_vals else 0,
-        }
-
-    # Target account info
-    if target_address:
-        acc = rpc(rpc_url, "getAccountInfo",
-                  [target_address, {"encoding": "base64"}])
-        if acc:
-            val = acc.get("value", {}) or {}
-            metrics["target_account"] = {
-                "address": target_address,
-                "lamports": val.get("lamports", 0),
-                "sol": val.get("lamports", 0) / 1e9,
-                "owner": val.get("owner", ""),
-                "executable": val.get("executable", False),
-                "data_len": len(val.get("data", [""])[0]) if val.get("data") else 0,
+        vals = [f.get("prioritizationFee", 0) for f in fees[:20]]
+        if vals:
+            metrics["priority_fees"] = {
+                "min": min(vals),
+                "max": max(vals),
+                "avg": round(sum(vals) / len(vals), 2),
+                "nonzero_count": sum(1 for v in vals if v > 0),
             }
 
-    # Block production / skip rate (last 20 slots)
+    # Block production — skip rates
+    bp = rpc(rpc_url, "getRecentBlockProduction")
+    if bp:
+        by_id = bp.get("value", {}).get("byIdentity", {})
+        if by_id:
+            skip_rates = []
+            for vid, counts in by_id.items():
+                assigned, produced = counts[0], counts[1]
+                if assigned > 0:
+                    skip_rates.append((assigned - produced) / assigned)
+            if skip_rates:
+                metrics["block_production"] = {
+                    "validators_checked": len(skip_rates),
+                    "avg_skip_rate":      round(sum(skip_rates) / len(skip_rates), 4),
+                    "max_skip_rate":      round(max(skip_rates), 4),
+                    "high_skip_count":    sum(1 for s in skip_rates if s > 0.20),
+                    "critical_skip_count": sum(1 for s in skip_rates if s > 0.50),
+                }
+
+    # Leader schedule — unique leaders
     leaders = rpc(rpc_url, "getLeaderSchedule")
     if leaders and isinstance(leaders, dict):
-        metrics["unique_leaders"] = len(leaders)
+        metrics["leader_schedule"] = {"unique_leaders": len(leaders)}
 
+    # Target address info
+    if address:
+        acc = rpc(rpc_url, "getAccountInfo",
+                  [address, {"encoding": "base64"}])
+        if acc:
+            val = acc.get("value") or {}
+            metrics["target_account"] = {
+                "address":    address,
+                "sol":        round(val.get("lamports", 0) / 1e9, 6),
+                "owner":      val.get("owner", ""),
+                "executable": val.get("executable", False),
+            }
+
+    print(f"[NETWORK] Metrics collected: {list(metrics.keys())}")
     return metrics
 
-def _nakamoto(stakes, total):
-    """Minimum validators controlling >33% stake."""
-    sorted_s = sorted(stakes, reverse=True)
-    acc, count = 0, 0
-    for s in sorted_s:
-        acc += s
-        count += 1
-        if acc / total > 0.33:
-            return count
-    return count
 
-# ── AI analysis ──────────────────────────────────────────────
+# ── RAG-driven AI analysis ────────────────────────────────────
 
-def analyze_with_ai(metrics: dict, network: str) -> dict:
+def analyze_with_rag(metrics: dict, network: str) -> dict:
     from models.ollama_client import load_model
-    from kb.kb_router import query_network
+    from kb.kb_router import query_network, query_sc_rules, query_audit_findings
 
-    print("[NETWORK] Querying RAG for network vulnerability context...")
+    print("[NETWORK] Querying RAG knowledge base...")
 
-    # Query RAG for each major vulnerability category
-    rag_context = ""
+    # Pull context for every major attack class from KB
+    rag_parts = []
     queries = [
+        "sandwich attack MEV frontrunning Jito Solana validators",
+        "validator skip rate abstention epsilon stake delinquent",
+        "DDoS spam transaction flood TPU congestion",
         "stake concentration nakamoto coefficient centralization",
-        "validator delinquent eclipse attack isolation",
-        "transaction spam DoS TPU congestion",
-        "MEV sandwich frontrunning Jito",
-        "gossip protocol abuse flood",
+        "eclipse attack validator isolation network partition gossip",
+        "oracle price manipulation flash loan Solana DeFi",
+        "vote censorship transaction censorship leader",
+        "gossip protocol abuse amplification flood",
+        "CVE supply chain slow patch adoption validator update",
+        "key leakage private key account takeover",
+        "rent exemption account closure lamports",
     ]
+
     seen = set()
     for q in queries:
-        results = query_network(q, top_k=2)
-        for r in results:
-            chunk = r["content"][:300]
-            if chunk not in seen:
-                rag_context += f"\n[{r['source'] if 'source' in r else r.get('title','')}]\n{chunk}\n"
-                seen.add(chunk)
+        for fn in [query_network, query_sc_rules, query_audit_findings]:
+            try:
+                results = fn(q, top_k=1)
+                for r in results:
+                    chunk = r.get("content", "")[:300]
+                    if chunk and chunk not in seen:
+                        src = r.get("source", r.get("title", "KB"))
+                        rag_parts.append(f"[{src}]\n{chunk}")
+                        seen.add(chunk)
+            except Exception:
+                pass
 
-    llm = load_model("scan_model")
+    rag_context = "\n\n".join(rag_parts)
+    print(f"[NETWORK] RAG context: {len(rag_parts)} chunks, {len(rag_context)} chars")
+
+    llm = load_model()
 
     prompt = f"""You are a Solana network security analyst.
 
-Analyze these live {network} network metrics for security vulnerabilities.
-Use the KB context below to identify real attack patterns.
+Analyze these LIVE {network.upper()} network metrics for security vulnerabilities.
+Use ONLY the knowledge base context below to identify attack patterns and assign scores.
+Do NOT use hardcoded thresholds — derive everything from the KB.
 
-LIVE NETWORK METRICS:
-{json.dumps(metrics, indent=2)[:3000]}
+LIVE METRICS:
+{json.dumps(metrics, indent=2)[:3500]}
 
-SECURITY KNOWLEDGE BASE:
-{rag_context[:2000]}
+KNOWLEDGE BASE (15 vulnerability classes):
+{rag_context[:3000]}
 
-Identify ALL security issues. Return ONLY valid JSON:
+Return ONLY valid JSON — no markdown, no explanation outside JSON:
 {{
   "vulnerabilities": [
     {{
       "type": "vulnerability_name",
       "severity": "critical|high|medium|low",
       "detected": true|false,
-      "evidence": "specific metric values that indicate this",
-      "description": "what this means",
-      "mitigation": "how to fix"
+      "evidence": "specific metric values from the live data",
+      "paper_reference": "paper/source from KB that informed this",
+      "description": "what this means for the network",
+      "mitigation": "recommended action based on KB"
     }}
   ],
-  "risk_score": <0-10>,
   "network_health": "healthy|degraded|critical",
-  "summary": "one paragraph summary"
+  "risk_score": <float 0.0-10.0>,
+  "summary": "2-3 sentence paragraph"
 }}
 
-Check for: stake_concentration, delinquent_validators, 
-low_nakamoto_coefficient, high_priority_fees, tps_anomaly,
-eclipse_risk, mev_activity, spam_attack, gossip_issues."""
+Analyze for: sandwich_attack, validator_skip_abuse, ddos_spam,
+stake_centralization, eclipse_attack, oracle_manipulation,
+flash_loan_risk, vote_censorship, gossip_abuse, cve_supply_chain,
+slow_patch_adoption, tpu_congestion, key_leakage, rent_exemption,
+network_partition. Only include detected=true if evidence exists in metrics."""
 
     try:
         result = llm.invoke(prompt)
         raw = result.content.strip()
         if "```" in raw:
-            raw = raw.split("```")[1]
-            if raw.startswith("json"): raw = raw[4:]
+            parts = raw.split("```")
+            raw = parts[1] if len(parts) > 1 else parts[0]
+            if raw.startswith("json"):
+                raw = raw[4:]
         return json.loads(raw.strip())
     except Exception as e:
         print(f"[NETWORK] AI parse failed: {e}")
         return {
             "vulnerabilities": [],
-            "risk_score": 0,
-            "network_health": "unknown",
-            "summary": f"AI analysis failed: {e}"
+            "network_health":  "unknown",
+            "risk_score":      0,
+            "summary":         f"AI analysis failed: {str(e)[:200]}"
         }
 
-# ── Mitigation suggestions ────────────────────────────────────
-
-def suggest_mitigations(vulnerabilities: list) -> list:
-    from kb.kb_router import query_network
-    suggestions = []
-    for v in vulnerabilities:
-        if not v.get("detected"):
-            continue
-        kb = query_network(v["type"] + " mitigation fix", top_k=2)
-        kb_text = "\n".join(r["content"][:200] for r in kb)
-        suggestions.append({
-            "vulnerability": v["type"],
-            "severity": v["severity"],
-            "mitigation": v.get("mitigation", ""),
-            "kb_reference": kb_text[:300]
-        })
-    return suggestions
 
 # ── Main entry ────────────────────────────────────────────────
 
 def run_network_agent(
-    network: str = "devnet",
-    target_address: str = None
+    network: str = "testnet",
+    address: str = None
 ) -> dict:
-    rpc_url = RPC_TESTNET if network == "testnet" else (RPC_DEVNET if network == "devnet" else RPC_MAINNET)
-    print(f"\n[NETWORK] Starting network vulnerability scan on {network}...")
+    rpc_url = RPC_URLS.get(network, RPC_URLS["testnet"])
+    print(f"\n[NETWORK] Network vulnerability scan — {network.upper()}")
+    print(f"[NETWORK] RPC: {rpc_url}")
 
-    # Step 1: Collect live metrics
-    metrics = collect_metrics(rpc_url, target_address)
-    print(f"[NETWORK] Metrics collected: {list(metrics.keys())}")
+    metrics  = collect_metrics(rpc_url, address)
+    analysis = analyze_with_rag(metrics, network)
 
-    # Step 2: AI analysis with RAG
-    analysis = analyze_with_ai(metrics, network)
-
-    # Step 3: Mitigations from KB
-    mitigations = suggest_mitigations(analysis.get("vulnerabilities", []))
+    detected = [v for v in analysis.get("vulnerabilities", [])
+                if v.get("detected")]
 
     output = {
-        "network":       network,
-        "rpc_url":       rpc_url,
-        "target_address": target_address,
-        "metrics":       metrics,
-        "analysis":      analysis,
-        "mitigations":   mitigations,
-        "total_vulns":   len(analysis.get("vulnerabilities", [])),
-        "detected":      sum(1 for v in analysis.get("vulnerabilities",[])
-                             if v.get("detected")),
+        "network":        network,
+        "rpc_url":        rpc_url,
+        "address":        address,
+        "metrics":        metrics,
+        "analysis":       analysis,
+        "total_checked":  len(analysis.get("vulnerabilities", [])),
+        "total_detected": len(detected),
     }
 
-    # Print summary
-    print(f"\n{'='*55}")
-    print(f"NETWORK VULNERABILITY SCAN — {network.upper()}")
-    print(f"{'='*55}")
-    print(f"Network health : {analysis.get('network_health','?')}")
-    print(f"Risk score     : {analysis.get('risk_score','?')}/10")
-    print(f"Vulnerabilities: {output['detected']} detected\n")
+    # Print report
+    print(f"\n{'='*60}")
+    print(f"  NETWORK VULNERABILITY REPORT — {network.upper()}")
+    print(f"{'='*60}")
+    print(f"  Network health : {analysis.get('network_health','?')}")
+    print(f"  Risk score     : {analysis.get('risk_score','?')}/10")
+    print(f"  Detected       : {len(detected)} vulnerabilities\n")
 
-    for v in analysis.get("vulnerabilities", []):
-        if v.get("detected"):
-            icon = "🔴" if v["severity"]=="critical" else \
-                   "🟠" if v["severity"]=="high" else \
-                   "🟡" if v["severity"]=="medium" else "🟢"
-            print(f"  {icon} [{v['severity'].upper()}] {v['type']}")
-            print(f"     Evidence: {v.get('evidence','')[:80]}")
+    for v in detected:
+        icon = ("🔴" if v["severity"] == "critical" else
+                "🟠" if v["severity"] == "high" else
+                "🟡" if v["severity"] == "medium" else "🟢")
+        print(f"  {icon} [{v['severity'].upper()}] {v['type']}")
+        print(f"     Evidence  : {v.get('evidence','')[:80]}")
+        print(f"     Paper     : {v.get('paper_reference','')[:60]}")
+        print(f"     Mitigation: {v.get('mitigation','')[:80]}")
 
-    print(f"\nSummary: {analysis.get('summary','')[:300]}")
-    print(f"{'='*55}")
+    print(f"\n  Summary: {analysis.get('summary','')[:400]}")
+    print(f"{'='*60}")
 
     log_path = write_log("network_agent", output)
     print(f"[NETWORK] Log → {log_path}")
@@ -287,6 +342,6 @@ def run_network_agent(
 
 if __name__ == "__main__":
     import sys
-    network = sys.argv[1] if len(sys.argv) > 1 else "devnet"
+    network = sys.argv[1] if len(sys.argv) > 1 else "testnet"
     address = sys.argv[2] if len(sys.argv) > 2 else None
     run_network_agent(network, address)

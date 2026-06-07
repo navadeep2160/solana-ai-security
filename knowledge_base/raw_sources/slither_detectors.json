@@ -1,11 +1,11 @@
 {
   "id": "slither_detectors",
-  "title": "Slither Detectors EVM pattern reference",
+  "title": "Slither Security Detectors",
   "url": "https://github.com/crytic/slither/tree/master/slither/detectors",
-  "type": "github",
+  "type": "web",
   "collection": "audit_findings",
   "status": "OK",
-  "char_count": 830,
-  "text": "Repository contents of https://github.com/crytic/slither/tree/master/slither/detectors:\n- __init__.py: slither/detectors/__init__.py\n- abstract_detector.py: slither/detectors/abstract_detector.py\n- all_detectors.py: slither/detectors/all_detectors.py\n- assembly: slither/detectors/assembly\n- attributes: slither/detectors/attributes\n- compiler_bugs: slither/detectors/compiler_bugs\n- erc: slither/detectors/erc\n- examples: slither/detectors/examples\n- functions: slither/detectors/functions\n- naming_convention: slither/detectors/naming_convention\n- operations: slither/detectors/operations\n- reentrancy: slither/detectors/reentrancy\n- shadowing: slither/detectors/shadowing\n- slither: slither/detectors/slither\n- source: slither/detectors/source\n- statements: slither/detectors/statements\n- variables: slither/detectors/variables",
+  "char_count": 1303,
+  "text": "# Slither Security Detectors (EVM reference patterns)\n\n\n## abstract_detector.py\nimport abc\nimport re\nfrom logging import Logger\nfrom typing import TYPE_CHECKING\nfrom collections.abc import Callable\n\nfrom slither.core.compilation_unit import SlitherCompilationUnit, Language\nfrom slither.core.declarations import Contract\nfrom slither.formatters.exceptions import FormatImpossible\nfrom slither.formatters.utils.patches import apply_patch, create_diff\nfrom slither.utils.colors import green, yellow, red\nfrom slither.utils.comparable_enum import ComparableEnum\nfrom slither.utils.output import Output, SupportedOutput\n\nif TYPE_CHECKING:\n    from slither import Slither\n\n\nclass Incor\n\n## all_detectors.py\nfrom .examples.backdoor import Backdoor\nfrom .variables.uninitialized_state_variables import UninitializedStateVarsDetection\nfrom .variables.uninitialized_storage_variables import UninitializedStorageVars\nfrom .variables.uninitialized_local_variables import UninitializedLocalVars\nfrom .variables.var_read_using_this import VarReadUsingThis\nfrom .attributes.constant_pragma import ConstantPragma\nfrom .attributes.incorrect_solc import IncorrectSolc\nfrom .attributes.locked_ether import LockedEther\nfrom .functions.arbitrary_send_eth import ArbitrarySendEth\nfrom .erc.erc20.arbitrary_send_erc20_no_per\n",
   "error": ""
 }

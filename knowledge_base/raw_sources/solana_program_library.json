@@ -1,0 +1,11 @@
+{
+  "id": "solana_program_library",
+  "title": "Solana Program Library Security",
+  "url": "https://github.com/solana-labs/solana-program-library",
+  "type": "web",
+  "collection": "architecture",
+  "status": "OK",
+  "char_count": 977,
+  "text": "# Solana Program Library \u2014 Security Relevant Libraries\n\n- README.md: file\n- concurrent-merkle-tree: dir\n- math-example: dir\n- math: dir\n- merkle-tree-reference: dir\n\n\n## Security Policy\n## This repo will be archived soon\nActive development in this repo is ending 2024-03-02. Anza is continuing development\nin program-specific repos under the\n[solana-program organization](https://github.com/solana-program). Please refer to \nthe security policy in individual repos:\n\n* [associated-token-account](https://github.com/solana-program/associated-token-account/security)\n* [feature-proposal](https://github.com/solana-program/feature-proposal/security)\n* [memo](https://github.com/solana-program/memo/security)\n* [single-pool](https://github.com/solana-program/single-pool/security)\n* [stake-pool](https://github.com/solana-program/stake-pool/security)\n* [token](https://github.com/solana-program/token/security)\n* [token-2022](https://github.com/solana-program/token-2022/security)\n",
+  "error": ""
+}
