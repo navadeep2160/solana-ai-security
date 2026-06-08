@@ -303,6 +303,8 @@ load_model(force_local=True)  # qwen2.5-coder:14b (Rust patching)
 
 Input Contract (.rs)
 ↓
+
+
 ┌─────────────────────────────────┐
 │  Multi-Layer Static Analysis    │
 │  - KB-driven Regex Scanner      │
@@ -311,8 +313,14 @@ Input Contract (.rs)
 │  - V3 Node Matching Scanner     │
 └──────────────┬──────────────────┘
 ↓
+
+
 Knowledge Base (490 chunks, 63 nodes)
+
+
 ↓
+
+
 ┌─────────────────────────────────┐
 │  AI Agents (Groq + Ollama)      │
 │  - Scanner Agent (llama3.2:3b)  │
@@ -322,7 +330,12 @@ Knowledge Base (490 chunks, 63 nodes)
 │  - Scorer Agent                 │
 │  - Network Agent                │
 └──────────────┬──────────────────┘
+
+
 ↓
+
+
+
 Final Report + Patched Contract
 ---
 
