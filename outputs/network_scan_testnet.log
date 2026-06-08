@@ -1,0 +1,27 @@
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+
+[NETWORK] Starting network vulnerability scan on testnet...
+[NETWORK] Collecting metrics from https://api.testnet.solana.com...
+[NETWORK] Metrics collected: ['cluster_health', 'current_slot']
+[NETWORK] Querying RAG for network vulnerability context...
+[GROQ] Loading → llama-3.3-70b-versatile
+[GROQ] Model loaded successfully
+
+=======================================================
+NETWORK VULNERABILITY SCAN — TESTNET
+=======================================================
+Network health : degraded
+Risk score     : 6/10
+Vulnerabilities: 3 detected
+
+  🟠 [HIGH] stake_concentration
+     Evidence: top 20 validators control >30% of stake
+  🟡 [MEDIUM] mev_activity
+     Evidence: MEV extraction concentrated among top 5 validators, $30M+ extracted in 2024
+  🟡 [MEDIUM] low_nakamoto_coefficient
+     Evidence: top 5 validators control a significant portion of the network's stake
+
+Summary: The Solana testnet network exhibits signs of centralization, with a high stake concentration among top validators and significant MEV activity. While no immediate security threats are detected, the network's health is degraded due to these factors. Implementing decentralization and MEV mitigation st
+=======================================================
+[NETWORK] Log → outputs/logs/network_agent_2026-06-05_11-21-30.json

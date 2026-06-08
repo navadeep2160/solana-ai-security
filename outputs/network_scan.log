@@ -1,0 +1,29 @@
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+
+[NETWORK] Starting network vulnerability scan on devnet...
+[NETWORK] Collecting metrics from https://api.devnet.solana.com...
+[NETWORK] Metrics collected: ['cluster_health', 'current_slot', 'avg_tps', 'avg_slots_per_sample', 'perf_samples', 'active_validators', 'delinquent_validators', 'stake_concentration', 'delinquent_details', 'epoch_info', 'priority_fees', 'target_account', 'unique_leaders']
+[NETWORK] Querying RAG for network vulnerability context...
+[GROQ] Loading → llama-3.3-70b-versatile
+[GROQ] Model loaded successfully
+
+=======================================================
+NETWORK VULNERABILITY SCAN — DEVNET
+=======================================================
+Network health : degraded
+Risk score     : 7/10
+Vulnerabilities: 4 detected
+
+  🟠 [HIGH] Stake Concentration
+     Evidence: top5_validators_pct: 96.72, top20_validators_pct: 100.0
+  🟡 [MEDIUM] Delinquent Validators
+     Evidence: delinquent_validators: 26
+  🟠 [HIGH] Low Nakamoto Coefficient
+     Evidence: nakamoto_coefficient: 2
+  🟡 [MEDIUM] MEV Activity
+     Evidence: avg_tps: 85.53, numNonVoteTransactions: 2128, 2868, 2160
+
+Summary: The Solana network is currently experiencing a range of security issues, including high stake concentration, delinquent validators, and a low Nakamoto coefficient. Additionally, MEV activity is present, which can lead to extractable value and potential security risks. To mitigate these risks, it is 
+=======================================================
+[NETWORK] Log → outputs/logs/network_agent_2026-06-05_07-11-59.json

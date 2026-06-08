@@ -1,0 +1,335 @@
+{
+  "timestamp": "2026-06-08T05:52:04.153093",
+  "success": true,
+  "iterations": 2,
+  "vulnerabilities_found": [
+    {
+      "type": "No signer check",
+      "severity": "high",
+      "reason": "Anyone can withdraw funds."
+    },
+    {
+      "type": "No owner verification",
+      "severity": "high",
+      "reason": "Withdraw function does not verify the owner."
+    },
+    {
+      "type": "No underflow check",
+      "severity": "medium",
+      "reason": "Withdraw function can cause underflow."
+    },
+    {
+      "type": "No overflow check",
+      "severity": "medium",
+      "reason": "Deposit function can cause overflow."
+    },
+    {
+      "type": "No authority check on close",
+      "severity": "high",
+      "reason": "Anyone can close the account."
+    },
+    {
+      "type": "Reinitialization without check",
+      "severity": "medium",
+      "reason": "Bank can be reinitialized without checks."
+    },
+    {
+      "type": "Admin action with no admin check",
+      "severity": "high",
+      "reason": "Anyone can lock/unlock the bank."
+    },
+    {
+      "type": "Arithmetic precision loss",
+      "severity": "medium",
+      "reason": "Calculate fee function loses precision."
+    },
+    {
+      "type": "CPI to arbitrary program",
+      "severity": "high",
+      "reason": "No check on the target program ID."
+    },
+    {
+      "type": "Duplicate mutable accounts",
+      "severity": "medium",
+      "reason": "From and to accounts can be the same."
+    },
+    {
+      "type": "Missing Signer Check",
+      "severity": "high",
+      "reason": "withdraw at line 40 type=function",
+      "line": 40,
+      "fix": "pub fn log_message(ctx: Context<LogMessage>) -> ProgramResult { if !ctx.accounts.authority.is_signer { return Err(Progra",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Incorrect Authority Check",
+      "severity": "high",
+      "reason": "withdraw at line 40 type=function",
+      "line": 40,
+      "fix": "if ctx.accounts.token.owner != &spl_token::ID {",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Missing Signer Checks",
+      "severity": "high",
+      "reason": "withdraw at line 40 type=function",
+      "line": 40,
+      "fix": "",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Integer Overflow/Underflow",
+      "severity": "critical",
+      "reason": "withdraw at line 40 type=function",
+      "line": 40,
+      "fix": "Use safe arithmetic libraries; ensure proper bounds checking",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Account Data Matching Vulnerability",
+      "severity": "high",
+      "reason": "withdraw at line 40 type=function",
+      "line": 40,
+      "fix": "if ctx.accounts.authority.key != &token.owner { return Err(ProgramError::InvalidAccountData); }",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Precision Loss in Arithmetic Operations",
+      "severity": "medium",
+      "reason": "calculate_fee at line 77 type=function",
+      "line": 77,
+      "fix": "let result = (a * PRECISION) / b;",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Integer Overflows & Underflows",
+      "severity": "high",
+      "reason": "calculate_fee at line 77 type=function",
+      "line": 77,
+      "fix": "let result = a.checked_add(b).ok_or(ErrorCode::ArithmeticOverflow)?;",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Arbitrary CPI to SPL Token Program",
+      "severity": "critical",
+      "reason": "cpi_transfer at line 89 type=function",
+      "line": 89,
+      "fix": "if &spl_token::ID != ctx.accounts.token_program.key { return Err(ProgramError::IncorrectProgramId); }",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Improper Validation of Associated Token Account",
+      "severity": "high",
+      "reason": "bank at line 116 type=Account<'info",
+      "line": 116,
+      "fix": "Use `get_associated_token_address` for validating associated token accounts.",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Account Confusion",
+      "severity": "high",
+      "reason": "bank at line 116 type=Account<'info",
+      "line": 116,
+      "fix": "",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Missing ownership check",
+      "severity": "critical",
+      "reason": "user at line 128 type=AccountInfo<'info>",
+      "line": 128,
+      "fix": "Create a helper function that takes an untrusted `AccountInfo`, checks the owner and returns an object of a different, t",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Missing Discriminant Check",
+      "severity": "high",
+      "reason": "user at line 135 type=Signer<'inf",
+      "line": 135,
+      "fix": "if user.discriminant != AccountDiscriminant::User { return Err(ProgramError::InvalidAccountData); }",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "missing_signer_check",
+      "severity": "critical",
+      "reason": "The withdraw function does not check if the caller is a signer, allowing anyone to withdraw funds.",
+      "source": "static"
+    },
+    {
+      "type": "missing_owner_check",
+      "severity": "critical",
+      "reason": "The withdraw function does not verify if the caller is the owner of the bank account, allowing unauthorized withdrawals.",
+      "source": "static"
+    },
+    {
+      "type": "integer_underflow",
+      "severity": "high",
+      "reason": "The withdraw function does not check for underflow when subtracting from the balance, which could lead to incorrect balances or unexpected behavior.",
+      "source": "static"
+    },
+    {
+      "type": "integer_overflow",
+      "severity": "high",
+      "reason": "The deposit function does not check for overflow when adding to the balance, which could lead to incorrect balances or unexpected behavior.",
+      "source": "static"
+    },
+    {
+      "type": "unchecked_account_closure",
+      "severity": "high",
+      "reason": "The close_account function does not verify if the caller has authority to close the account, allowing unauthorized closure.",
+      "source": "static"
+    },
+    {
+      "type": "reinitialization_attack",
+      "severity": "high",
+      "reason": "The reinitialize function does not check if the bank has already been initialized, allowing it to be reinitialized multiple times.",
+      "source": "static"
+    },
+    {
+      "type": "missing_admin_check",
+      "severity": "high",
+      "reason": "The set_locked function does not verify if the caller is an admin, allowing anyone to lock or unlock the bank.",
+      "source": "static"
+    },
+    {
+      "type": "precision_loss",
+      "severity": "medium",
+      "reason": "The calculate_fee function divides before multiplying, which can lead to precision loss and incorrect fee calculations.",
+      "source": "static"
+    },
+    {
+      "type": "arbitrary_cpi",
+      "severity": "medium",
+      "reason": "The cpi_transfer function does not verify if the target_program is a trusted program, allowing arbitrary CPI calls.",
+      "source": "static"
+    },
+    {
+      "type": "duplicate_mutable_accounts",
+      "severity": "medium",
+      "reason": "The transfer function does not check for uniqueness of mutable accounts, allowing duplicate mutable accounts.",
+      "source": "static"
+    },
+    {
+      "type": "missing_signer",
+      "severity": "critical",
+      "reason": "Field 'user' uses AccountInfo \u2014 no signer enforced. (at struct Withdraw, field user, line 128)",
+      "line": 128,
+      "source": "ast"
+    },
+    {
+      "type": "missing_signer",
+      "severity": "critical",
+      "reason": "Field 'caller' uses AccountInfo \u2014 no signer enforced. (at struct CloseAccount, field caller, line 144)",
+      "line": 144,
+      "source": "ast"
+    },
+    {
+      "type": "missing_owner_check",
+      "severity": "critical",
+      "reason": "'withdraw' has no owner check. (at fn withdraw, line 25)",
+      "line": 25,
+      "source": "ast"
+    },
+    {
+      "type": "unsafe_math",
+      "severity": "high",
+      "reason": "'withdraw' uses unsafe arithmetic. (at fn withdraw, line 25)",
+      "line": 25,
+      "source": "ast"
+    },
+    {
+      "type": "integer_overflow",
+      "severity": "high",
+      "reason": "'deposit' uses += without checked_add. (at fn deposit, line 35)",
+      "line": 35,
+      "source": "ast"
+    },
+    {
+      "type": "missing_owner_check",
+      "severity": "critical",
+      "reason": "'close_account' has no owner check. (at fn close_account, line 45)",
+      "line": 45,
+      "source": "ast"
+    },
+    {
+      "type": "missing_owner_check",
+      "severity": "critical",
+      "reason": "'transfer' has no owner check. (at fn transfer, line 100)",
+      "line": 100,
+      "source": "ast"
+    },
+    {
+      "type": "unsafe_math",
+      "severity": "high",
+      "reason": "'transfer' uses unsafe arithmetic. (at fn transfer, line 100)",
+      "line": 100,
+      "source": "ast"
+    },
+    {
+      "type": "unchecked_arithmetic",
+      "severity": "critical",
+      "reason": "Unchecked math in withdraw() lines 24-31",
+      "line": 24,
+      "source": "cfg"
+    },
+    {
+      "type": "no_security_checks",
+      "severity": "critical",
+      "reason": "Function 'withdraw' has NO security checks",
+      "line": 0,
+      "source": "cfg"
+    },
+    {
+      "type": "unchecked_arithmetic",
+      "severity": "critical",
+      "reason": "Unchecked math in deposit() lines 34-41",
+      "line": 34,
+      "source": "cfg"
+    },
+    {
+      "type": "no_security_checks",
+      "severity": "critical",
+      "reason": "Function 'close_account' has NO security checks",
+      "line": 0,
+      "source": "cfg"
+    },
+    {
+      "type": "unchecked_arithmetic",
+      "severity": "critical",
+      "reason": "Unchecked math in calculate_fee() lines 76-85",
+      "line": 76,
+      "source": "cfg"
+    },
+    {
+      "type": "unchecked_arithmetic",
+      "severity": "critical",
+      "reason": "Unchecked math in cpi_transfer() lines 88-96",
+      "line": 88,
+      "source": "cfg"
+    },
+    {
+      "type": "unchecked_arithmetic",
+      "severity": "critical",
+      "reason": "Unchecked math in transfer() lines 99-108",
+      "line": 99,
+      "source": "cfg"
+    },
+    {
+      "type": "operation_before_check",
+      "severity": "critical",
+      "reason": "Transfer in transfer() block transfer:bb0 with no signer check",
+      "line": 99,
+      "source": "cfg"
+    },
+    {
+      "type": "no_security_checks",
+      "severity": "critical",
+      "reason": "Function 'transfer' has NO security checks",
+      "line": 0,
+      "source": "cfg"
+    }
+  ],
+  "total_vulnerabilities": 49,
+  "patched_contract_path": "outputs/patched/patched_contract.rs",
+  "status": "SECURED"
+}

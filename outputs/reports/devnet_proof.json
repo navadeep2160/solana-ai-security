@@ -1,0 +1,99 @@
+{
+  "generated_at": "2026-06-05T05:13:44.009301Z",
+  "network": "solana-devnet",
+  "rpc_url": "https://api.devnet.solana.com",
+  "deployer": {
+    "address": "2QtmUBygxwmLwxh762QaRzw479CPFgRVBc64maQxywhM",
+    "balance_start": 8.47281472,
+    "balance_end": 8.47064972,
+    "sol_spent": 0.002165
+  },
+  "vulnerable_contract": {
+    "program_id": "Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL",
+    "signature": "JTdMXe1BvWjN6ZPfa7dko627z3bpAkyGF6m8mABKXSXmr7KjvYopBDwFe4nm7j4E2GycimMHzAvSirsYsP7HfY4",
+    "explorer_url": "https://explorer.solana.com/address/Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL?cluster=devnet",
+    "tx_url": "https://explorer.solana.com/tx/JTdMXe1BvWjN6ZPfa7dko627z3bpAkyGF6m8mABKXSXmr7KjvYopBDwFe4nm7j4E2GycimMHzAvSirsYsP7HfY4?cluster=devnet",
+    "program_info": {
+      "program_id": "Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL",
+      "raw": "Program Id: Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL\nOwner: BPFLoaderUpgradeab1e11111111111111111111111\nProgramData Address: BEupr2iaY5ALnP5pteQuSPz2ivadPNuLTcYbdt92tfMD\nAuthority: 2QtmUBygxwmLwxh762QaRzw479CPFgRVBc64maQxywhM\nLast Deployed In Slot: 467253030\nData Length: 218056 (0x353c8) bytes\nBalance: 1.51887384 SOL",
+      "authority": "2QtmUBygxwmLwxh762QaRzw479CPFgRVBc64maQxywhM",
+      "data_length": "218056 (0x353c8) bytes",
+      "balance": "1.51887384 SOL"
+    },
+    "findings": {
+      "total": 32,
+      "critical": 12,
+      "high": 8,
+      "medium": 7,
+      "low": 5,
+      "breakdown": {
+        "static": 5,
+        "ast": 8,
+        "cfg": 9,
+        "ai": 10
+      }
+    },
+    "known_vulnerabilities": [
+      "Missing signer check on withdraw (line 128)",
+      "Missing owner check on withdraw (line 25)",
+      "Integer underflow on withdraw (line 25)",
+      "Integer overflow on deposit (line 35)",
+      "Missing authority check on close_account (line 45)",
+      "Reinitialization attack vector (line 54)",
+      "Unauthorized set_locked (line 65)",
+      "Loss of precision in calculate_fee (line 76)",
+      "Unvalidated CPI target program (line 88)",
+      "Duplicate mutable accounts in transfer (line 100)"
+    ]
+  },
+  "patched_contract": {
+    "program_id": "Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL",
+    "signature": "4dSBWkvmX8tqFDHXqNRstEZ8EDyzHnacpaoSj2GzbCF3LJ9ibhGxUYtrStp7C2ud1q4sTnaDNvkp77NPLnStSLDn",
+    "explorer_url": "https://explorer.solana.com/address/Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL?cluster=devnet",
+    "tx_url": "https://explorer.solana.com/tx/4dSBWkvmX8tqFDHXqNRstEZ8EDyzHnacpaoSj2GzbCF3LJ9ibhGxUYtrStp7C2ud1q4sTnaDNvkp77NPLnStSLDn?cluster=devnet",
+    "program_info": {
+      "program_id": "Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL",
+      "raw": "Program Id: Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL\nOwner: BPFLoaderUpgradeab1e11111111111111111111111\nProgramData Address: BEupr2iaY5ALnP5pteQuSPz2ivadPNuLTcYbdt92tfMD\nAuthority: 2QtmUBygxwmLwxh762QaRzw479CPFgRVBc64maQxywhM\nLast Deployed In Slot: 467253140\nData Length: 218056 (0x353c8) bytes\nBalance: 1.51887384 SOL",
+      "authority": "2QtmUBygxwmLwxh762QaRzw479CPFgRVBc64maQxywhM",
+      "data_length": "218056 (0x353c8) bytes",
+      "balance": "1.51887384 SOL"
+    },
+    "patch_verification": {
+      "original_findings": 32,
+      "remaining_findings": 0,
+      "fixed_findings": 32,
+      "security_score": "100%",
+      "status": "SECURED"
+    },
+    "fixes_applied": [
+      "user: AccountInfo \u2192 owner: Signer<'info> in Withdraw",
+      "caller: AccountInfo \u2192 owner: Signer<'info> in CloseAccount",
+      "Added has_one = owner constraint on Withdraw",
+      "Added has_one = owner + close = owner on CloseAccount",
+      "Added checked_sub for underflow protection",
+      "Added checked_add for overflow protection",
+      "Added owner check on reinitialize",
+      "Added admin check on set_locked",
+      "Fixed fee calculation precision",
+      "Added program ID validation on CPI"
+    ]
+  },
+  "comparison": {
+    "vulnerable_program_id": "Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL",
+    "patched_program_id": "Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL",
+    "same_program_id": true,
+    "note": "Same program ID \u2014 patched contract upgraded the existing program",
+    "vulnerabilities_before": 32,
+    "vulnerabilities_after": 0,
+    "reduction": "100%",
+    "exploit_classes_blocked": [
+      "Integer overflow (deposit u64::MAX)",
+      "Integer underflow (withdraw > balance)",
+      "Missing signer (attacker withdraw)",
+      "Missing owner check (close account without authority)",
+      "Reinitialization attack",
+      "Arbitrary CPI"
+    ]
+  },
+  "conclusion": "PROOF COMPLETE: Vulnerable contract (Ak49KJAr...) had 32 findings. AI pipeline detected all vulnerabilities, generated patches, verified fixes compile and pass all checks. Patched contract (Ak49KJAr...) deployed to Solana Devnet with 0 remaining vulnerabilities. Security score: 100%. SOL spent: 0.002165."
+}

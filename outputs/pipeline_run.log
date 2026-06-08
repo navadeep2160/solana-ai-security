@@ -1,0 +1,572 @@
+[GROQ] Loading → llama-3.3-70b-versatile
+[GROQ] Model loaded successfully
+[GROQ] Loading → llama-3.3-70b-versatile
+[GROQ] Model loaded successfully
+
+🚀 SOLANA AI SECURITY PIPELINE STARTED
+
+[MAIN] Restored original vulnerable contract
+
+==================================================
+PHASE 1: STATIC ANALYSIS
+==================================================
+
+[MAIN] Running regex static checks...
+[MAIN] Static findings: 5
+  → [CRITICAL] missing_signer_check: Found 2 AccountInfo field(s) without signer validation — use Signer<'info> instead.
+  → [HIGH] missing_owner_check: No owner validation found — add has_one constraint or require!(caller == owner).
+  → [CRITICAL] integer_underflow: Unsafe subtraction (-=) without checked_sub — may underflow to u64::MAX.
+  → [HIGH] integer_overflow: Unsafe addition (+=) without checked_add — may overflow to 0.
+  → [MEDIUM] unchecked_account_closure: Account closure sets balance=0 but missing close= constraint — rent not returned to owner.
+
+[MAIN] Running AST parser...
+Functions found: 9
+  fn initialize() at line 10
+    signer_check=False, owner_check=False, safe_math=True
+  fn withdraw() at line 25
+    signer_check=False, owner_check=False, safe_math=False
+  fn deposit() at line 35
+    signer_check=False, owner_check=False, safe_math=False
+  fn close_account() at line 45
+    signer_check=False, owner_check=False, safe_math=True
+  fn reinitialize() at line 54
+    signer_check=False, owner_check=False, safe_math=True
+  fn set_locked() at line 65
+    signer_check=False, owner_check=False, safe_math=True
+  fn calculate_fee() at line 77
+    signer_check=False, owner_check=False, safe_math=False
+  fn cpi_transfer() at line 89
+    signer_check=False, owner_check=False, safe_math=False
+  fn transfer() at line 100
+    signer_check=False, owner_check=False, safe_math=False
+
+Account structs found: 9
+  struct Initialize at line 114
+    bank: Account<'info (signer=False)
+    owner: Signer<'info> (signer=True)
+    system_program: Program<'info (signer=False)
+  struct Withdraw at line 123
+    bank: Account<'info (signer=False)
+    user: AccountInfo<'info> (signer=False)
+  struct Deposit at line 132
+    bank: Account<'info (signer=False)
+    user: Signer<'info> (signer=True)
+  struct CloseAccount at line 139
+    bank: Account<'info (signer=False)
+    caller: AccountInfo<'info> (signer=False)
+  struct Reinitialize at line 148
+    bank: Account<'info (signer=False)
+    caller: Signer<'info> (signer=True)
+  struct SetLocked at line 156
+    bank: Account<'info (signer=False)
+    caller: Signer<'info> (signer=True)
+  struct CalculateFee at line 164
+    bank: Account<'info (signer=False)
+    caller: Signer<'info> (signer=True)
+  struct CpiTransfer at line 171
+    bank: Account<'info (signer=False)
+    caller: Signer<'info> (signer=True)
+    target_program: AccountInfo<'info> (signer=False)
+  struct Transfer at line 181
+    from: Account<'info (signer=False)
+    to: Account<'info (signer=False)
+    caller: Signer<'info> (signer=True)
+
+AST findings: 8
+  [CRITICAL] missing_signer at struct Withdraw, field user, line 128
+    Field 'user' uses AccountInfo instead of Signer<'info'> — no authentication enforced.
+  [CRITICAL] missing_signer at struct CloseAccount, field caller, line 144
+    Field 'caller' uses AccountInfo instead of Signer<'info'> — no authentication enforced.
+  [CRITICAL] missing_owner_check at fn withdraw, line 25
+    Function 'withdraw' does not verify the caller is the account owner.
+  [HIGH] unsafe_math at fn withdraw, line 25
+    Function 'withdraw' uses unsafe arithmetic without checked_add/checked_sub.
+  [HIGH] integer_overflow at fn deposit, line 35
+    Function 'deposit' uses += without checked_add — may overflow.
+  [CRITICAL] missing_owner_check at fn close_account, line 45
+    Function 'close_account' does not verify the caller is the account owner.
+  [CRITICAL] missing_owner_check at fn transfer, line 100
+    Function 'transfer' does not verify the caller is the account owner.
+  [HIGH] unsafe_math at fn transfer, line 100
+    Function 'transfer' uses unsafe arithmetic without checked_add/checked_sub.
+
+[MAIN] Running CFG analysis...
+{
+  "source_file": "<source>",
+  "functions": {
+    "initialize": {
+      "params": [],
+      "entry": "initialize:bb0",
+      "exits": [
+        "initialize:bb0"
+      ],
+      "blocks": [
+        {
+          "id": "initialize:bb0",
+          "line_start": 9,
+          "line_end": 19,
+          "tags": {
+            "arithmetic": true,
+            "signer_check": false,
+            "owner_check": true,
+            "cpi": false,
+            "pda": false,
+            "transfer": false,
+            "close": false,
+            "init": true,
+            "remaining": false,
+            "unchecked_math": false
+          },
+          "lines": [
+            "    pub fn initialize(",
+            "        ctx: Context<Initialize>,",
+            "        amount: u64,",
+            "    ) -> Result<()> {",
+            "        let bank = &mut ctx.accounts.bank;",
+            "        bank.owner   = *ctx.accounts.owner.key;",
+            "        bank.balance = amount;",
+            "        bank.admin   = *ctx.accounts.owner.key;",
+            "        bank.locked  = false;",
+            "        Ok(())",
+            "    }"
+          ]
+        }
+      ],
+      "hotspot_block_ids": [
+        "initialize:bb0"
+      ]
+    },
+    "withdraw": {
+      "params": [],
+      "entry": "withdraw:bb0",
+      "exits": [
+        "withdraw:bb0"
+      ],
+      "blocks": [
+        {
+          "id": "withdraw:bb0",
+          "line_start": 24,
+          "line_end": 31,
+          "tags": {
+            "arithmetic": true,
+            "signer_check": false,
+            "owner_check": false,
+            "cpi": false,
+            "pda": false,
+            "transfer": false,
+            "close": false,
+            "init": false,
+            "remaining": false,
+            "unchecked_math": true
+          },
+          "lines": [
+            "    pub fn withdraw(",
+            "        ctx: Context<Withdraw>,",
+            "        amount: u64,",
+            "    ) -> Result<()> {",
+            "        let bank = &mut ctx.accounts.bank;",
+            "        bank.balance -= amount;",
+            "        Ok(())",
+            "    }"
+          ]
+        }
+      ],
+      "hotspot_block_ids": [
+        "withdraw:bb0"
+      ]
+    },
+    "deposit": {
+      "params": [],
+      "entry": "deposit:bb0",
+      "exits": [
+        "deposit:bb0"
+      ],
+      "blocks": [
+        {
+          "id": "deposit:bb0",
+          "line_start": 34,
+          "line_end": 41,
+          "tags": {
+            "arithmetic": true,
+            "signer_check": false,
+            "owner_check": false,
+            "cpi": false,
+            "pda": false,
+            "transfer": false,
+            "close": false,
+            "init": false,
+            "remaining": false,
+            "unchecked_math": true
+          },
+          "lines": [
+            "    pub fn deposit(",
+            "        ctx: Context<Deposit>,",
+            "        amount: u64,",
+            "    ) -> Result<()> {",
+            "        let bank = &mut ctx.accounts.bank;",
+            "        bank.balance += amount;",
+            "        Ok(())",
+            "    }"
+          ]
+        }
+      ],
+      "hotspot_block_ids": [
+        "deposit:bb0"
+      ]
+    },
+    "close_account": {
+      "params": [],
+      "entry": "close_account:bb0",
+      "exits": [
+        "close_account:bb0"
+      ],
+      "blocks": [
+        {
+          "id": "close_account:bb0",
+          "line_start": 44,
+          "line_end": 50,
+          "tags": {
+            "arithmetic": true,
+            "signer_check": false,
+            "owner_check": false,
+            "cpi": false,
+            "pda": false,
+            "transfer": false,
+            "close": true,
+            "init": false,
+            "remaining": false,
+            "unchecked_math": false
+          },
+          "lines": [
+            "    pub fn close_account(",
+            "        ctx: Context<CloseAccount>,",
+            "    ) -> Result<()> {",
+            "        let bank = &mut ctx.accounts.bank;",
+            "        bank.balance = 0;",
+            "        Ok(())",
+            "    }"
+          ]
+        }
+      ],
+      "hotspot_block_ids": [
+        "close_account:bb0"
+      ]
+    },
+    "reinitialize": {
+      "params": [],
+      "entry": "reinitialize:bb0",
+      "exits": [
+        "reinitialize:bb0"
+      ],
+      "blocks": [
+        {
+          "id": "reinitialize:bb0",
+          "line_start": 53,
+          "line_end": 61,
+          "tags": {
+            "arithmetic": true,
+            "signer_check": false,
+            "owner_check": true,
+            "cpi": false,
+            "pda": false,
+            "transfer": false,
+            "close": false,
+            "init": true,
+            "remaining": false,
+            "unchecked_math": false
+          },
+          "lines": [
+            "    pub fn reinitialize(",
+            "        ctx: Context<Reinitialize>,",
+            "        new_owner: Pubkey,",
+            "    ) -> Result<()> {",
+            "        let bank = &mut ctx.accounts.bank;",
+            "        bank.owner = new_owner;",
+            "        bank.admin = new_owner;",
+            "        Ok(())",
+            "    }"
+          ]
+        }
+      ],
+      "hotspot_block_ids": [
+        "reinitialize:bb0"
+      ]
+    },
+    "set_locked": {
+      "params": [],
+      "entry": "set_locked:bb0",
+      "exits": [
+        "set_locked:bb0"
+      ],
+      "blocks": [
+        {
+          "id": "set_locked:bb0",
+          "line_start": 64,
+          "line_end": 72,
+          "tags": {
+            "arithmetic": true,
+            "signer_check": false,
+            "owner_check": false,
+            "cpi": false,
+            "pda": false,
+            "transfer": false,
+            "close": false,
+            "init": false,
+            "remaining": false,
+            "unchecked_math": false
+          },
+          "lines": [
+            "    pub fn set_locked(",
+            "        ctx: Context<SetLocked>,",
+            "        locked: bool,",
+            "    ) -> Result<()> {",
+            "        let bank = &mut ctx.accounts.bank;",
+            "        // anyone can lock/unlock the bank",
+            "        bank.locked = locked;",
+            "        Ok(())",
+            "    }"
+          ]
+        }
+      ],
+      "hotspot_block_ids": [
+        "set_locked:bb0"
+      ]
+    },
+    "calculate_fee": {
+      "params": [],
+      "entry": "calculate_fee:bb0",
+      "exits": [
+        "calculate_fee:bb0"
+      ],
+      "blocks": [
+        {
+          "id": "calculate_fee:bb0",
+          "line_start": 76,
+          "line_end": 85,
+          "tags": {
+            "arithmetic": true,
+            "signer_check": false,
+            "owner_check": false,
+            "cpi": false,
+            "pda": false,
+            "transfer": false,
+            "close": false,
+            "init": false,
+            "remaining": false,
+            "unchecked_math": true
+          },
+          "lines": [
+            "    pub fn calculate_fee(",
+            "        ctx: Context<CalculateFee>,",
+            "        amount: u64,",
+            "    ) -> Result<()> {",
+            "        let bank = &mut ctx.accounts.bank;",
+            "        // divides before multiply \u2014 precision loss",
+            "        let fee = (amount / 100) * 3;",
+            "        bank.balance -= fee;",
+            "        Ok(())",
+            "    }"
+          ]
+        }
+      ],
+      "hotspot_block_ids": [
+        "calculate_fee:bb0"
+      ]
+    },
+    "cpi_transfer": {
+      "params": [],
+      "entry": "cpi_transfer:bb0",
+      "exits": [
+        "cpi_transfer:bb0"
+      ],
+      "blocks": [
+        {
+          "id": "cpi_transfer:bb0",
+          "line_start": 88,
+          "line_end": 96,
+          "tags": {
+            "arithmetic": true,
+            "signer_check": false,
+            "owner_check": false,
+            "cpi": false,
+            "pda": false,
+            "transfer": false,
+            "close": false,
+            "init": false,
+            "remaining": false,
+            "unchecked_math": true
+          },
+          "lines": [
+            "    pub fn cpi_transfer(",
+            "        ctx: Context<CpiTransfer>,",
+            "        amount: u64,",
+            "    ) -> Result<()> {",
+            "        let bank = &mut ctx.accounts.bank;",
+            "        bank.balance -= amount;",
+            "        // no verification that target_program is a trusted program",
+            "        Ok(())",
+            "    }"
+          ]
+        }
+      ],
+      "hotspot_block_ids": [
+        "cpi_transfer:bb0"
+      ]
+    },
+    "transfer": {
+      "params": [],
+      "entry": "transfer:bb0",
+      "exits": [
+        "transfer:bb0"
+      ],
+      "blocks": [
+        {
+          "id": "transfer:bb0",
+          "line_start": 99,
+          "line_end": 108,
+          "tags": {
+            "arithmetic": true,
+            "signer_check": false,
+            "owner_check": false,
+            "cpi": false,
+            "pda": false,
+            "transfer": true,
+            "close": false,
+            "init": false,
+            "remaining": false,
+            "unchecked_math": true
+          },
+          "lines": [
+            "    pub fn transfer(",
+            "        ctx: Context<Transfer>,",
+            "        amount: u64,",
+            "    ) -> Result<()> {",
+            "        let from = &mut ctx.accounts.from;",
+            "        let to   = &mut ctx.accounts.to;",
+            "        from.balance -= amount;",
+            "        to.balance   += amount;",
+            "        Ok(())",
+            "    }"
+          ]
+        }
+      ],
+      "hotspot_block_ids": [
+        "transfer:bb0"
+      ]
+    }
+  },
+  "edges": []
+}Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+
+[MAIN] CFG findings: 9
+  → [CRITICAL] unchecked_arithmetic (line 24)
+  → [CRITICAL] no_security_checks
+  → [CRITICAL] unchecked_arithmetic (line 34)
+  → [CRITICAL] no_security_checks
+  → [CRITICAL] unchecked_arithmetic (line 76)
+  → [CRITICAL] unchecked_arithmetic (line 88)
+  → [CRITICAL] unchecked_arithmetic (line 99)
+  → [CRITICAL] operation_before_check (line 99)
+  → [CRITICAL] no_security_checks
+
+==================================================
+PHASE 2: AI SCAN
+==================================================
+[SCANNER] Retrieving RAG context...
+[SCANNER] Running Gemini scan...
+[SCANNER] Log saved → outputs/logs/scanner_2026-06-05_06-47-26.json
+[MAIN] AI findings: 10
+  → [HIGH] Unprotected Function: No signer check in withdraw function
+  → [HIGH] Unprotected Function: No owner verification in withdraw function
+  → [MEDIUM] Underflow: No underflow check in withdraw function
+  → [MEDIUM] Overflow: No overflow check in deposit function
+  → [HIGH] Unprotected Function: No authority check on close account function
+  → [HIGH] Reinitialization: No check if account is already initialized in reinitialize function
+  → [HIGH] Unprotected Function: No admin check in set locked function
+  → [MEDIUM] Arithmetic Error: Loss of precision in calculate fee function
+  → [CRITICAL] Unvalidated CPI: No program ID check in CPI transfer function
+  → [MEDIUM] Duplicate Mutable Accounts: No uniqueness check in transfer function
+
+[MAIN] Total findings: 32
+  AI: 10  Static: 5  AST: 8  CFG: 9
+
+==================================================
+PHASE 3: PATCH + VALIDATE
+==================================================
+
+--- Patch Iteration 1 / 3 ---
+
+[PATCHER] Retrieving RAG context...
+[PATCHER] Calling Gemini for patch...
+[PATCHER] Injected clean ErrorCode enum
+[PATCHER] Log saved → outputs/logs/patcher_2026-06-05_06-47-29.json
+[VALIDATOR] Writing contract to disk...
+[VALIDATOR] Running cargo check...
+[VALIDATOR] Log saved → outputs/logs/validator_2026-06-05_06-47-30.json
+[VALIDATOR] ✅ cargo check passed
+
+✅ CONTRACT COMPILED SUCCESSFULLY
+
+==================================================
+PHASE 3b: PATCH VERIFICATION
+==================================================
+
+[PATCH VERIFY] Running static checks on patched contract...
+[PATCH VERIFY] Running AST analysis on patched contract...
+[PATCH VERIFY] Running CFG analysis on patched contract...
+
+[PATCH VERIFY] Original findings  : 32
+[PATCH VERIFY] Remaining findings  : 0
+[PATCH VERIFY] Fixed findings      : 32
+[PATCH VERIFY] Security score      : 100.0%
+[PATCH VERIFY] Status              : SECURED
+
+==================================================
+PHASE 4: RUNTIME VALIDATION
+==================================================
+[RUNTIME] Starting solana-test-validator...
+[RUNTIME] ✅ Validator ready (took 2s)
+[RUNTIME] Building program with cargo build-sbf...
+[RUNTIME] ✅ Build successful
+[RUNTIME] Deploying from contracts/vulnerable_bank/target/deploy/vulnerable_bank.so...
+[RUNTIME] ✅ Deployed: Program Id: Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL
+
+Signature: 27WALqu9m16TY7fGYNuCYnCrYQtDMcgre2FxPLkog4oKBhBEVQjxxr8hc8Bch2qHGuN1XLFgVEETu3GXaf8kiCmH
+[RUNTIME] ✅ Contract deployed and verified on local validator
+[RUNTIME] Stopping validator...
+[RUNTIME] Log saved → outputs/logs/runtime_2026-06-05_06-47-37.json
+[MAIN] ✅ Contract verified on local Solana validator
+[FILE] Patched contract saved → outputs/patched/patched_contract.rs
+[FILE] Final report saved → outputs/reports/final_report.json
+
+==================================================
+FINAL RESULT
+==================================================
+{
+  "success": true,
+  "runtime_deployed": true,
+  "iterations": 1,
+  "findings": {
+    "static": 5,
+    "ast": 8,
+    "cfg": 9,
+    "ai": 10,
+    "total": 32
+  },
+  "patch_verification": {
+    "original_findings": 32,
+    "remaining_findings": 0,
+    "fixed_findings": 32,
+    "security_score": 100.0,
+    "status": "SECURED"
+  },
+  "report": "outputs/reports/final_report.json",
+  "patched": "outputs/patched/patched_contract.rs"
+}
+
+🏁 PIPELINE COMPLETED
+
