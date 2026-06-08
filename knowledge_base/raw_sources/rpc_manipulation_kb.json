@@ -1,0 +1,11 @@
+{
+  "id": "rpc_manipulation_kb",
+  "title": "RPC Node Manipulation Attack Solana",
+  "url": "internal://kb",
+  "type": "manual",
+  "collection": "network_kb",
+  "status": "OK",
+  "char_count": 1533,
+  "text": "\nRPC Node Manipulation and Eclipse via Malicious RPC\n\nDescription:\nAttackers can run malicious RPC nodes that serve false or stale data to\nclients, manipulating application behavior without compromising the blockchain.\n\nAttack patterns:\n1. Serve stale account state (old balances, wrong data)\n2. Return false transaction confirmations\n3. Withhold transaction submission (censor transactions)\n4. Return manipulated getRecentBlockhash causing transaction failures\n5. Man-in-the-middle between client and real validators\n\nVulnerable client pattern:\n```javascript\n// Trusting single RPC endpoint\nconst connection = new Connection('https://malicious-rpc.com');\nconst balance = await connection.getBalance(wallet);\n// balance could be manipulated!\n```\n\nSecure pattern:\n```javascript\n// Multi-RPC verification\nconst rpcs = [Connection1, Connection2, Connection3];\nconst balances = await Promise.all(rpcs.map(r => r.getBalance(wallet)));\nconst consensus = balances.filter(b => b === balances[0]).length > balances.length/2;\nrequire(consensus, 'RPC disagreement detected');\n\n// Use commitment levels\nconst balance = await connection.getBalance(wallet, 'finalized');\n```\n\nDetection:\n- Response inconsistency across multiple RPC endpoints\n- Latency anomalies vs known good endpoints\n- Commitment level mismatches\n\nMitigation:\n- Use multiple RPC providers (Helius + Triton + QuickNode)\n- Always use 'finalized' commitment for critical operations\n- Verify critical state on-chain directly\nSource: Helius RPC best practices, Solana security guide\n",
+  "error": ""
+}

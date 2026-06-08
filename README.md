@@ -244,3 +244,158 @@ cd contracts/vulnerable_bank && anchor keys sync
 pkill -f solana-test-validator && sleep 5
 python tests/test_fuzzer.py
 ```
+cat > ~/solana-ai-security/README.md << 'EOF'
+# Solana AI Security Pipeline
+
+Agentic AI system for Solana smart contract and network vulnerability detection, exploitation, patching, and scoring.
+
+---
+
+## Week 3 Updates
+
+### Knowledge Base (42/42 Vulnerability Coverage — 98%)
+
+Built a persistent RAG knowledge base from 57 sources (1.5M characters):
+
+| Collection | Chunks | Coverage |
+|---|---|---|
+| vulnerabilities | 167+ | 27/27 SC vulns |
+| audit_findings | 66 | Fix patterns |
+| architecture | 73 | Solana internals |
+| network_kb | 184 | 15/15 net vulns |
+| vuln_nodes | 63 | Structured nodes |
+
+Sources include: VRust, Sealevel Attacks (11 PoCs), Neodyme, OtterSec, Trail of Bits, ACM papers, arxiv papers, CVE records, Helius reports, Anza technical reports.
+
+### V3 KB-Driven Scanner
+
+Zero hardcoded vulnerability rules. Flow:
+
+### Contract → AST Facts → Dynamic KB Query → Node Matching → AI Reasoning → Findings
+- Extracts structural facts from AST (no vulnerability logic in parser)
+- Dynamically queries 63 vulnerability nodes based on facts
+- AI confirms matches against actual code
+- Detects 12-13 unique vulnerabilities per scan
+
+### Network Vulnerability Agent
+
+Live devnet/mainnet scanning:
+
+### RPC Metrics → RAG Context → AI Analysis → Mitigations
+Detects: Eclipse attacks, DoS spam, MEV sandwich, stake concentration, vote censorship, gossip abuse, supply chain CVEs, TPU congestion, QUIC exhaustion, validator equivocation.
+
+### Two-Step KB-Driven Patcher
+
+### Step 1: Contract + AST + KB → Fix Plan (what to change)
+### Step 2: Fix Plan → Apply to code → Compilable Rust
+No hardcoded field names or struct names — AI reads actual contract structure.
+
+### Model Router
+
+```python
+load_model()              # Groq (fast) → Ollama fallback
+load_model(force_local=True)  # qwen2.5-coder:14b (Rust patching)
+```
+
+---
+
+## Architecture
+
+Input Contract (.rs)
+↓
+┌─────────────────────────────────┐
+│  Multi-Layer Static Analysis    │
+│  - KB-driven Regex Scanner      │
+│  - KB-driven AST Analyzer       │
+│  - KB-driven CFG Analyzer       │
+│  - V3 Node Matching Scanner     │
+└──────────────┬──────────────────┘
+↓
+Knowledge Base (490 chunks, 63 nodes)
+↓
+┌─────────────────────────────────┐
+│  AI Agents (Groq + Ollama)      │
+│  - Scanner Agent (llama3.2:3b)  │
+│  - V3 Scanner (node matching)   │
+│  - Patcher (qwen2.5-coder:14b)  │
+│  - Exploit Agent                │
+│  - Scorer Agent                 │
+│  - Network Agent                │
+└──────────────┬──────────────────┘
+↓
+Final Report + Patched Contract
+---
+
+## Pipeline Phases
+
+| Phase | Component | Output |
+|---|---|---|
+| 1 | Static Analysis (Regex+AST+CFG) | Structural findings |
+| 2 | AI Scan + V3 KB Scanner | Semantic findings |
+| 3 | Two-Step Patcher + Validator | Patched contract |
+| 4 | Runtime Validator | Deploy verification |
+| 5 | Exploit Agent | Confirmed vulnerabilities |
+| 6 | Risk Scorer | CVSS-style scores |
+
+---
+
+## Quick Start
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Set API key
+echo "GROQ_API_KEY=your_key" > .env
+
+# Run full pipeline
+python3 agents/coordinator/main.py
+
+# Run network scan
+python3 agents/network/network_agent.py devnet <your_address>
+
+# Check KB coverage
+python3 -c "
+from kb.kb_router import query_sc_rules
+r = query_sc_rules('missing signer check', top_k=1)
+print(r[0]['relevance'], r[0]['content'][:100])
+"
+```
+
+---
+
+## Vulnerability Coverage
+
+### Smart Contracts (27/27)
+Auth: Missing Signer, Missing Owner, Sysvar Spoofing, Access Control, Privilege Escalation
+Account: Type Cosplay, Reinitialization, Duplicate Mutable, Closing Accounts, PDA Sharing, Bump Seed, Account Data Matching, Missing Discriminator, Account Confusion, Uninitialized
+Arithmetic: Integer Overflow, Integer Underflow, Precision Loss, Unchecked Arithmetic
+CPI: Arbitrary CPI, CPI Reentrancy, Missing CPI Validation
+Token: Missing Token Program, SPL Token Confusion, Associated Token Misuse
+Oracle: Oracle Manipulation, Flash Loan, Stale Price Data
+
+### Network (15/15)
+Eclipse Attack, Transaction Spam DoS, MEV Sandwich, Stake Concentration, Vote Censorship, Gossip Abuse, Supply Chain CVE, TPU Congestion, Slow Patch Adoption, QUIC Exhaustion, Validator Equivocation, RPC Manipulation, Leader Predictability, NFT Congestion, BPF Loader Congestion
+
+---
+
+## Week 1-2 (Previous)
+- Vulnerable Bank smart contract (Anchor)
+- Regex-based static scanner
+- Basic AST parser
+- Hardcoded patcher
+- Basic exploit agent
+- Risk scorer
+
+## Week 3 (Current)
+- 57-source knowledge base (1.5M chars)
+- 490 ChromaDB chunks across 5 collections
+- 63 structured vulnerability nodes
+- V3 KB-driven scanner (zero hardcoded rules)
+- Two-step KB-driven patcher
+- Network vulnerability agent (live RPC)
+- Model router (Groq + Ollama)
+- 98% vulnerability coverage (42/42)
+EOF
+
+echo "README created"

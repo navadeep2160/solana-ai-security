@@ -1,0 +1,11 @@
+{
+  "id": "validator_equivocation_kb",
+  "title": "Validator Equivocation Attack Solana",
+  "url": "internal://kb",
+  "type": "manual",
+  "collection": "network_kb",
+  "status": "OK",
+  "char_count": 1243,
+  "text": "\nValidator Equivocation Attack on Solana\n\nDescription:\nEquivocation occurs when a validator signs two different blocks for the same\nslot, creating a fork. This violates the safety property of Tower BFT consensus.\n\nAttack mechanism:\n1. Attacker compromises validator private key\n2. Validator signs two conflicting blocks at same slot height\n3. Network receives contradictory blocks from same leader\n4. Fork detection triggers but resolution takes time\n5. Double-spend possible during fork window\n\nDetection indicators:\n- duplicate_block_count > 0 in validator metrics\n- Same validator pubkey appearing in two fork heads\n- Tower BFT violation alerts\n- Sudden fork_count increase\n\nSolana Tower BFT protection:\n- Validators lock their votes: cannot vote on competing forks\n- Lockout exponentially increases with each vote\n- Slashing proposed for equivocation (SIMD-0204)\n- Current mitigation: social slashing, stake loss\n\nMonitoring:\n- solana-gossip spy to watch for duplicate block announcements\n- Monitor fork counts via RPC getBlockCommitment\n- Track validator vote patterns for anomalies\n\nImpact: Chain halt, double-spend, consensus instability\nSeverity: Critical \u2014 rare but catastrophic\nSource: Anza Technical Report, Tower BFT specification\n",
+  "error": ""
+}

@@ -1,0 +1,11 @@
+{
+  "id": "reinitialization_kb",
+  "title": "Account Reinitialization Attack Solana",
+  "url": "internal://kb",
+  "type": "manual",
+  "collection": "vulnerabilities",
+  "status": "OK",
+  "char_count": 1092,
+  "text": "\nAccount Reinitialization Vulnerability Solana Anchor\n\nReinitialization attack: attacker reinitializes an already-initialized account\nto take ownership or reset state, frontrunning the legitimate initializer.\n\nVulnerable code:\npub fn initialize(ctx: Context<Initialize>) -> Result<()> {\n    let account = &mut ctx.accounts.my_account;\n    account.owner = ctx.accounts.user.key();\n    account.data = 0;\n    Ok(())\n}\n\nAttack: call initialize() again after victim initializes to steal ownership.\n\nSecure pattern 1 - Anchor init constraint:\n#[account(init, payer = user, space = 8 + 32)]\npub my_account: Account<info, MyAccount>\n\nSecure pattern 2 - Manual check:\nrequire!(!account.is_initialized, ErrorCode::AlreadyInitialized);\naccount.is_initialized = true;\n\nSecure pattern 3 - PDA with seeds prevents reinitialization:\n#[account(init, seeds = [b\"account\", user.key().as_ref()], bump, payer = user, space = 8 + 32)]\n\nDetection: initialize function without init constraint or is_initialized check.\nSeverity: High \u2014 account takeover, fund theft.\nSource: Sealevel Attacks program 4-initialization\n",
+  "error": ""
+}

@@ -4,40 +4,28 @@ venv_new/
 __pycache__/
 *.pyc
 *.pyo
-.Python
-
-# Environment
 .env
 
-# Outputs
-outputs/logs/
-outputs/patched/
-outputs/reports/
+# Node
+node_modules/
+*.lock
 
-# Anchor / Solana
-contracts/*/target/
-contracts/*/.anchor/
+# Rust/Solana build
 target/
+Cargo.lock
 test-ledger/
-/tmp/fuzz-ledger/
 
-# Knowledge Base Generated Data
-rag/vector_db/
-kb/chroma_unified/
-knowledge_base/raw/
-knowledge_base/processed/
-
-# Logs
-*.log
-
-# OS / Editor
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
-
-# Keypairs (never commit)
-/tmp/fuzz_payer.json
+# Large binary files
+knowledge_base/chromadb/
+knowledge_base/raw_sources/*.pdf
 *.tar.bz2
-*.zip
-*.gz
+*.so
+
+# Outputs (logs are gitignored, keep structure)
+outputs/logs/*
+outputs/patched/*
+!outputs/logs/.gitkeep
+!outputs/patched/.gitkeep
+
+# Old KB
+kb/chroma_unified/

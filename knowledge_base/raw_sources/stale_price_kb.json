@@ -1,0 +1,11 @@
+{
+  "id": "stale_price_kb",
+  "title": "Stale Price Oracle Data Vulnerability",
+  "url": "internal://kb",
+  "type": "manual",
+  "collection": "vulnerabilities",
+  "status": "OK",
+  "char_count": 1224,
+  "text": "\nStale Oracle Price Data Vulnerability in Solana DeFi\n\nDescription:\nPrograms that use price oracles (Pyth, Switchboard, Chainlink) without\nchecking data freshness are vulnerable to stale price attacks.\n\nVulnerable pattern:\n```rust\nlet price_account = &ctx.accounts.price_feed;\nlet price_data = price_account.try_borrow_data()?;\nlet price = parse_price(&price_data);  // No staleness check!\n// Use stale price for liquidation/swap\n```\n\nAttack vector:\n- Oracle stops updating (network issues, manipulation)\n- Price becomes stale (hours old)\n- Attacker exploits difference between stale and real price\n- Liquidations at wrong price, arbitrage opportunities\n\nSecure pattern:\n```rust\nuse pyth_sdk_solana::load_price_feed_from_account_info;\n\nlet price_feed = load_price_feed_from_account_info(&ctx.accounts.price_feed)?;\nlet current_time = Clock::get()?.unix_timestamp;\nlet price = price_feed.get_price_no_older_than(current_time, 60)?; // Max 60s old\n\nrequire!(price.is_some(), ErrorCode::StalePriceData);\n```\n\nDetection: Look for price oracle accounts without timestamp/age validation.\nAffected protocols: Mango Markets, Solend, Marginfi, any DeFi using oracles.\nSource: Mango Markets exploit 2022, Oracle manipulation research\n",
+  "error": ""
+}

@@ -1,0 +1,11 @@
+{
+  "id": "arbitrary_cpi_kb",
+  "title": "Arbitrary CPI Cross Program Invocation Attack",
+  "url": "internal://kb",
+  "type": "manual",
+  "collection": "vulnerabilities",
+  "status": "OK",
+  "char_count": 1251,
+  "text": "\nArbitrary CPI (Cross Program Invocation) Vulnerability\n\nDescription:\nWhen a program accepts an arbitrary program account and invokes it without\nvalidation, an attacker can pass a malicious program that steals funds or\ncorrupts state.\n\nVulnerable pattern:\n```rust\npub fn cpi_transfer(ctx: Context<CpiTransfer>, amount: u64) -> Result<()> {\n    let ix = transfer(\n        ctx.accounts.token_program.key,  // Not validated!\n        ctx.accounts.from.key,\n        ctx.accounts.to.key,\n        ctx.accounts.authority.key,\n        &[],\n        amount,\n    )?;\n    invoke(&ix, &[...])?;\n    Ok(())\n}\n\n#[derive(Accounts)]\npub struct CpiTransfer<'info> {\n    token_program: AccountInfo<'info>,  // Any program accepted!\n}\n```\n\nSecure pattern:\n```rust\n#[derive(Accounts)]\npub struct CpiTransfer<'info> {\n    #[account(address = spl_token::ID)]  // Validate program address\n    token_program: Program<'info, Token>,\n}\n```\n\nOr manually:\n```rust\nrequire!(\n    ctx.accounts.token_program.key() == &spl_token::ID,\n    ErrorCode::InvalidProgram\n);\n```\n\nDetection AST pattern: AccountInfo for program fields without address constraint.\nDetection CFG pattern: invoke() or invoke_signed() without program key check.\nSource: Sealevel Attacks #5, Neodyme Common Pitfalls\n",
+  "error": ""
+}
