@@ -299,44 +299,40 @@ load_model(force_local=True)  # qwen2.5-coder:14b (Rust patching)
 
 ---
 
-## Architecture
+### Architecture
 
+```
 Input Contract (.rs)
-↓
-
-
-┌─────────────────────────────────┐
-│  Multi-Layer Static Analysis    │
-│  - KB-driven Regex Scanner      │
-│  - KB-driven AST Analyzer       │
-│  - KB-driven CFG Analyzer       │
-│  - V3 Node Matching Scanner     │
-└──────────────┬──────────────────┘
-↓
-
-
-Knowledge Base (490 chunks, 63 nodes)
-
-
-↓
-
-
-┌─────────────────────────────────┐
-│  AI Agents (Groq + Ollama)      │
-│  - Scanner Agent (llama3.2:3b)  │
-│  - V3 Scanner (node matching)   │
-│  - Patcher (qwen2.5-coder:14b)  │
-│  - Exploit Agent                │
-│  - Scorer Agent                 │
-│  - Network Agent                │
-└──────────────┬──────────────────┘
-
-
-↓
-
-
-
-Final Report + Patched Contract
+        │
+        ▼
+┌───────────────────────────────┐
+│ Multi-Layer Static Analysis   │
+│                               │
+│ 1. KB Regex Scanner           │
+│ 2. KB AST Analyzer            │
+│ 3. KB CFG Analyzer            │
+│ 4. V3 Node Matching Scanner   │
+└──────────────┬────────────────┘
+               │
+               ▼
+      Knowledge Base
+ (490 chunks, 63 vuln nodes)
+               │
+               ▼
+┌───────────────────────────────┐
+│ AI Agents                     │
+│                               │
+│ Scanner Agent                 │
+│ V3 Scanner                    │
+│ Patcher Agent                 │
+│ Exploit Agent                 │
+│ Scorer Agent                  │
+│ Network Agent                 │
+└──────────────┬────────────────┘
+               │
+               ▼
+      Report + Patch
+```
 ---
 
 ## Pipeline Phases
