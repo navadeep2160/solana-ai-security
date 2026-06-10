@@ -84,7 +84,7 @@ source venv/bin/activate
 ### 3. Install dependencies
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements_full.txt
 ```
 
 ### 4. Add your Gemini API key
