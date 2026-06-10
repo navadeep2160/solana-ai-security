@@ -1,0 +1,1065 @@
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+
+🚀 LANGGRAPH SECURITY PIPELINE STARTED
+
+=======================================================
+SETUP
+=======================================================
+[SETUP] ✅ Restored original vulnerable contract
+[SETUP] Contract loaded (5106 chars)
+
+=======================================================
+PHASE 1: STATIC ANALYSIS
+=======================================================
+[NODE] Running KB static checks...
+[CHECKER] Querying KB for vulnerability patterns...
+[CHECKER] 17 KB chunks loaded
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+[CHECKER] 10 findings from KB-driven AI analysis
+[NODE] Static: 10 findings
+[NODE] Running AST parser...
+Functions found: 9
+  fn initialize() at line 10
+    signer_check=False, owner_check=False, safe_math=True
+  fn withdraw() at line 25
+    signer_check=False, owner_check=False, safe_math=False
+  fn deposit() at line 35
+    signer_check=False, owner_check=False, safe_math=False
+  fn close_account() at line 45
+    signer_check=False, owner_check=False, safe_math=True
+  fn reinitialize() at line 54
+    signer_check=False, owner_check=False, safe_math=True
+  fn set_locked() at line 65
+    signer_check=False, owner_check=False, safe_math=True
+  fn calculate_fee() at line 77
+    signer_check=False, owner_check=False, safe_math=False
+  fn cpi_transfer() at line 89
+    signer_check=False, owner_check=False, safe_math=False
+  fn transfer() at line 100
+    signer_check=False, owner_check=False, safe_math=False
+
+Account structs found: 9
+  struct Initialize at line 114
+    bank: Account<'info (signer=False)
+    owner: Signer<'info> (signer=True)
+    system_program: Program<'info (signer=False)
+  struct Withdraw at line 123
+    bank: Account<'info (signer=False)
+    user: AccountInfo<'info> (signer=False)
+  struct Deposit at line 132
+    bank: Account<'info (signer=False)
+    user: Signer<'info> (signer=True)
+  struct CloseAccount at line 139
+    bank: Account<'info (signer=False)
+    caller: AccountInfo<'info> (signer=False)
+  struct Reinitialize at line 148
+    bank: Account<'info (signer=False)
+    caller: Signer<'info> (signer=True)
+  struct SetLocked at line 156
+    bank: Account<'info (signer=False)
+    caller: Signer<'info> (signer=True)
+  struct CalculateFee at line 164
+    bank: Account<'info (signer=False)
+    caller: Signer<'info> (signer=True)
+  struct CpiTransfer at line 171
+    bank: Account<'info (signer=False)
+    caller: Signer<'info> (signer=True)
+    target_program: AccountInfo<'info> (signer=False)
+  struct Transfer at line 181
+    from: Account<'info (signer=False)
+    to: Account<'info (signer=False)
+    caller: Signer<'info> (signer=True)
+
+AST findings: 8
+  [CRITICAL] missing_signer at struct Withdraw, field user, line 128
+    Field 'user' uses AccountInfo — no signer enforced.
+  [CRITICAL] missing_signer at struct CloseAccount, field caller, line 144
+    Field 'caller' uses AccountInfo — no signer enforced.
+  [CRITICAL] missing_owner_check at fn withdraw, line 25
+    'withdraw' has no owner check.
+  [HIGH] unsafe_math at fn withdraw, line 25
+    'withdraw' uses unsafe arithmetic.
+  [HIGH] integer_overflow at fn deposit, line 35
+    'deposit' uses += without checked_add.
+  [CRITICAL] missing_owner_check at fn close_account, line 45
+    'close_account' has no owner check.
+  [CRITICAL] missing_owner_check at fn transfer, line 100
+    'transfer' has no owner check.
+  [HIGH] unsafe_math at fn transfer, line 100
+    'transfer' uses unsafe arithmetic.
+[NODE] AST: 8 findings
+[NODE] Running CFG analysis...
+{
+  "source_file": "<source>",
+  "functions": {
+    "initialize": {
+      "params": [],
+      "entry": "initialize:bb0",
+      "exits": [
+        "initialize:bb0"
+      ],
+      "blocks": [
+        {
+          "id": "initialize:bb0",
+          "line_start": 9,
+          "line_end": 19,
+          "tags": {
+            "arithmetic": true,
+            "signer_check": false,
+            "owner_check": true,
+            "cpi": false,
+            "pda": false,
+            "transfer": false,
+            "close": false,
+            "init": true,
+            "remaining": false,
+            "unchecked_math": false
+          },
+          "lines": [
+            "    pub fn initialize(",
+            "        ctx: Context<Initialize>,",
+            "        amount: u64,",
+            "    ) -> Result<()> {",
+            "        let bank = &mut ctx.accounts.bank;",
+            "        bank.owner   = *ctx.accounts.owner.key;",
+            "        bank.balance = amount;",
+            "        bank.admin   = *ctx.accounts.owner.key;",
+            "        bank.locked  = false;",
+            "        Ok(())",
+            "    }"
+          ]
+        }
+      ],
+      "hotspot_block_ids": [
+        "initialize:bb0"
+      ]
+    },
+    "withdraw": {
+      "params": [],
+      "entry": "withdraw:bb0",
+      "exits": [
+        "withdraw:bb0"
+      ],
+      "blocks": [
+        {
+          "id": "withdraw:bb0",
+          "line_start": 24,
+          "line_end": 31,
+          "tags": {
+            "arithmetic": true,
+            "signer_check": false,
+            "owner_check": false,
+            "cpi": false,
+            "pda": false,
+            "transfer": false,
+            "close": false,
+            "init": false,
+            "remaining": false,
+            "unchecked_math": true
+          },
+          "lines": [
+            "    pub fn withdraw(",
+            "        ctx: Context<Withdraw>,",
+            "        amount: u64,",
+            "    ) -> Result<()> {",
+            "        let bank = &mut ctx.accounts.bank;",
+            "        bank.balance -= amount;",
+            "        Ok(())",
+            "    }"
+          ]
+        }
+      ],
+      "hotspot_block_ids": [
+        "withdraw:bb0"
+      ]
+    },
+    "deposit": {
+      "params": [],
+      "entry": "deposit:bb0",
+      "exits": [
+        "deposit:bb0"
+      ],
+      "blocks": [
+        {
+          "id": "deposit:bb0",
+          "line_start": 34,
+          "line_end": 41,
+          "tags": {
+            "arithmetic": true,
+            "signer_check": false,
+            "owner_check": false,
+            "cpi": false,
+            "pda": false,
+            "transfer": false,
+            "close": false,
+            "init": false,
+            "remaining": false,
+            "unchecked_math": true
+          },
+          "lines": [
+            "    pub fn deposit(",
+            "        ctx: Context<Deposit>,",
+            "        amount: u64,",
+            "    ) -> Result<()> {",
+            "        let bank = &mut ctx.accounts.bank;",
+            "        bank.balance += amount;",
+            "        Ok(())",
+            "    }"
+          ]
+        }
+      ],
+      "hotspot_block_ids": [
+        "deposit:bb0"
+      ]
+    },
+    "close_account": {
+      "params": [],
+      "entry": "close_account:bb0",
+      "exits": [
+        "close_account:bb0"
+      ],
+      "blocks": [
+        {
+          "id": "close_account:bb0",
+          "line_start": 44,
+          "line_end": 50,
+          "tags": {
+            "arithmetic": true,
+            "signer_check": false,
+            "owner_check": false,
+            "cpi": false,
+            "pda": false,
+            "transfer": false,
+            "close": true,
+            "init": false,
+            "remaining": false,
+            "unchecked_math": false
+          },
+          "lines": [
+            "    pub fn close_account(",
+            "        ctx: Context<CloseAccount>,",
+            "    ) -> Result<()> {",
+            "        let bank = &mut ctx.accounts.bank;",
+            "        bank.balance = 0;",
+            "        Ok(())",
+            "    }"
+          ]
+        }
+      ],
+      "hotspot_block_ids": [
+        "close_account:bb0"
+      ]
+    },
+    "reinitialize": {
+      "params": [],
+      "entry": "reinitialize:bb0",
+      "exits": [
+        "reinitialize:bb0"
+      ],
+      "blocks": [
+        {
+          "id": "reinitialize:bb0",
+          "line_start": 53,
+          "line_end": 61,
+          "tags": {
+            "arithmetic": true,
+            "signer_check": false,
+            "owner_check": true,
+            "cpi": false,
+            "pda": false,
+            "transfer": false,
+            "close": false,
+            "init": true,
+            "remaining": false,
+            "unchecked_math": false
+          },
+          "lines": [
+            "    pub fn reinitialize(",
+            "        ctx: Context<Reinitialize>,",
+            "        new_owner: Pubkey,",
+            "    ) -> Result<()> {",
+            "        let bank = &mut ctx.accounts.bank;",
+            "        bank.owner = new_owner;",
+            "        bank.admin = new_owner;",
+            "        Ok(())",
+            "    }"
+          ]
+        }
+      ],
+      "hotspot_block_ids": [
+        "reinitialize:bb0"
+      ]
+    },
+    "set_locked": {
+      "params": [],
+      "entry": "set_locked:bb0",
+      "exits": [
+        "set_locked:bb0"
+      ],
+      "blocks": [
+        {
+          "id": "set_locked:bb0",
+          "line_start": 64,
+          "line_end": 72,
+          "tags": {
+            "arithmetic": true,
+            "signer_check": false,
+            "owner_check": false,
+            "cpi": false,
+            "pda": false,
+            "transfer": false,
+            "close": false,
+            "init": false,
+            "remaining": false,
+            "unchecked_math": false
+          },
+          "lines": [
+            "    pub fn set_locked(",
+            "        ctx: Context<SetLocked>,",
+            "        locked: bool,",
+            "    ) -> Result<()> {",
+            "        let bank = &mut ctx.accounts.bank;",
+            "        // anyone can lock/unlock the bank",
+            "        bank.locked = locked;",
+            "        Ok(())",
+            "    }"
+          ]
+        }
+      ],
+      "hotspot_block_ids": [
+        "set_locked:bb0"
+      ]
+    },
+    "calculate_fee": {
+      "params": [],
+      "entry": "calculate_fee:bb0",
+      "exits": [
+        "calculate_fee:bb0"
+      ],
+      "blocks": [
+        {
+          "id": "calculate_fee:bb0",
+          "line_start": 76,
+          "line_end": 85,
+          "tags": {
+            "arithmetic": true,
+            "signer_check": false,
+            "owner_check": false,
+            "cpi": false,
+            "pda": false,
+            "transfer": false,
+            "close": false,
+            "init": false,
+            "remaining": false,
+            "unchecked_math": true
+          },
+          "lines": [
+            "    pub fn calculate_fee(",
+            "        ctx: Context<CalculateFee>,",
+            "        amount: u64,",
+            "    ) -> Result<()> {",
+            "        let bank = &mut ctx.accounts.bank;",
+            "        // divides before multiply \u2014 precision loss",
+            "        let fee = (amount / 100) * 3;",
+            "        bank.balance -= fee;",
+            "        Ok(())",
+            "    }"
+          ]
+        }
+      ],
+      "hotspot_block_ids": [
+        "calculate_fee:bb0"
+      ]
+    },
+    "cpi_transfer": {
+      "params": [],
+      "entry": "cpi_transfer:bb0",
+      "exits": [
+        "cpi_transfer:bb0"
+      ],
+      "blocks": [
+        {
+          "id": "cpi_transfer:bb0",
+          "line_start": 88,
+          "line_end": 96,
+          "tags": {
+            "arithmetic": true,
+            "signer_check": false,
+            "owner_check": false,
+            "cpi": false,
+            "pda": false,
+            "transfer": false,
+            "close": false,
+            "init": false,
+            "remaining": false,
+            "unchecked_math": true
+          },
+          "lines": [
+            "    pub fn cpi_transfer(",
+            "        ctx: Context<CpiTransfer>,",
+            "        amount: u64,",
+            "    ) -> Result<()> {",
+            "        let bank = &mut ctx.accounts.bank;",
+            "        bank.balance -= amount;",
+            "        // no verification that target_program is a trusted program",
+            "        Ok(())",
+            "    }"
+          ]
+        }
+      ],
+      "hotspot_block_ids": [
+        "cpi_transfer:bb0"
+      ]
+    },
+    "transfer": {
+      "params": [],
+      "entry": "transfer:bb0",
+      "exits": [
+        "transfer:bb0"
+      ],
+      "blocks": [
+        {
+          "id": "transfer:bb0",
+          "line_start": 99,
+          "line_end": 108,
+          "tags": {
+            "arithmetic": true,
+            "signer_check": false,
+            "owner_check": false,
+            "cpi": false,
+            "pda": false,
+            "transfer": true,
+            "close": false,
+            "init": false,
+            "remaining": false,
+            "unchecked_math": true
+          },
+          "lines": [
+            "    pub fn transfer(",
+            "        ctx: Context<Transfer>,",
+            "        amount: u64,",
+            "    ) -> Result<()> {",
+            "        let from = &mut ctx.accounts.from;",
+            "        let to   = &mut ctx.accounts.to;",
+            "        from.balance -= amount;",
+            "        to.balance   += amount;",
+            "        Ok(())",
+            "    }"
+          ]
+        }
+      ],
+      "hotspot_block_ids": [
+        "transfer:bb0"
+      ]
+    }
+  },
+  "edges": []
+}Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+
+[NODE] CFG: 9 findings
+
+=======================================================
+PHASE 2: AI SCAN
+=======================================================
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+[NODE] Running AI scanner...
+[SCANNER] Retrieving RAG context...
+[SCANNER] Running Gemini scan...
+[SCANNER] Log saved → outputs/logs/scanner_2026-06-10_11-52-05.json
+[NODE] AI: 10 findings
+[NODE] Running V3 KB scanner...
+[SCANNER-V3] Parsing AST...
+[SCANNER-V3] 30 AST facts extracted
+[SCANNER-V3] Matching facts → KB nodes...
+[SCANNER-V3] 13 unique vulnerabilities matched
+[SCANNER-V3] AI confirming matches...
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+[SCANNER-V3] Log → outputs/logs/scanner_v3_2026-06-10_11-52-52.json
+[SCANNER-V3] 12 findings confirmed
+[NODE] V3: 12 findings
+
+[NODE] Total findings: 49
+
+=======================================================
+PHASE 2b: TAINT ANALYSIS
+=======================================================
+[TAINT] Extracting raw AST facts...
+[TAINT] 9 functions extracted
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+[TAINT] 6 taint findings
+[NODE] Taint: 6 findings
+
+=======================================================
+PHASE 2c: INVARIANT EXTRACTION
+=======================================================
+[INVARIANT] Extracting contract invariants...
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+[INVARIANT] Extracted 9 invariants
+  INV-001: balance never goes below zero
+  INV-002: only the owner can withdraw funds
+  INV-003: only the admin can set the locked state
+  INV-004: bank can only be initialized once
+  INV-005: only the owner can close the account
+  INV-006: balance should not overflow when depositing
+  INV-007: fee calculation should not lose precision
+  INV-008: CPI transfer should only be to trusted programs
+  INV-009: mutable accounts should be unique
+[NODE] Extracted 9 invariants
+  → balance never goes below zero
+  → only the owner can withdraw funds
+  → only the admin can set the locked state
+  → bank can only be initialized once
+  → only the owner can close the account
+  → balance should not overflow when depositing
+  → fee calculation should not lose precision
+  → CPI transfer should only be to trusted programs
+  → mutable accounts should be unique
+
+=======================================================
+PHASE 3: EXPLOIT VALIDATION
+=======================================================
+
+[EXPLOIT] Starting validator...
+[EXPLOIT] ✅ Validator ready
+[EXPLOIT] Funding keypairs...
+[EXPLOIT] Deploying vulnerable contract...
+[EXPLOIT] ✅ Program: Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL
+[EXPLOIT] Testing 46 critical/high findings...
+
+[EXPLOIT] → No signer check
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(1) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🟡 UNCONFIRMED
+[EXPLOIT] → No owner verification
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(1) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🟡 UNCONFIRMED
+[EXPLOIT] → No authority check on close
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: close_account(0) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → Admin action with no admin check
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: set_locked(0) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → CPI to arbitrary program
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → missing_signer_check
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(1) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🟡 UNCONFIRMED
+[EXPLOIT] → missing_owner_check
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(1) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🟡 UNCONFIRMED
+[EXPLOIT] → integer_underflow
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=owner
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → integer_overflow
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: deposit(18446744073709551615) signed_by=owner
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → unchecked_account_closure
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: close_account(0) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → reinitialization_attack
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: reinitialize(0) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → missing_admin_check
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: set_locked(0) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → missing_signer
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → missing_signer
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: close_account(0) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → missing_owner_check
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → unsafe_math
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → integer_overflow
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: deposit(18446744073709551615) signed_by=owner
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → missing_owner_check
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: close_account(0) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → missing_owner_check
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → unsafe_math
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → unchecked_arithmetic
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → no_security_checks
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → unchecked_arithmetic
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: deposit(18446744073709551615) signed_by=owner
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → no_security_checks
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → unchecked_arithmetic
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → unchecked_arithmetic
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → unchecked_arithmetic
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → operation_before_check
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → no_security_checks
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → Missing Signer Check
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → Incorrect Authority Check
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → Missing Signer Checks
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → Integer Overflow/Underflow
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → Account Data Matching Vulnerability
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → Integer Overflows & Underflows
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: deposit(18446744073709551615) signed_by=owner
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → Arbitrary CPI to SPL Token Program
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → Improper Validation of Associated Token Account
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → Account Confusion
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → Missing ownership check
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → Missing Discriminant Check
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → taint
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: initialize(18446744073709551615) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → taint
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: withdraw(999999999999) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → taint
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: deposit(18446744073709551615) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → taint
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: close_account(0) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🟡 UNCONFIRMED
+[EXPLOIT] → taint
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: reinitialize(0) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+[EXPLOIT] → taint
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  Plan: set_locked(0) signed_by=attacker
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+  🔴 CONFIRMED (confidence=1.0)
+
+[EXPLOIT] Log → outputs/logs/exploit_2026-06-10_12-02-05.json
+[EXPLOIT] Confirmed: 41/46
+[NODE] Exploit: 41/46 confirmed
+
+=======================================================
+PHASE 4: RISK SCORING
+=======================================================
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+[SCORER] Scoring 55 findings (0 false positives removed)
+
+[SCORER] Log → outputs/logs/scorer_2026-06-10_12-02-38.json
+
+=======================================================
+RISK SCORING SUMMARY
+=======================================================
+  🔴 [ 9.5] CRITICAL No owner verification               📋 static
+  🔴 [ 9.5] CRITICAL Admin action with no admin check    ✅ runtime
+  🔴 [ 9.0] CRITICAL missing_owner_check                 ✅ runtime
+  🔴 [ 9.0] CRITICAL integer_underflow                   ✅ runtime
+  🔴 [ 9.0] CRITICAL integer_overflow                    ✅ runtime
+  🔴 [ 9.0] CRITICAL unchecked_account_closure           ✅ runtime
+  🔴 [ 9.0] CRITICAL reinitialization_attack             ✅ runtime
+  🔴 [ 9.0] CRITICAL missing_admin_check                 ✅ runtime
+  🔴 [ 9.0] CRITICAL missing_signer                      ✅ runtime
+  🔴 [ 9.0] CRITICAL unsafe_math                         ✅ runtime
+  🔴 [ 9.0] CRITICAL unchecked_arithmetic                ✅ runtime
+  🔴 [ 9.0] CRITICAL no_security_checks                  ✅ runtime
+  🔴 [ 9.0] CRITICAL operation_before_check              ✅ runtime
+  🔴 [ 9.0] CRITICAL Missing Signer Check                ✅ runtime
+  🔴 [ 9.0] CRITICAL Incorrect Authority Check           ✅ runtime
+  🔴 [ 9.0] CRITICAL Missing Signer Checks               ✅ runtime
+  🔴 [ 9.0] CRITICAL Integer Overflow/Underflow          ✅ runtime
+  🔴 [ 9.0] CRITICAL Account Data Matching Vulnerability ✅ runtime
+  🔴 [ 9.0] CRITICAL Integer Overflows & Underflows      ✅ runtime
+  🔴 [ 9.0] CRITICAL Arbitrary CPI to SPL Token Program  ✅ runtime
+  🔴 [ 9.0] CRITICAL Improper Validation of Associated T ✅ runtime
+  🔴 [ 9.0] CRITICAL Account Confusion                   ✅ runtime
+  🔴 [ 9.0] CRITICAL Missing ownership check             ✅ runtime
+  🔴 [ 9.0] CRITICAL Missing Discriminant Check          ✅ runtime
+  🔴 [ 9.0] CRITICAL taint                               ✅ runtime
+  🔴 [ 8.5] CRITICAL No signer check                     📋 static
+  🔴 [ 8.5] CRITICAL No authority check on close         ✅ runtime
+  🔴 [ 8.5] CRITICAL CPI to arbitrary program            ✅ runtime
+  🟠 [ 8.5] HIGH     Duplicate mutable accounts          📋 static
+  🟠 [ 8.5] HIGH     arbitrary_cpi                       📋 static
+  🟠 [ 8.5] HIGH     duplicate_mutable_accounts          📋 static
+  🔴 [ 7.5] CRITICAL No underflow check                  📋 static
+  🔴 [ 7.5] CRITICAL Reinitialization without check      📋 static
+  🟠 [ 7.0] HIGH     No overflow check                   📋 static
+  🟠 [ 7.0] HIGH     missing_signer_check                📋 static
+  🟡 [ 6.5] MEDIUM   Arithmetic precision loss           📋 static
+  🟡 [ 5.0] MEDIUM   precision_loss                      📋 static
+  🟡 [ 5.0] MEDIUM   Precision Loss in Arithmetic Operat 📋 static
+  False positives removed: 0
+=======================================================
+[NODE] Scored: 38 findings
+
+--- Patch Iteration 1 / 3 ---
+[PATCHER] Extracting contract structure...
+[PATCHER] 9 structs, 9 functions
+[PATCHER] Getting KB fix patterns...
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+[PATCHER] Calling LLM for patch...
+[PATCHER] Injected ErrorCode enum
+[PATCHER] Log saved
+[VALIDATOR] Writing contract to disk...
+[VALIDATOR] Running cargo check...
+[VALIDATOR] Log saved → outputs/logs/validator_2026-06-10_12-04-01.json
+[VALIDATOR] ❌ cargo check failed
+[NODE] ❌ cargo check failed
+
+--- Patch Iteration 2 / 3 ---
+[PATCHER] Extracting contract structure...
+[PATCHER] 9 structs, 9 functions
+[PATCHER] Getting KB fix patterns...
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+[PATCHER] Calling LLM for patch...
+[PATCHER] Injected ErrorCode enum
+[PATCHER] Log saved
+[VALIDATOR] Writing contract to disk...
+[VALIDATOR] Running cargo check...
+[VALIDATOR] Log saved → outputs/logs/validator_2026-06-10_12-05-42.json
+[VALIDATOR] ✅ cargo check passed
+[NODE] ✅ cargo check passed
+
+=======================================================
+PHASE 5b: PATCH VERIFICATION
+=======================================================
+[VERIFIER] Re-running 41 confirmed exploits on patched contract...
+[VERIFIER] Building patched contract...
+[VERIFIER] Starting validator...
+[VERIFIER] Patched program: Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL
+
+[VERIFIER] Testing: No authority check on close
+  ✅ BLOCKED
+
+[VERIFIER] Testing: Admin action with no admin check
+  ✅ BLOCKED
+
+[VERIFIER] Testing: CPI to arbitrary program
+  ✅ BLOCKED
+
+[VERIFIER] Testing: integer_underflow
+  ✅ BLOCKED
+
+[VERIFIER] Testing: integer_overflow
+  ✅ BLOCKED
+
+[VERIFIER] Testing: unchecked_account_closure
+  ✅ BLOCKED
+
+[VERIFIER] Testing: reinitialization_attack
+  ✅ BLOCKED
+
+[VERIFIER] Testing: missing_admin_check
+  ✅ BLOCKED
+
+[VERIFIER] Testing: missing_signer
+  ✅ BLOCKED
+
+[VERIFIER] Testing: missing_signer
+  ✅ BLOCKED
+
+[VERIFIER] Testing: missing_owner_check
+  ✅ BLOCKED
+
+[VERIFIER] Testing: unsafe_math
+  ✅ BLOCKED
+
+[VERIFIER] Testing: integer_overflow
+  ✅ BLOCKED
+
+[VERIFIER] Testing: missing_owner_check
+  ✅ BLOCKED
+
+[VERIFIER] Testing: missing_owner_check
+  ✅ BLOCKED
+
+[VERIFIER] Testing: unsafe_math
+  ✅ BLOCKED
+
+[VERIFIER] Testing: unchecked_arithmetic
+  ✅ BLOCKED
+
+[VERIFIER] Testing: no_security_checks
+  ✅ BLOCKED
+
+[VERIFIER] Testing: unchecked_arithmetic
+  ✅ BLOCKED
+
+[VERIFIER] Testing: no_security_checks
+  ✅ BLOCKED
+
+[VERIFIER] Testing: unchecked_arithmetic
+  ✅ BLOCKED
+
+[VERIFIER] Testing: unchecked_arithmetic
+  ✅ BLOCKED
+
+[VERIFIER] Testing: unchecked_arithmetic
+  ✅ BLOCKED
+
+[VERIFIER] Testing: operation_before_check
+  ✅ BLOCKED
+
+[VERIFIER] Testing: no_security_checks
+  ✅ BLOCKED
+
+[VERIFIER] Testing: Missing Signer Check
+  ✅ BLOCKED
+
+[VERIFIER] Testing: Incorrect Authority Check
+  ✅ BLOCKED
+
+[VERIFIER] Testing: Missing Signer Checks
+  ✅ BLOCKED
+
+[VERIFIER] Testing: Integer Overflow/Underflow
+  ✅ BLOCKED
+
+[VERIFIER] Testing: Account Data Matching Vulnerability
+  ✅ BLOCKED
+
+[VERIFIER] Testing: Integer Overflows & Underflows
+  ✅ BLOCKED
+
+[VERIFIER] Testing: Arbitrary CPI to SPL Token Program
+  ✅ BLOCKED
+
+[VERIFIER] Testing: Improper Validation of Associated Token Account
+  ✅ BLOCKED
+
+[VERIFIER] Testing: Account Confusion
+  ✅ BLOCKED
+
+[VERIFIER] Testing: Missing ownership check
+  ✅ BLOCKED
+
+[VERIFIER] Testing: Missing Discriminant Check
+  ✅ BLOCKED
+
+[VERIFIER] Testing: taint
+  ✅ BLOCKED
+
+[VERIFIER] Testing: taint
+  ✅ BLOCKED
+
+[VERIFIER] Testing: taint
+  ✅ BLOCKED
+
+[VERIFIER] Testing: taint
+  ✅ BLOCKED
+
+[VERIFIER] Testing: taint
+  ✅ BLOCKED
+
+[VERIFIER] 41/41 exploits blocked
+[VERIFIER] Patch ✅ VERIFIED
+[NODE] Patch verified: 41/41 exploits blocked
+
+=======================================================
+PHASE 5c: REFLECTION
+=======================================================
+[REFLECTION] Analyzing patch quality...
+[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)
+[REFLECTION] Score: 7.5/10
+[REFLECTION] Addressed: 4
+[REFLECTION] Missed: 1
+  ⚠️  vuln5 was not addressed because the reinitialize function still lacks a check to
+[NODE] Reflection score: 7.5/10
+[NODE] Notes: The patch addresses most of the confirmed vulnerabilities by adding necessary checks for signer, own
+
+=======================================================
+PHASE 6: RUNTIME VALIDATION
+=======================================================
+[RUNTIME] Starting solana-test-validator...
+[RUNTIME] ✅ Validator ready (took 2s)
+[RUNTIME] Building program with cargo build-sbf...
+[RUNTIME] ✅ Build successful
+[RUNTIME] Deploying from contracts/vulnerable_bank/target/deploy/vulnerable_bank.so...
+[RUNTIME] ❌ Deploy failed:
+ keypair as the
+[BUFFER_SIGNER] to `solana program deploy` or `solana program write-buffer'.
+Or to recover the account's lamports, use:
+===================================================================================
+solana program close 4Mw6oeLsRssNUrqKs3dohSW2StNzereyxiVoCwSupZow
+===================================================================================
+Error: Account 2QtmUBygxwmLwxh762QaRzw479CPFgRVBc64maQxywhM has insufficient funds for spend (1.6077948 SOL) + fee (0.001165 SOL)
+
+[RUNTIME] Stopping validator...
+[NODE] Runtime deployed: False
+
+=======================================================
+PHASE 7: DEVNET DEPLOYMENT
+=======================================================
+[DEVNET] Balance: 8.38159076 SOL
+[DEVNET] Building with cargo build-sbf...
+[DEVNET] ✅ Build successful
+[DEVNET] Deploying contracts/vulnerable_bank/target/deploy/vulnerable_bank.so to devnet...
+[DEVNET] ✅ Deployed → Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL
+[DEVNET] ✅ Verified on devnet
+[DEVNET] Explorer: https://explorer.solana.com/address/Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL?cluster=devnet
+[DEVNET] Log saved → outputs/logs/devnet_2026-06-10_12-06-43.json
+[NODE] ✅ Devnet: https://explorer.solana.com/address/Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL?cluster=devnet
+
+=======================================================
+PHASE 8: NETWORK ANALYSIS
+=======================================================
+[NODE] Network scan error: cannot import name 'run_network_scan' from 'agents.network.network_agent' (/home/navadeep2160/solana-ai-security/agents/network/network_agent.py)
+
+=======================================================
+SAVING OUTPUTS
+=======================================================
+[FILE] Patched contract saved → outputs/patched/patched_contract.rs
+[NODE] ✅ Patched contract saved
+[NODE] ✅ Final report saved
+
+=======================================================
+FINAL RESULT
+=======================================================
+{
+  "success": true,
+  "runtime_deployed": false,
+  "devnet_deployed": true,
+  "patch_iterations": 2,
+  "patch_verified": true,
+  "security_score": 0.0,
+  "reflection_score": 7.5,
+  "findings": {
+    "static": 10,
+    "ast": 8,
+    "cfg": 9,
+    "ai": 10,
+    "v3": 12,
+    "taint": 6,
+    "total": 55
+  },
+  "invariants_count": 9
+}
+
+🏁 LANGGRAPH PIPELINE COMPLETED
+
