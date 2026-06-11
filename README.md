@@ -300,7 +300,7 @@ load_model(force_local=True)  # qwen2.5-coder:14b (Rust patching)
 ---
 
 ## Architecture
-
+```
 Input Contract (.rs)
 ↓
 ┌─────────────────────────────────┐
@@ -338,7 +338,7 @@ Final Report + Patched Contract
 | 6 | Risk Scorer | CVSS-style scores |
 
 ---
-
+```
 ## Quick Start
 
 ```bash

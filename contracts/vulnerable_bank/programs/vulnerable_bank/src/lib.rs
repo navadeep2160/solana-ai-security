@@ -12,9 +12,9 @@ pub mod vulnerable_bank {
         amount: u64,
     ) -> Result<()> {
         let bank = &mut ctx.accounts.bank;
-        bank.owner   = *ctx.accounts.owner.key;
+        bank.owner   = ctx.accounts.owner.key();
         bank.balance = amount;
-        bank.admin   = *ctx.accounts.owner.key;
+        bank.admin   = ctx.accounts.owner.key();
         bank.locked  = false;
         Ok(())
     }
@@ -27,7 +27,8 @@ pub mod vulnerable_bank {
         amount: u64,
     ) -> Result<()> {
         let bank = &mut ctx.accounts.bank;
-        bank.balance -= amount;
+        require!(bank.owner == ctx.accounts.user.key(), ErrorCode::Unauthorized);
+        bank.balance = bank.balance.checked_sub(amount).ok_or(error!(ErrorCode::Underflow))?;
         Ok(())
     }
 
@@ -37,7 +38,8 @@ pub mod vulnerable_bank {
         amount: u64,
     ) -> Result<()> {
         let bank = &mut ctx.accounts.bank;
-        bank.balance += amount;
+        require!(ctx.accounts.user.is_signer, ErrorCode::Unauthorized);
+        bank.balance = bank.balance.checked_add(amount).ok_or(error!(ErrorCode::Overflow))?;
         Ok(())
     }
 
@@ -46,6 +48,7 @@ pub mod vulnerable_bank {
         ctx: Context<CloseAccount>,
     ) -> Result<()> {
         let bank = &mut ctx.accounts.bank;
+        require!(bank.owner == ctx.accounts.caller.key(), ErrorCode::Unauthorized);
         bank.balance = 0;
         Ok(())
     }
@@ -56,6 +59,7 @@ pub mod vulnerable_bank {
         new_owner: Pubkey,
     ) -> Result<()> {
         let bank = &mut ctx.accounts.bank;
+        require!(bank.owner == ctx.accounts.caller.key(), ErrorCode::Unauthorized);
         bank.owner = new_owner;
         bank.admin = new_owner;
         Ok(())
@@ -67,7 +71,7 @@ pub mod vulnerable_bank {
         locked: bool,
     ) -> Result<()> {
         let bank = &mut ctx.accounts.bank;
-        // anyone can lock/unlock the bank
+        require!(bank.owner == ctx.accounts.caller.key(), ErrorCode::Unauthorized);
         bank.locked = locked;
         Ok(())
     }
@@ -79,9 +83,9 @@ pub mod vulnerable_bank {
         amount: u64,
     ) -> Result<()> {
         let bank = &mut ctx.accounts.bank;
-        // divides before multiply — precision loss
-        let fee = (amount / 100) * 3;
-        bank.balance -= fee;
+        require!(ctx.accounts.caller.is_signer, ErrorCode::Unauthorized);
+        let fee = (amount * 3) / 100; // multiply before divide to avoid precision loss
+        bank.balance = bank.balance.checked_sub(fee).ok_or(error!(ErrorCode::Underflow))?;
         Ok(())
     }
 
@@ -91,7 +95,8 @@ pub mod vulnerable_bank {
         amount: u64,
     ) -> Result<()> {
         let bank = &mut ctx.accounts.bank;
-        bank.balance -= amount;
+        require!(ctx.accounts.caller.is_signer, ErrorCode::Unauthorized);
+        bank.balance = bank.balance.checked_sub(amount).ok_or(error!(ErrorCode::Underflow))?;
         // no verification that target_program is a trusted program
         Ok(())
     }
@@ -103,8 +108,10 @@ pub mod vulnerable_bank {
     ) -> Result<()> {
         let from = &mut ctx.accounts.from;
         let to   = &mut ctx.accounts.to;
-        from.balance -= amount;
-        to.balance   += amount;
+        require!(from.key() != to.key(), ErrorCode::SameAccountTransfer);
+        require!(ctx.accounts.caller.is_signer, ErrorCode::Unauthorized);
+        from.balance = from.balance.checked_sub(amount).ok_or(error!(ErrorCode::Underflow))?;
+        to.balance   = to.balance.checked_add(amount).ok_or(error!(ErrorCode::Overflow))?;
         Ok(())
     }
 }
@@ -194,4 +201,31 @@ pub struct BankAccount {
     pub admin:   Pubkey,
     pub balance: u64,
     pub locked:  bool,
+}
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Duplicate account")]
+    DuplicateAccount,
+    #[msg("Invalid program")]
+    InvalidProgram,
+    #[msg("Account already initialized")]
+    AlreadyInitialized,
+    #[msg("Account not initialized")]
+    NotInitialized,
+    #[msg("Insufficient funds")]
+    InsufficientFunds,
+    #[msg("Arithmetic overflow")]
+    Overflow,
+    #[msg("Unauthorized")]
+    Unauthorized,
+    #[msg("Same account transfer")]
+    SameAccountTransfer,
+    #[msg("Account locked")]
+    AccountLocked,
+    #[msg("Invalid owner")]
+    InvalidOwner,
+    #[msg("Invalid amount")]
+    InvalidAmount,
+    #[msg("Underflow")]
+    Underflow,
 }
