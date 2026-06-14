@@ -148,29 +148,21 @@ def analyze_cfg_with_kb(cfg_result: dict, full_code: str) -> list:
     from kb.kb_router import query_sc_rules, query_audit_findings
     from models.ollama_client import load_model
 
-    # Build CFG summary — functions with their security tags
+    # Use structured facts from CFG (no vulnerability logic in CFG builder)
     cfg_summary = []
-    functions = cfg_result.get("graphs", {})
-    for fn_name, fn_cfg in functions.items():
-        blocks_summary = []
-        for block in fn_cfg.blocks:
-            blocks_summary.append({
-                "id":             block.id,
-                "line_start":     block.line_start,
-                "line_end":       block.line_end,
-                "unchecked_math": block.unchecked_math,
-                "has_arithmetic": block.has_arithmetic,
-                "has_signer":     block.has_signer_check,
-                "has_owner":      block.has_owner_check,
-                "has_cpi":        block.has_cpi,
-                "has_transfer":   block.has_transfer,
-                "has_close":      block.has_close,
-                "has_init":       block.has_init,
+    function_facts = cfg_result.get("function_facts", {})
+    if function_facts:
+        for fn_name, fn_data in function_facts.items():
+            cfg_summary.append({
+                "function":     fn_name,
+                "struct_signer": fn_data.get("struct_signer", False),
+                "struct_owner":  fn_data.get("struct_owner", False),
+                "blocks":        fn_data.get("blocks", []),
             })
-        cfg_summary.append({
-            "function": fn_name,
-            "blocks":   blocks_summary,
-        })
+    else:
+        # Fallback for old format
+        for fn_name, fn_cfg in cfg_result.get("graphs", {}).items():
+            cfg_summary.append({"function": fn_name, "blocks": []})
 
     # Query KB for execution path vulnerability patterns
     queries = [

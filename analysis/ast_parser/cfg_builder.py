@@ -385,58 +385,44 @@ def build(source: str, source_file: str = "<source>") -> CFG:
 # ---------------------------------------------------------------------------
 
 def analyze_cfg(code: str) -> dict:
+    """
+    Pure fact extractor — NO hardcoded vulnerability detection.
+    Returns structured facts per function for KB-driven analysis.
+    Findings always empty — use kb_ast_analyzer.analyze_cfg_with_kb()
+    """
     cfg = build(code, source_file="<source>")
-    findings: List[dict] = []
 
+    function_facts = {}
     for fn_name, fn_cfg in cfg.functions.items():
+        blocks_facts = []
         for block in fn_cfg.blocks:
-            if block.unchecked_math:
-                findings.append({
-                    "type":        "unchecked_arithmetic",
-                    "severity":    "critical",
-                    "description": (f"Unchecked math in {fn_name}() "
-                                    f"lines {block.line_start}-{block.line_end}"),
-                    "line": block.line_start,
-                })
-            _struct_sig, _ = _fn_has_struct_security(fn_name, code)
-            if block.has_transfer and not block.has_signer_check and not _struct_sig:
-                findings.append({
-                    "type":        "operation_before_check",
-                    "severity":    "critical",
-                    "description": (f"Transfer in {fn_name}() block {block.id} "
-                                    f"with no signer check"),
-                    "line": block.line_start,
-                })
-            if block.has_cpi and not block.has_owner_check:
-                findings.append({
-                    "type":        "unvalidated_cpi",
-                    "severity":    "high",
-                    "description": (f"CPI in {fn_name}() lines "
-                                    f"{block.line_start}-{block.line_end} "
-                                    f"with no owner check"),
-                    "line": block.line_start,
-                })
-
-        sensitive = {"withdraw", "transfer", "close_account", "burn", "close_vault"}
-        if fn_name in sensitive:
-            # Also check struct definition for security constraints
-            struct_signer, struct_owner = _fn_has_struct_security(fn_name, code)
-            has_check = (
-                any(b.has_signer_check or b.has_owner_check for b in fn_cfg.blocks)
-                or struct_signer or struct_owner
-            )
-            if not has_check:
-                findings.append({
-                    "type":        "no_security_checks",
-                    "severity":    "critical",
-                    "description": f"Function '{fn_name}' has NO security checks",
-                    "line":        0,
-                })
+            blocks_facts.append({
+                "id":             block.id,
+                "line_start":     block.line_start,
+                "line_end":       block.line_end,
+                "has_arithmetic": block.has_arithmetic,
+                "unchecked_math": block.unchecked_math,
+                "has_signer":     block.has_signer_check,
+                "has_owner":      block.has_owner_check,
+                "has_cpi":        block.has_cpi,
+                "has_transfer":   block.has_transfer,
+                "has_close":      block.has_close,
+                "has_init":       block.has_init,
+                "lines":          block.lines[:5],
+            })
+        struct_signer, struct_owner = _fn_has_struct_security(fn_name, code)
+        function_facts[fn_name] = {
+            "entry":         fn_cfg.entry,
+            "blocks":        blocks_facts,
+            "struct_signer": struct_signer,
+            "struct_owner":  struct_owner,
+        }
 
     return {
-        "graphs":   cfg.functions,
-        "findings": findings,
-        "summary":  cfg.to_json(indent=2),
+        "graphs":         cfg.functions,
+        "function_facts": function_facts,
+        "findings":       [],
+        "summary":        cfg.to_json(indent=2),
     }
 
 
