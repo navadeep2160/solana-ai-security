@@ -1,0 +1,506 @@
+"""
+Enhanced Semantic Extractor for Solana Bytecode Security Analysis
+Based on real exploit patterns from Wormhole, Mango, Cashio, Crema, Nirvana
+
+Vulnerability Classes (from research 2026):
+1. Missing Signer Check (MSC) - Wormhole $320M
+2. Missing Owner Check (MOC) - Cashio $52M
+3. Arbitrary CPI (ACPI) - Crema $8.8M
+4. Sysvar Spoofing - Wormhole variant
+5. PDA Validation Missing - Various
+6. Signer Account Forwarding - 2025+ pattern
+7. Integer Overflow - Release mode unchecked
+8. Reentrancy-like patterns - CPI depth abuse
+"""
+
+from typing import List, Dict, Optional, Tuple, Set, Any
+from dataclasses import dataclass, field
+from collections import defaultdict
+
+from .disassembler import eBPFInstruction, eBPFDisassembler
+from .cfg_recovery import CFGRecoverer, BasicBlock, FunctionCFG
+
+
+@dataclass
+class VulnerabilityPattern:
+    """Detected vulnerability pattern - bulletproof version."""
+    name: str = ""
+    severity: str = "Low"  # Critical, High, Medium, Low
+    category: str = ""
+    confidence: float = 0.0
+    description: str = ""
+    location: str = ""  # function:block
+    instruction_offsets: List[int] = field(default_factory=list)
+    remediation: str = ""
+    references: List[str] = field(default_factory=list)
+    # Backward compatibility fields
+    function: str = ""
+    block_id: str = ""
+    pattern_type: str = ""
+
+    def __post_init__(self):
+        """Parse location into function and block_id if not set."""
+        if not self.function and ":" in self.location:
+            parts = self.location.split(":", 1)
+            self.function = parts[0]
+            self.block_id = parts[1] if len(parts) > 1 else ""
+        elif not self.function:
+            self.function = self.location
+        # Auto-set pattern_type from name if not provided
+        if not self.pattern_type:
+            self.pattern_type = self.name
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for JSON serialization."""
+        return {
+            "name": self.name,
+            "severity": self.severity,
+            "category": self.category,
+            "confidence": self.confidence,
+            "description": self.description,
+            "location": self.location,
+            "instruction_offsets": self.instruction_offsets,
+            "remediation": self.remediation,
+            "references": self.references,
+            "function": self.function,
+            "block_id": self.block_id,
+            "pattern_type": self.pattern_type,
+        }
+
+
+class SemanticExtractor:
+    """
+    Extracts security-relevant semantic patterns from eBPF bytecode.
+    Based on real Solana exploit patterns from major hacks.
+    """
+
+    # Severity weights
+    SEVERITY_WEIGHTS = {
+        "Critical": 1.0,
+        "High": 0.75,
+        "Medium": 0.5,
+        "Low": 0.25
+    }
+
+    # Known vulnerable syscall patterns
+    CPI_SYSCALLS = {
+        "sol_invoke_signed_c", "sol_invoke_signed_rust",
+        "sol_invoke_signed", "sol_invoke_unchecked"
+    }
+
+    # Signer-related syscalls
+    SIGNER_SYSCALLS = {
+        "sol_log_pubkey", "sol_create_program_address",
+        "sol_try_find_program_address"
+    }
+
+    # Account validation syscalls
+    VALIDATION_SYSCALLS = {
+        "sol_create_program_address", "sol_try_find_program_address",
+        "sol_log_pubkey"
+    }
+
+    # Dangerous arithmetic patterns
+    ARITHMETIC_OPCODES = {"add", "sub", "mul", "div", "mod"}
+
+    def __init__(self, disassembler: eBPFDisassembler, cfg_recoverer: CFGRecoverer):
+        self.disasm = disassembler
+        self.cfg = cfg_recoverer
+        self.patterns: List[VulnerabilityPattern] = []
+        self.strings = disassembler.find_strings()
+
+    def extract(self) -> List[VulnerabilityPattern]:
+        """Run all extraction passes. Guaranteed to return a list."""
+        self.patterns = []
+
+        if not self.cfg or not getattr(self.cfg, 'functions', None):
+            return self.patterns
+
+        try:
+            for func_name, func_cfg in self.cfg.functions.items():
+                self._extract_signer_checks(func_name, func_cfg)
+                self._extract_owner_checks(func_name, func_cfg)
+                self._extract_cpi_patterns(func_name, func_cfg)
+                self._extract_arithmetic_patterns(func_name, func_cfg)
+                self._extract_pda_patterns(func_name, func_cfg)
+                self._extract_sysvar_patterns(func_name, func_cfg)
+                self._extract_signer_forwarding(func_name, func_cfg)
+                self._extract_reentrancy_patterns(func_name, func_cfg)
+        except Exception as e:
+            print(f"[SemanticExtractor] Warning during extraction: {e}")
+            import traceback
+            traceback.print_exc()
+
+        return self.patterns
+
+    def extract_all(self) -> List[VulnerabilityPattern]:
+        """Alias for extract() - backward compatibility. Always returns list."""
+        result = self.extract()
+        return result if result is not None else []
+
+    def get_critical_findings(self) -> List[VulnerabilityPattern]:
+        """Return only Critical severity patterns."""
+        return [p for p in self.patterns if p.severity == "Critical"]
+
+    def get_vulnerability_summary(self) -> Dict:
+        """Alias for get_summary() - backward compatibility."""
+        return self.get_summary()
+
+    def get_risk_score(self) -> float:
+        """Calculate overall risk score (0-100)."""
+        if not self.patterns:
+            return 0.0
+
+        total_score = 0.0
+        for pattern in self.patterns:
+            weight = self.SEVERITY_WEIGHTS.get(pattern.severity, 0.5)
+            total_score += weight * pattern.confidence * 25  # Max 25 per pattern
+
+        return min(100.0, total_score)
+
+    def get_summary(self) -> Dict:
+        """Get vulnerability summary."""
+        severity_counts = defaultdict(int)
+        category_counts = defaultdict(int)
+
+        for p in self.patterns:
+            severity_counts[p.severity] += 1
+            category_counts[p.category] += 1
+
+        return {
+            "total_patterns": len(self.patterns),
+            "risk_score": round(self.get_risk_score(), 2),
+            "severity_breakdown": dict(severity_counts),
+            "category_breakdown": dict(category_counts),
+            "critical_patterns": [
+                p.name for p in self.patterns if p.severity == "Critical"
+            ]
+        }
+
+    def _extract_signer_checks(self, func_name: str, func_cfg: FunctionCFG):
+        """
+        Detect Missing Signer Check (MSC) - #1 exploit class
+        Pattern: pubkey comparison WITHOUT is_signer verification
+        """
+        for block_id, block in func_cfg.blocks.items():
+            instructions = block.instructions
+
+            pubkey_checks = []
+            signer_checks = []
+
+            for i, instr in enumerate(instructions):
+                if instr.is_jump and any(kw in instr.operands.lower() for kw in ["pubkey", "key", "admin", "authority"]):
+                    pubkey_checks.append(i)
+
+                if instr.is_load and any(kw in str(instr.operands).lower() for kw in ["signer", "is_signer"]):
+                    signer_checks.append(i)
+
+                if any(kw in str(instr.operands).lower() for kw in ["signer", "is_signer"]):
+                    signer_checks.append(i)
+
+            if pubkey_checks and not signer_checks:
+                has_cpi_after = any(
+                    instructions[j].is_syscall and any(s in instructions[j].operands for s in self.CPI_SYSCALLS)
+                    for j in range(max(pubkey_checks) + 1, len(instructions))
+                )
+
+                has_state_change = any(
+                    instructions[j].is_store or instructions[j].mnemonic in ["stx", "st"]
+                    for j in range(max(pubkey_checks) + 1, len(instructions))
+                )
+
+                if has_cpi_after or has_state_change:
+                    confidence = 0.85 if has_cpi_after else 0.65
+
+                    self.patterns.append(VulnerabilityPattern(
+                        name="missing_signer_check",
+                        severity="Critical",
+                        category="Authentication",
+                        confidence=confidence,
+                        description="Pubkey comparison found without is_signer verification before privileged operation. This was the root cause of the Wormhole $320M exploit.",
+                        location=f"{func_name}:{block_id}",
+                        instruction_offsets=[instructions[i].offset for i in pubkey_checks],
+                        remediation="Add is_signer check: verify account.is_signer || use Signer<'info> in Anchor",
+                        references=["https://github.com/coral-xyz/sealevel-attacks", "Wormhole 2022"]
+                    ))
+
+    def _extract_owner_checks(self, func_name: str, func_cfg: FunctionCFG):
+        """
+        Detect Missing Owner Check (MOC) - #2 exploit class
+        Pattern: Account data read WITHOUT owner verification
+        """
+        for block_id, block in func_cfg.blocks.items():
+            instructions = block.instructions
+
+            owner_checks = []
+            data_reads = []
+
+            for i, instr in enumerate(instructions):
+                if any(kw in str(instr.operands).lower() for kw in ["owner", "program_id"]):
+                    if instr.is_jump or instr.is_arithmetic:
+                        owner_checks.append(i)
+
+                if instr.is_load and any(kw in str(instr.operands).lower() for kw in ["data", "account"]):
+                    data_reads.append(i)
+
+                if instr.mnemonic in ["ldx", "ld"] and "account" in str(instr.operands).lower():
+                    data_reads.append(i)
+
+            if data_reads:
+                has_proper_order = False
+                for read_idx in data_reads:
+                    for check_idx in owner_checks:
+                        if check_idx < read_idx:
+                            has_proper_order = True
+                            break
+
+                if not has_proper_order and not owner_checks:
+                    is_cpi_context = getattr(block, 'has_cpi', False) or any(
+                        instr.is_syscall for instr in instructions
+                    )
+
+                    confidence = 0.75 if is_cpi_context else 0.55
+
+                    self.patterns.append(VulnerabilityPattern(
+                        name="missing_owner_check",
+                        severity="Critical",
+                        category="Account Validation",
+                        confidence=confidence,
+                        description="Account data accessed without owner verification. Cashio lost $52M to forged accounts with fake owners.",
+                        location=f"{func_name}:{block_id}",
+                        instruction_offsets=[instructions[i].offset for i in data_reads],
+                        remediation="Verify account.owner == expected program_id before reading data. Use Account<'info, T> in Anchor.",
+                        references=["https://github.com/coral-xyz/sealevel-attacks", "Cashio 2022"]
+                    ))
+
+    def _extract_cpi_patterns(self, func_name: str, func_cfg: FunctionCFG):
+        """
+        Detect Arbitrary CPI (ACPI) and CPI security issues - #3 exploit class
+        """
+        for block_id, block in func_cfg.blocks.items():
+            instructions = block.instructions
+
+            for i, instr in enumerate(instructions):
+                if not instr.is_syscall:
+                    continue
+
+                if any(s in instr.operands for s in self.CPI_SYSCALLS):
+                    has_program_id_check = False
+                    has_signer_forwarding = False
+
+                    for j in range(max(0, i-10), i):
+                        prev = instructions[j]
+
+                        if any(kw in str(prev.operands).lower() for kw in ["program_id", "expected", "whitelist"]):
+                            if prev.is_jump or prev.is_arithmetic:
+                                has_program_id_check = True
+
+                        if any(kw in str(prev.operands).lower() for kw in ["signer", "is_signer"]):
+                            if prev.is_load:
+                                has_signer_forwarding = True
+
+                    program_from_user = any(
+                        any(kw in str(instructions[j].operands).lower() for kw in ["input", "arg", "param"])
+                        for j in range(max(0, i-5), i)
+                    )
+
+                    if not has_program_id_check and program_from_user:
+                        self.patterns.append(VulnerabilityPattern(
+                            name="arbitrary_cpi",
+                            severity="Critical",
+                            category="Cross-Program Invocation",
+                            confidence=0.85,
+                            description="CPI made to user-controlled program ID without validation. Crema lost $8.8M to fake oracle CPI.",
+                            location=f"{func_name}:{block_id}",
+                            instruction_offsets=[instr.offset],
+                            remediation="Whitelist CPI targets: hardcode program IDs or verify against known list. Use Program<'info, T> in Anchor.",
+                            references=["https://github.com/coral-xyz/sealevel-attacks", "Crema 2022"]
+                        ))
+
+                    if has_signer_forwarding and not has_program_id_check:
+                        self.patterns.append(VulnerabilityPattern(
+                            name="cpi_signer_forwarding",
+                            severity="High",
+                            category="Cross-Program Invocation",
+                            confidence=0.75,
+                            description="Signer account forwarded to CPI without program ID validation. Attacker can steal signer privileges.",
+                            location=f"{func_name}:{block_id}",
+                            instruction_offsets=[instr.offset],
+                            remediation="Never forward user signers to arbitrary CPIs. Use protocol PDAs as authorities instead.",
+                            references=["https://www.asymmetric.re/blog-archived/invocation-security"]
+                        ))
+
+    def _extract_arithmetic_patterns(self, func_name: str, func_cfg: FunctionCFG):
+        """
+        Detect unchecked arithmetic - #6 exploit class
+        """
+        for block_id, block in func_cfg.blocks.items():
+            instructions = block.instructions
+
+            for i, instr in enumerate(instructions):
+                if not instr.is_arithmetic:
+                    continue
+
+                is_64bit = "64" in instr.mnemonic
+
+                has_overflow_check = False
+
+                for j in range(i+1, min(i+5, len(instructions))):
+                    next_instr = instructions[j]
+                    if any(kw in str(next_instr.operands).lower() for kw in ["overflow", "checked", "saturating"]):
+                        has_overflow_check = True
+                    if next_instr.is_jump and any(kw in str(next_instr.operands).lower() for kw in ["overflow", "carry"]):
+                        has_overflow_check = True
+
+                has_compute_log = any(
+                    "sol_log_compute_units" in str(instructions[j].operands)
+                    for j in range(max(0, i-3), min(i+3, len(instructions)))
+                )
+
+                if not has_overflow_check and is_64bit:
+                    confidence = 0.7 if not has_compute_log else 0.4
+
+                    self.patterns.append(VulnerabilityPattern(
+                        name="unchecked_arithmetic",
+                        severity="High" if is_64bit else "Medium",
+                        category="Math & Precision",
+                        confidence=confidence,
+                        description=f"Unchecked {instr.mnemonic} operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+                        location=f"{func_name}:{block_id}",
+                        instruction_offsets=[instr.offset],
+                        remediation="Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+                        references=["https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"]
+                    ))
+
+    def _extract_pda_patterns(self, func_name: str, func_cfg: FunctionCFG):
+        """
+        Detect PDA validation issues
+        """
+        for block_id, block in func_cfg.blocks.items():
+            instructions = block.instructions
+
+            pda_calls = []
+            seed_checks = []
+
+            for i, instr in enumerate(instructions):
+                if any(s in instr.operands for s in ["sol_create_program_address", "sol_try_find_program_address"]):
+                    pda_calls.append(i)
+
+                if any(kw in str(instr.operands).lower() for kw in ["seed", "bump", "canonical"]):
+                    seed_checks.append(i)
+
+            if pda_calls and not seed_checks:
+                self.patterns.append(VulnerabilityPattern(
+                    name="pda_validation_missing",
+                    severity="High",
+                    category="Account Validation",
+                    confidence=0.65,
+                    description="PDA derived without canonical seed/bump verification. Attacker can forge PDAs with different seeds.",
+                    location=f"{func_name}:{block_id}",
+                    instruction_offsets=[instructions[i].offset for i in pda_calls],
+                    remediation="Always verify PDA seeds and canonical bumps. Use find_program_address with known seeds.",
+                    references=["https://github.com/coral-xyz/sealevel-attacks"]
+                ))
+
+    def _extract_sysvar_patterns(self, func_name: str, func_cfg: FunctionCFG):
+        """
+        Detect Sysvar spoofing - Wormhole variant
+        """
+        for block_id, block in func_cfg.blocks.items():
+            instructions = block.instructions
+
+            for i, instr in enumerate(instructions):
+                if not instr.is_syscall:
+                    continue
+
+                if any(s in instr.operands for s in ["sol_sysvar_clock", "sol_sysvar_rent", "sol_sysvar_instructions"]):
+                    has_validation = any(
+                        any(kw in str(instructions[j].operands).lower() for kw in ["sysvar", "owner", "expected"])
+                        for j in range(max(0, i-5), i)
+                    )
+
+                    if not has_validation:
+                        self.patterns.append(VulnerabilityPattern(
+                            name="sysvar_spoofing_risk",
+                            severity="High",
+                            category="Account Validation",
+                            confidence=0.7,
+                            description="Sysvar account used without validation. Wormhole exploited forged instructions sysvar to bypass signature checks.",
+                            location=f"{func_name}:{block_id}",
+                            instruction_offsets=[instr.offset],
+                            remediation="Verify sysvar account owner == sysvar::id(). Use Sysvar<'info, T> in Anchor.",
+                            references=["https://github.com/coral-xyz/sealevel-attacks", "Wormhole 2022"]
+                        ))
+
+    def _extract_signer_forwarding(self, func_name: str, func_cfg: FunctionCFG):
+        """
+        Detect Signer Account Forwarding - 2025+ attack pattern
+        """
+        cpi_blocks = []
+        for block_id, block in func_cfg.blocks.items():
+            if getattr(block, 'has_cpi', False):
+                cpi_blocks.append((block_id, block))
+
+        if len(cpi_blocks) >= 2:
+            for i in range(len(cpi_blocks) - 1):
+                block1_id, block1 = cpi_blocks[i]
+                block2_id, block2 = cpi_blocks[i + 1]
+
+                block1_signers = set()
+                block2_signers = set()
+
+                for instr in block1.instructions:
+                    if any(kw in str(instr.operands).lower() for kw in ["signer", "pda"]):
+                        block1_signers.add(instr.dst_reg)
+
+                for instr in block2.instructions:
+                    if any(kw in str(instr.operands).lower() for kw in ["signer", "pda"]):
+                        block2_signers.add(instr.dst_reg)
+
+                if block1_signers & block2_signers:
+                    self.patterns.append(VulnerabilityPattern(
+                        name="signer_forwarding_chain",
+                        severity="High",
+                        category="Cross-Program Invocation",
+                        confidence=0.6,
+                        description="Signer account forwarded across multiple CPI calls. Attacker can exploit intermediate programs to steal privileges.",
+                        location=f"{func_name}:{block1_id}->{block2_id}",
+                        instruction_offsets=[],
+                        remediation="Use protocol PDAs instead of user signers for CPIs. Validate all intermediate programs.",
+                        references=["https://dedaub.com/blog/ethereum-developers-on-solana"]
+                    ))
+
+    def _extract_reentrancy_patterns(self, func_name: str, func_cfg: FunctionCFG):
+        """
+        Detect reentrancy-like patterns
+        Pattern: State update AFTER CPI call (not before)
+        """
+        for block_id, block in func_cfg.blocks.items():
+            instructions = block.instructions
+
+            for i, instr in enumerate(instructions):
+                if not instr.is_syscall or not any(s in instr.operands for s in self.CPI_SYSCALLS):
+                    continue
+
+                state_updates_after = []
+                for j in range(i+1, len(instructions)):
+                    if instructions[j].is_store or instructions[j].mnemonic in ["stx", "st", "st64"]:
+                        state_updates_after.append(j)
+
+                state_updates_before = []
+                for j in range(max(0, i-5), i):
+                    if instructions[j].is_store or instructions[j].mnemonic in ["stx", "st", "st64"]:
+                        state_updates_before.append(j)
+
+                if state_updates_after and not state_updates_before:
+                    self.patterns.append(VulnerabilityPattern(
+                        name="reentrancy_risk",
+                        severity="High",
+                        category="State Management",
+                        confidence=0.7,
+                        description="State updated AFTER CPI call. Reentrancy-like attack possible: CPI callee can re-enter before state is committed.",
+                        location=f"{func_name}:{block_id}",
+                        instruction_offsets=[instr.offset] + [instructions[j].offset for j in state_updates_after],
+                        remediation="Always update state BEFORE CPI. Use checks-effects-interactions pattern.",
+                        references=["https://github.com/coral-xyz/sealevel-attacks"]
+                    ))

@@ -1,0 +1,68 @@
+{
+  "program_id": "test_program",
+  "so_path": "test_program.so",
+  "timestamp": 1782543981.4739172,
+  "instruction_count": 8,
+  "function_count": 1,
+  "block_count": 3,
+  "patterns": [
+    {
+      "pattern_type": "missing_signer_check_before_cpi",
+      "function": "entrypoint",
+      "block_id": "lbb_0020",
+      "line": 32,
+      "confidence": 0.75,
+      "description": "CPI call in entrypoint without visible signer validation",
+      "evidence": [
+        "eBPFInstruction(offset=32, opcode=133, mnemonic='syscall', operands='sol_invoke_signed_rust', is_load=False, is_store=False, is_call=True, is_jump=True, is_syscall=True, is_return=False, is_arithmetic=False, target_offset=None, dst_reg=1, src_reg=0, imm=35, offset_imm=0)"
+      ]
+    },
+    {
+      "pattern_type": "missing_owner_check_before_cpi",
+      "function": "entrypoint",
+      "block_id": "lbb_0020",
+      "line": 32,
+      "confidence": 0.6,
+      "description": "CPI call in entrypoint without visible owner validation",
+      "evidence": [
+        "eBPFInstruction(offset=32, opcode=133, mnemonic='syscall', operands='sol_invoke_signed_rust', is_load=False, is_store=False, is_call=True, is_jump=True, is_syscall=True, is_return=False, is_arithmetic=False, target_offset=None, dst_reg=1, src_reg=0, imm=35, offset_imm=0)"
+      ]
+    }
+  ],
+  "critical_findings": [
+    {
+      "pattern_type": "missing_signer_check_before_cpi",
+      "function": "entrypoint",
+      "block_id": "lbb_0020",
+      "line": 32,
+      "confidence": 0.75,
+      "description": "CPI call in entrypoint without visible signer validation",
+      "evidence": [
+        "eBPFInstruction(offset=32, opcode=133, mnemonic='syscall', operands='sol_invoke_signed_rust', is_load=False, is_store=False, is_call=True, is_jump=True, is_syscall=True, is_return=False, is_arithmetic=False, target_offset=None, dst_reg=1, src_reg=0, imm=35, offset_imm=0)"
+      ]
+    },
+    {
+      "pattern_type": "missing_owner_check_before_cpi",
+      "function": "entrypoint",
+      "block_id": "lbb_0020",
+      "line": 32,
+      "confidence": 0.6,
+      "description": "CPI call in entrypoint without visible owner validation",
+      "evidence": [
+        "eBPFInstruction(offset=32, opcode=133, mnemonic='syscall', operands='sol_invoke_signed_rust', is_load=False, is_store=False, is_call=True, is_jump=True, is_syscall=True, is_return=False, is_arithmetic=False, target_offset=None, dst_reg=1, src_reg=0, imm=35, offset_imm=0)"
+      ]
+    }
+  ],
+  "metadata": {
+    "scan_duration": 0.001115560531616211,
+    "use_capstone": false,
+    "node_statistics": {
+      "Program": 1,
+      "Function": 1,
+      "BasicBlock": 3,
+      "Instruction": 8,
+      "Syscall": 2,
+      "VulnerabilityPattern": 2
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "total_patterns": 111,
+  "risk_score": 100.0,
+  "severity_breakdown": {
+    "High": 111
+  },
+  "category_breakdown": {
+    "Math & Precision": 111
+  },
+  "critical_patterns": []
+}

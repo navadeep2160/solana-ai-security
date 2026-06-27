@@ -1,0 +1,4 @@
+{
+  "missing_signer_check_before_cpi": 1,
+  "missing_owner_check_before_cpi": 1
+}

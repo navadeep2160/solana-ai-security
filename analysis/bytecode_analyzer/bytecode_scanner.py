@@ -1,0 +1,471 @@
+"""
+Bytecode Scanner - Main Orchestrator
+
+Integrates all components:
+1. Fetches .so from mainnet/devnet
+2. Disassembles eBPF instructions (Capstone-based)
+3. Recovers control flow graph
+4. Extracts semantic security patterns
+5. Encodes features for GNN/HGT
+6. Produces unified vulnerability report
+
+Usage:
+    scanner = BytecodeScanner()
+    result = scanner.scan_program("9xQeWvG816bUx9EP...")
+"""
+
+import json
+import time
+from pathlib import Path
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass, field
+
+from .so_fetcher import SolanaProgramFetcher
+from .disassembler import eBPFDisassembler
+from .cfg_recovery import CFGRecoverer
+from .semantic_extractor import SemanticExtractor, VulnerabilityPattern
+from .feature_encoder import FeatureEncoder, GraphFeatures
+
+
+@dataclass
+class BytecodeScanResult:
+    """Complete result from a bytecode scan."""
+    program_id: str
+    so_path: Path
+    timestamp: float
+
+    # Analysis results
+    instruction_count: int = 0
+    function_count: int = 0
+    block_count: int = 0
+
+    # Security findings
+    patterns: List[VulnerabilityPattern] = field(default_factory=list)
+    critical_findings: List[VulnerabilityPattern] = field(default_factory=list)
+
+    # Graph features
+    graph_features: Optional[GraphFeatures] = None
+
+    # Metadata
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> Dict:
+        """Convert to dictionary for serialization."""
+        return {
+            "program_id": self.program_id,
+            "so_path": str(self.so_path),
+            "timestamp": self.timestamp,
+            "instruction_count": self.instruction_count,
+            "function_count": self.function_count,
+            "block_count": self.block_count,
+            "patterns": [p.to_dict() for p in self.patterns],
+            "critical_findings": [p.to_dict() for p in self.critical_findings],
+            "metadata": self.metadata,
+        }
+
+    def to_json(self, output_path: Optional[str] = None) -> str:
+        """Serialize to JSON."""
+        data = self.to_dict()
+        json_str = json.dumps(data, indent=2, default=str)
+
+        if output_path:
+            with open(output_path, 'w') as f:
+                f.write(json_str)
+
+        return json_str
+
+
+class BytecodeScanner:
+    """
+    Main orchestrator for Solana bytecode analysis.
+
+    Pipeline:
+    1. Fetch .so from blockchain
+    2. Disassemble eBPF (Capstone-based)
+    3. Recover CFG
+    4. Extract semantic patterns
+    5. Encode graph features
+    6. Generate report
+    """
+
+    def __init__(self, 
+                 rpc_url: Optional[str] = None,
+                 output_dir: str = "bytecode_results",
+                 use_capstone: bool = True):
+        self.use_capstone = use_capstone  # Kept for API compatibility
+        self.fetcher = SolanaProgramFetcher(rpc_url=rpc_url)
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.use_capstone = use_capstone
+
+        # Component instances (set during scan)
+        self.disassembler: Optional[eBPFDisassembler] = None
+        self.cfg_recoverer: Optional[CFGRecoverer] = None
+        self.semantic_extractor: Optional[SemanticExtractor] = None
+        self.feature_encoder: Optional[FeatureEncoder] = None
+    
+    def _bridge_to_langgraph(self, program_id: str, patterns: list, outdir: str):
+        """Direct LLM pipeline using kb_router.query_vuln_nodes()."""
+        try:
+            from agents.validator.validator_agent import validate_contract
+            from kb.kb_router import query_vuln_nodes
+            import requests
+            
+            print("\n[BRIDGE] KB-driven LLM pipeline starting...")
+            
+            print(f"[BRIDGE] Querying KB for {len(patterns)} patterns...")
+            matched_vulns = []
+            seen = set()
+            
+            for pattern in patterns:
+                p_dict = pattern.to_dict() if hasattr(pattern, "to_dict") else pattern
+                name = p_dict.get("name", "")
+                desc = p_dict.get("description", "")
+                
+                try:
+                    kb_results = query_vuln_nodes(name, top_k=3)
+                    for r in kb_results:
+                        vuln_name = r.get("name", "")
+                        if vuln_name and vuln_name not in seen:
+                            seen.add(vuln_name)
+                            matched_vulns.append({
+                                "pattern_name": name,
+                                "kb_match": vuln_name,
+                                "severity": r.get("severity", "medium"),
+                                "description": r.get("description", ""),
+                                "fix": r.get("fix", ""),
+                                "category": r.get("category", "other"),
+                            })
+                except Exception:
+                    if name not in seen:
+                        seen.add(name)
+                        matched_vulns.append({
+                            "pattern_name": name,
+                            "kb_match": name,
+                            "severity": "medium",
+                            "description": desc,
+                            "fix": "",
+                            "category": "other",
+                        })
+            
+            print(f"[BRIDGE] Found {len(matched_vulns)} unique KB-matched vulnerabilities")
+            
+            print("[BRIDGE] Building LLM prompt from KB findings...")
+            prompt = self._build_kb_prompt(program_id, matched_vulns)
+            
+            print("[BRIDGE] Calling qwen2.5-coder:14b via Ollama...")
+            try:
+                response = requests.post(
+                    "http://localhost:11434/api/generate",
+                    json={
+                        "model": "qwen2.5-coder:14b",
+                        "prompt": prompt,
+                        "stream": False,
+                        "options": {"temperature": 0.3, "num_predict": 4096}
+                    },
+                    timeout=300
+                )
+                response.raise_for_status()
+                result = response.json()
+                generated_code = result.get("response", "").strip()
+            except Exception as e:
+                print(f"[BRIDGE] Ollama error: {e}")
+                return None
+            
+            if generated_code.startswith("```"):
+                lines_code = generated_code.split("\n")
+                if lines_code[0].startswith("```"):
+                    lines_code = lines_code[1:]
+                if lines_code and lines_code[-1].startswith("```"):
+                    lines_code = lines_code[:-1]
+                generated_code = "\n".join(lines_code).strip()
+            
+            if not generated_code:
+                print("[BRIDGE] LLM returned empty response")
+                return None
+                
+            print(f"[BRIDGE] Generated {len(generated_code)} chars of Rust code")
+            
+            print("[BRIDGE] Sanitizing generated code...")
+            generated_code = self._sanitize_rust_code(generated_code)
+            print(f"[BRIDGE] Sanitized code: {len(generated_code)} chars")
+            
+            print("[BRIDGE] Running validator_agent...")
+            validation = validate_contract(generated_code)
+            
+            if validation.get("success"):
+                print("[BRIDGE] Full pipeline complete! Contract compiles.")
+            else:
+                print("[BRIDGE] Generated contract failed validation.")
+                stderr = validation.get("stderr", "")
+                if stderr:
+                    print(f"[BRIDGE] Error preview: {stderr[:500]}")
+            
+            return {
+                "generated_code": generated_code,
+                "validation": validation,
+                "vulnerabilities": matched_vulns,
+                "patterns_count": len(patterns)
+            }
+            
+        except Exception as e:
+            print(f"[BRIDGE] Error: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+    
+    def _sanitize_rust_code(self, code: str) -> str:
+        """Fix common LLM mistakes in generated Rust code."""
+        import re
+        
+        # Fix 1: Remove * before .key() — .key() returns Pubkey directly
+        code = re.sub(r'\*ctx\.accounts\.(\w+)\.key\(\)', r'ctx.accounts.\1.key()', code)
+        code = re.sub(r'\*([a-zA-Z_][a-zA-Z0-9_]*)\.key\(\)', r'\1.key()', code)
+        
+        # Fix 2: Add pub to Bank struct fields if missing
+        code = re.sub(
+            r'(#\[account\]\s*\n\s*pub struct Bank \{)([^}]+)(\})',
+            lambda m: m.group(1) + re.sub(r'^(\s+)(bump|authority|balance|owner)(:)', r'\1pub \2\3', m.group(2), flags=re.M) + m.group(3),
+            code,
+            flags=re.DOTALL
+        )
+        
+        # Fix 3: Replace has_one with proper seeds if seeds are missing
+        if 'has_one = authority' in code and 'seeds' not in code:
+            code = code.replace('has_one = authority', 'seeds = [b"bank", authority.key().as_ref()],\n           bump = bank.bump')
+        
+        # Fix 4: Ensure Initialize uses proper PDA pattern
+        if 'pub struct Initialize' in code and 'seeds' not in code:
+            code = re.sub(
+                r'(pub struct Initialize<\'info> \{[^}]*?\[account\(\s*init,\s*payer = authority,\s*space = [^)]+)(\)\])',
+                r'\1,\n           seeds = [b"bank", authority.key().as_ref()],\n           bump\2',
+                code,
+                flags=re.DOTALL
+            )
+        
+        # Fix 5: Add seeds/bump to Deposit/Withdraw if missing
+        for struct_name in ['Deposit', 'Withdraw']:
+            if f'pub struct {struct_name}' in code:
+                struct_section = code.split(f'pub struct {struct_name}')[1].split('pub struct')[0] if 'pub struct' in code.split(f'pub struct {struct_name}')[1] else code.split(f'pub struct {struct_name}')[1]
+                if 'seeds' not in struct_section:
+                    code = re.sub(
+                        rf'(pub struct {struct_name}<\'info> \{{[^}}]*?#\[account\(\s*mut,)([^}}]*?pub bank:)',
+                        r'\1\n           seeds = [b"bank", authority.key().as_ref()],\n           bump = bank.bump,\2',
+                        code,
+                        flags=re.DOTALL
+                    )
+        
+        # Fix 6: Add bump parameter to initialize if missing
+        if 'pub fn initialize(ctx: Context<Initialize>' in code and 'bump: u8' not in code:
+            code = code.replace(
+                'pub fn initialize(ctx: Context<Initialize>) -> Result<()> {',
+                'pub fn initialize(ctx: Context<Initialize>, bump: u8) -> Result<()> {'
+            )
+        
+        # Fix 7: Store bump in initialize
+        if 'bank.bump = bump;' not in code and 'pub fn initialize' in code:
+            code = re.sub(
+                r'(pub fn initialize\(ctx: Context<Initialize>[^}]+?let bank = &mut ctx\.accounts\.bank;)([^}]+?)(Ok\(\))',
+                r'\1\n        bank.bump = bump;\2\3',
+                code,
+                flags=re.DOTALL
+            )
+        
+        # Fix 8: Ensure space is correct
+        code = re.sub(
+            r'space = 8 \+ 32 \+ 8',
+            r'space = 8 + std::mem::size_of::<Bank>()',
+            code
+        )
+        
+        return code
+    
+    
+    def _build_kb_prompt(self, program_id: str, vulnerabilities: list) -> str:
+        """Build prompt from KB-matched vulnerabilities."""
+        vuln_text = []
+        for v in vulnerabilities[:20]:
+            fix_str = f"\nFix: {v['fix']}" if v.get('fix') else ""
+            vuln_text.append(f"VULNERABILITY: {v['kb_match']}\nSeverity: {v['severity']}\nCategory: {v['category']}\nDescription: {v['description']}{fix_str}")
+        
+        vuln_str = "\n\n".join(vuln_text) if vuln_text else "No specific vulnerabilities detected."
+        
+        return f"""You are a Solana smart contract security expert. Generate a complete, compilable Anchor (v0.30.1) Rust smart contract.
+
+PROGRAM ID: {program_id}
+
+VULNERABILITIES ({len(vulnerabilities)} total):
+{vuln_str}
+
+RULES:
+1. Use ONLY anchor-lang v0.30.1 - NO anchor_spl
+2. Signer account MUST come BEFORE PDA accounts in struct
+3. Store bump: bank.bump = ctx.bumps.bank
+4. Use ctx.bumps.bank NOT ctx.bumps.get("bank")
+5. Use account.key() NOT account.key
+6. Use checked arithmetic
+7. Include ErrorCode enum with: ArithmeticOverflow, ArithmeticUnderflow, InsufficientFunds, Unauthorized
+8. Return Result<()> from all handlers
+
+OUTPUT ONLY the complete Rust code. Start with use anchor_lang::prelude::*;.
+"""
+
+
+    def scan_program(self,
+                     program_id: str,
+                     so_path: Optional[Path] = None,
+                     skip_fetch: bool = False) -> BytecodeScanResult:
+        """
+        Complete scan of a Solana program.
+
+        Args:
+            program_id: Solana program address (base58)
+            so_path: Optional local .so file path (skip fetch if provided)
+            skip_fetch: Use local file without fetching
+
+        Returns:
+            BytecodeScanResult with all findings
+        """
+        start_time = time.time()
+        print(f"\n{'='*60}")
+        print(f"BYTECODE SCAN: {program_id}")
+        print(f"{'='*60}\n")
+
+        # Step 1: Fetch or use local .so
+        if so_path and skip_fetch:
+            binary_path = Path(so_path)
+            print(f"[Scanner] Using local file: {binary_path}")
+        else:
+            try:
+                binary_path = self.fetcher.fetch(program_id, use_cli=True)
+            except Exception as e:
+                print(f"[Scanner] Fetch failed: {e}")
+                if so_path:
+                    binary_path = Path(so_path)
+                    print(f"[Scanner] Falling back to local file: {binary_path}")
+                else:
+                    raise
+
+        # Step 2: Disassemble
+        print(f"\n[Phase 1/5] Disassembling eBPF bytecode...")
+        try:
+            self.disassembler = eBPFDisassembler(str(binary_path))
+            instructions = self.disassembler.disassemble()
+            print(f"  -> {len(instructions)} instructions decoded")
+        except ValueError as e:
+            print(f"\nERROR: {e}")
+            print("\nTroubleshooting:")
+            print("  1. Make sure the file is a Solana program built with 'cargo build-sbf'")
+            print("  2. Check: file <your.so>  # Should show 'ELF 64-bit LSB relocatable, eBPF'")
+            print("  3. Try: llvm-objdump -d <your.so>  # Should show eBPF instructions")
+            print("  4. Run: python -m analysis.bytecode_analyzer.test_bytecode --create-test")
+            raise
+
+        # Step 3: Recover CFG
+        print(f"\n[Phase 2/5] Recovering control flow graph...")
+        self.cfg_recoverer = CFGRecoverer(self.disassembler)
+        functions = self.cfg_recoverer.recover()
+        total_blocks = sum(len(f.blocks) for f in functions.values())
+        print(f"  -> {len(functions)} functions, {total_blocks} basic blocks")
+
+        # Step 4: Extract semantic patterns
+        print(f"\n[Phase 3/5] Extracting security patterns...")
+        self.semantic_extractor = SemanticExtractor(self.disassembler, self.cfg_recoverer)
+        patterns = self.semantic_extractor.extract_all()
+        critical = self.semantic_extractor.get_critical_findings()
+        print(f"  -> {len(patterns)} patterns, {len(critical)} critical")
+
+        # Step 5: Encode features
+        print(f"\n[Phase 4/5] Encoding graph features for HGT...")
+        self.feature_encoder = FeatureEncoder(self.disassembler, self.cfg_recoverer, self.semantic_extractor)
+        features = self.feature_encoder.encode()
+        stats = self.feature_encoder.get_node_statistics()
+        print(f"  -> Graph nodes: {stats}")
+
+        # Step 6: Build result
+        print(f"\n[Phase 5/5] Generating report...")
+        result = BytecodeScanResult(
+            program_id=program_id,
+            so_path=binary_path,
+            timestamp=time.time(),
+            instruction_count=len(instructions),
+            function_count=len(functions),
+            block_count=total_blocks,
+            patterns=patterns,
+            critical_findings=critical,
+            graph_features=features,
+            metadata={
+                "scan_duration": time.time() - start_time,
+                "use_capstone": self.use_capstone,
+                "node_statistics": stats,
+            }
+        )
+
+        # Save outputs
+        self._save_outputs(result, program_id)
+
+        # Bridge to LangGraph pipeline
+        base_name = program_id.replace("/", "_")
+        out_dir = self.output_dir / base_name
+        self._bridge_to_langgraph(program_id, result.patterns, str(out_dir))
+
+        print(f"\n{'='*60}")
+        print(f"SCAN COMPLETE in {result.metadata['scan_duration']:.2f}s")
+        print(f"{'='*60}")
+
+        return result
+
+    def _save_outputs(self, result: BytecodeScanResult, program_id: str):
+        """Save all analysis outputs."""
+        base_name = program_id.replace("/", "_")
+        out_dir = self.output_dir / base_name
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        # JSON report
+        result.to_json(out_dir / "report.json")
+        print(f"  -> Report: {out_dir / 'report.json'}")
+
+        # Graph features
+        if self.feature_encoder:
+            self.feature_encoder.export_to_json(out_dir / "graph_features.json")
+            self.feature_encoder.export_to_dot(out_dir / "cfg.dot")
+            print(f"  -> Graph features: {out_dir / 'graph_features.json'}")
+            print(f"  -> CFG DOT: {out_dir / 'cfg.dot'}")
+
+        # Vulnerability summary
+        summary = self.semantic_extractor.get_vulnerability_summary() if self.semantic_extractor else {}
+        with open(out_dir / "vuln_summary.json", 'w') as f:
+            json.dump(summary, f, indent=2)
+        print(f"  -> Vuln summary: {out_dir / 'vuln_summary.json'}")
+
+    def scan_local(self, so_path: str, program_id: str = "unknown") -> BytecodeScanResult:
+        """
+        Scan a local .so file without fetching from chain.
+        """
+        return self.scan_program(program_id, so_path=Path(so_path), skip_fetch=True)
+
+    def get_call_graph(self) -> Dict[str, List[str]]:
+        """Get function call graph from last scan."""
+        if not self.cfg_recoverer:
+            raise ValueError("No scan performed yet")
+
+        G = self.cfg_recoverer.get_call_graph()
+        return {node: list(G.successors(node)) for node in G.nodes()}
+
+    def get_dominator_tree(self, func_name: str) -> Optional[Dict]:
+        """Get dominator tree for a function."""
+        if not self.cfg_recoverer:
+            raise ValueError("No scan performed yet")
+
+        dom_tree = self.cfg_recoverer.get_dominator_tree(func_name)
+        if dom_tree is None:
+            return None
+
+        return {node: list(dom_tree.successors(node)) for node in dom_tree.nodes()}
+
+    def find_loops(self, func_name: str) -> List[List[str]]:
+        """Find loops in a function."""
+        if not self.cfg_recoverer:
+            raise ValueError("No scan performed yet")
+
+        return self.cfg_recoverer.find_loops(func_name)

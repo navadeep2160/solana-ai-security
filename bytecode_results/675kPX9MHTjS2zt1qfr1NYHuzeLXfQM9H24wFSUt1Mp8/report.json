@@ -1,0 +1,2020 @@
+{
+  "program_id": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+  "so_path": "downloaded_programs/675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8.so",
+  "timestamp": 1782576166.4339886,
+  "instruction_count": 80819,
+  "function_count": 2,
+  "block_count": 187,
+  "patterns": [
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "custom_panic:lbb_7d4e8",
+      "instruction_offsets": [
+        513312
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "custom_panic",
+      "block_id": "lbb_7d4e8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "custom_panic:lbb_7d568",
+      "instruction_offsets": [
+        513432
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "custom_panic",
+      "block_id": "lbb_7d568",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c308",
+      "instruction_offsets": [
+        508680
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c308",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c320",
+      "instruction_offsets": [
+        508752
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c320",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c360",
+      "instruction_offsets": [
+        508808
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c360",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c398",
+      "instruction_offsets": [
+        508864
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c398",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c3d0",
+      "instruction_offsets": [
+        508912
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c3d0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c400",
+      "instruction_offsets": [
+        508960
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c400",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c430",
+      "instruction_offsets": [
+        509008
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c430",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c460",
+      "instruction_offsets": [
+        509056
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c460",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c490",
+      "instruction_offsets": [
+        509096
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c490",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c4b8",
+      "instruction_offsets": [
+        509136
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c4b8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c4e0",
+      "instruction_offsets": [
+        509168
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c4e0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c500",
+      "instruction_offsets": [
+        509200
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c500",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c520",
+      "instruction_offsets": [
+        509248
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c520",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c568",
+      "instruction_offsets": [
+        509288
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c568",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c598",
+      "instruction_offsets": [
+        509352
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c598",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c5b8",
+      "instruction_offsets": [
+        509384
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c5b8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c5d8",
+      "instruction_offsets": [
+        509416
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c5d8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c5f8",
+      "instruction_offsets": [
+        509448
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c5f8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c618",
+      "instruction_offsets": [
+        509480
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c618",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c638",
+      "instruction_offsets": [
+        509512
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c638",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c658",
+      "instruction_offsets": [
+        509544
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c658",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c678",
+      "instruction_offsets": [
+        509576
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c678",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c698",
+      "instruction_offsets": [
+        509608
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c698",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c6d0",
+      "instruction_offsets": [
+        509664
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c6d0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c700",
+      "instruction_offsets": [
+        509696
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c700",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c710",
+      "instruction_offsets": [
+        509768
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c710",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0x0064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c710",
+      "instruction_offsets": [
+        509776
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c710",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c760",
+      "instruction_offsets": [
+        509792
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c760",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0x0064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c770",
+      "instruction_offsets": [
+        509808
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c770",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0x0064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c780",
+      "instruction_offsets": [
+        509824
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c780",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0x0064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c780",
+      "instruction_offsets": [
+        509832
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c780",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c798",
+      "instruction_offsets": [
+        509848
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c798",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0x0064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c7a8",
+      "instruction_offsets": [
+        509880
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c7a8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c7a8",
+      "instruction_offsets": [
+        509904
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c7a8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0x0064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c7a8",
+      "instruction_offsets": [
+        509912
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c7a8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0x0064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c7e8",
+      "instruction_offsets": [
+        509944
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c7e8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c7e8",
+      "instruction_offsets": [
+        509968
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c7e8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c860",
+      "instruction_offsets": [
+        510048
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c860",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c8a8",
+      "instruction_offsets": [
+        510120
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c8a8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c8f0",
+      "instruction_offsets": [
+        510192
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c8f0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c930",
+      "instruction_offsets": [
+        510256
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c930",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c970",
+      "instruction_offsets": [
+        510320
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c970",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c9b0",
+      "instruction_offsets": [
+        510384
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c9b0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7c9f0",
+      "instruction_offsets": [
+        510448
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7c9f0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7ca28",
+      "instruction_offsets": [
+        510504
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7ca28",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7ca60",
+      "instruction_offsets": [
+        510560
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7ca60",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7ca98",
+      "instruction_offsets": [
+        510616
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7ca98",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cad0",
+      "instruction_offsets": [
+        510672
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cad0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cb08",
+      "instruction_offsets": [
+        510728
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cb08",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cb40",
+      "instruction_offsets": [
+        510784
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cb40",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cb78",
+      "instruction_offsets": [
+        510840
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cb78",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cbb0",
+      "instruction_offsets": [
+        510896
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cbb0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cbe0",
+      "instruction_offsets": [
+        510944
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cbe0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cc10",
+      "instruction_offsets": [
+        510992
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cc10",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cc40",
+      "instruction_offsets": [
+        511040
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cc40",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cc70",
+      "instruction_offsets": [
+        511088
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cc70",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cca0",
+      "instruction_offsets": [
+        511136
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cca0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7ccd0",
+      "instruction_offsets": [
+        511184
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7ccd0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cd00",
+      "instruction_offsets": [
+        511232
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cd00",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cd30",
+      "instruction_offsets": [
+        511280
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cd30",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cd60",
+      "instruction_offsets": [
+        511328
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cd60",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cd90",
+      "instruction_offsets": [
+        511376
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cd90",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cdc0",
+      "instruction_offsets": [
+        511424
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cdc0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cdd8",
+      "instruction_offsets": [
+        511448
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cdd8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cdf0",
+      "instruction_offsets": [
+        511472
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cdf0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7ce08",
+      "instruction_offsets": [
+        511496
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7ce08",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7ce20",
+      "instruction_offsets": [
+        511520
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7ce20",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7ce38",
+      "instruction_offsets": [
+        511544
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7ce38",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7ce50",
+      "instruction_offsets": [
+        511568
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7ce50",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7ce68",
+      "instruction_offsets": [
+        511592
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7ce68",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7ce80",
+      "instruction_offsets": [
+        511616
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7ce80",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7ce98",
+      "instruction_offsets": [
+        511640
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7ce98",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7ceb0",
+      "instruction_offsets": [
+        511664
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7ceb0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cec8",
+      "instruction_offsets": [
+        511688
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cec8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cee0",
+      "instruction_offsets": [
+        511712
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cee0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cef8",
+      "instruction_offsets": [
+        511736
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cef8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cf10",
+      "instruction_offsets": [
+        511760
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cf10",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cf28",
+      "instruction_offsets": [
+        511784
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cf28",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cf40",
+      "instruction_offsets": [
+        511808
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cf40",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cf58",
+      "instruction_offsets": [
+        511832
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cf58",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cf70",
+      "instruction_offsets": [
+        511856
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cf70",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cf88",
+      "instruction_offsets": [
+        511880
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cf88",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cfa0",
+      "instruction_offsets": [
+        511904
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cfa0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cfb8",
+      "instruction_offsets": [
+        511928
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cfb8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cfd0",
+      "instruction_offsets": [
+        511952
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cfd0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7cfe8",
+      "instruction_offsets": [
+        511976
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7cfe8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d000",
+      "instruction_offsets": [
+        512000
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d000",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d018",
+      "instruction_offsets": [
+        512024
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d018",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d030",
+      "instruction_offsets": [
+        512048
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d030",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d048",
+      "instruction_offsets": [
+        512072
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d048",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d060",
+      "instruction_offsets": [
+        512096
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d060",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d078",
+      "instruction_offsets": [
+        512120
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d078",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d090",
+      "instruction_offsets": [
+        512144
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d090",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d0a8",
+      "instruction_offsets": [
+        512168
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d0a8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d0c0",
+      "instruction_offsets": [
+        512208
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d0c0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d0c0",
+      "instruction_offsets": [
+        512272
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d0c0",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d118",
+      "instruction_offsets": [
+        512280
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d118",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0x1064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d118",
+      "instruction_offsets": [
+        512288
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d118",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d118",
+      "instruction_offsets": [
+        512296
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d118",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d118",
+      "instruction_offsets": [
+        512304
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d118",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d118",
+      "instruction_offsets": [
+        512320
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d118",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d148",
+      "instruction_offsets": [
+        512328
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d148",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d148",
+      "instruction_offsets": [
+        512344
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d148",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0x8064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d160",
+      "instruction_offsets": [
+        512352
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d160",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0x5064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d160",
+      "instruction_offsets": [
+        512360
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d160",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d160",
+      "instruction_offsets": [
+        512416
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d160",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d1a8",
+      "instruction_offsets": [
+        512440
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d1a8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d1a8",
+      "instruction_offsets": [
+        512448
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d1a8",
+      "pattern_type": "unchecked_arithmetic"
+    },
+    {
+      "name": "unchecked_arithmetic",
+      "severity": "High",
+      "category": "Math & Precision",
+      "confidence": 0.7,
+      "description": "Unchecked alu_0xb064 operation. Rust release mode wraps on overflow, potentially causing incorrect calculations.",
+      "location": "entrypoint:lbb_7d1a8",
+      "instruction_offsets": [
+        512504
+      ],
+      "remediation": "Use checked_add, checked_mul, or saturating arithmetic. Enable overflow-checks in Cargo.toml.",
+      "references": [
+        "https://doc.rust-lang.org/reference/expressions/operator-expr.html#overflow"
+      ],
+      "function": "entrypoint",
+      "block_id": "lbb_7d1a8",
+      "pattern_type": "unchecked_arithmetic"
+    }
+  ],
+  "critical_findings": [],
+  "metadata": {
+    "scan_duration": 0.23588943481445312,
+    "use_capstone": false,
+    "node_statistics": {
+      "Program": 1,
+      "Function": 2,
+      "BasicBlock": 187,
+      "Instruction": 469,
+      "VulnerabilityPattern": 96
+    }
+  }
+}

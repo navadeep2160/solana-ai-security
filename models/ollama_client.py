@@ -1,21 +1,65 @@
+"""
+Ollama Client with Singleton Caching
+====================================
+Loads model ONCE and reuses across all agent calls.
+Eliminates ~2 min overhead from repeated model reloads.
+"""
 import os
-from dotenv import load_dotenv
-load_dotenv()
+import warnings
+from typing import Optional
 
-USE_OLLAMA = True  # Set False to use Groq
+warnings.filterwarnings("ignore")
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-def load_model(model_name: str = None, model_key: str = "scan_model", force_local: bool = False):
-    if USE_OLLAMA or force_local:
-        from langchain_ollama import ChatOllama
-        print(f"[MODEL] Loading → qwen2.5-coder:14b (Ollama LOCAL)")
-        return ChatOllama(
-            model="qwen2.5-coder:14b",
-            temperature=0,
-            base_url="http://localhost:11434",
-        )
-    else:
-        from langchain_groq import ChatGroq
-        name = "llama-3.3-70b-versatile"
-        api_key = os.getenv("GROQ_API_KEY","").strip()
-        print(f"[MODEL] Loading → {name} (Groq)")
-        return ChatGroq(model=name, temperature=0, api_key=api_key, max_tokens=4096)
+# ── Singleton cache ────────────────────────────────────────
+_chat_ollama_instance: Optional[object] = None
+_chat_ollama_model_name: Optional[str] = None
+
+_raw_ollama_instance: Optional[object] = None
+_raw_ollama_model_name: Optional[str] = None
+
+def get_ollama_client(model_name: str = "qwen2.5-coder:14b", force_local: bool = True):
+    """Get cached raw Ollama client. Loads once, reuses forever."""
+    global _raw_ollama_instance, _raw_ollama_model_name
+    
+    if _raw_ollama_instance is not None and _raw_ollama_model_name == model_name:
+        return _raw_ollama_instance
+    
+    try:
+        import ollama
+        _raw_ollama_instance = ollama.Client()
+        _raw_ollama_model_name = model_name
+        return _raw_ollama_instance
+    except Exception as e:
+        print(f"[MODEL] Ollama not available: {e}")
+        return None
+
+def load_model(model_name: str = "qwen2.5-coder:14b", force_local: bool = True):
+    """Get cached ChatOllama (LangChain) instance. Loads once, reuses forever."""
+    global _chat_ollama_instance, _chat_ollama_model_name
+    
+    if _chat_ollama_instance is not None and _chat_ollama_model_name == model_name:
+        return _chat_ollama_instance
+    
+    from langchain_ollama import ChatOllama
+    
+    print(f"[MODEL] Loading → {model_name} (Ollama LOCAL) [CACHED]")
+    
+    _chat_ollama_instance = ChatOllama(
+        model=model_name,
+        temperature=0.1,
+        num_ctx=8192,
+        base_url="http://localhost:11434",
+    )
+    _chat_ollama_model_name = model_name
+    return _chat_ollama_instance
+
+def clear_cache():
+    """Clear all cached clients."""
+    global _chat_ollama_instance, _chat_ollama_model_name
+    global _raw_ollama_instance, _raw_ollama_model_name
+    _chat_ollama_instance = None
+    _chat_ollama_model_name = None
+    _raw_ollama_instance = None
+    _raw_ollama_model_name = None
+    print("[MODEL] Cache cleared")

@@ -1,206 +1,56 @@
 use anchor_lang::prelude::*;
 
-declare_id!("Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL");
+declare_id!("675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8");
 
 #[program]
-pub mod vulnerable_bank {
+pub mod pseudo_source {
     use super::*;
 
-    // ── INIT ─────────────────────────────────────────────────
-    pub fn initialize(
-        ctx: Context<Initialize>,
-        amount: u64,
-    ) -> Result<()> {
+    pub fn initialize(ctx: Context<Initialize>, bump: u8) -> ProgramResult {
         let bank = &mut ctx.accounts.bank;
-        bank.owner   = ctx.accounts.owner.key();
-        bank.balance = amount;
-        bank.admin   = ctx.accounts.owner.key();
-        bank.locked  = false;
+        require!(bank.owner == ctx.accounts.owner.key(), ErrorCode::Unauthorized);
+        bank.bump = bump;
         Ok(())
     }
 
-    // VULN 1: No signer check — anyone can withdraw
-    // VULN 2: No owner verification
-    // VULN 3: No underflow check
-    pub fn withdraw(
-        ctx: Context<Withdraw>,
-        amount: u64,
-    ) -> Result<()> {
-        let bank = &mut ctx.accounts.bank;
-        require!(bank.owner == ctx.accounts.user.key(), ErrorCode::Unauthorized);
-        bank.balance = bank.balance.checked_sub(amount).ok_or(error!(ErrorCode::Underflow))?;
-        Ok(())
-    }
+    pub fn transfer(ctx: Context<Transfer>, amount: u64) -> ProgramResult {
+        let from_bank = &mut ctx.accounts.from_bank;
+        let to_bank = &mut ctx.accounts.to_bank;
 
-    // VULN 4: No overflow check
-    pub fn deposit(
-        ctx: Context<Deposit>,
-        amount: u64,
-    ) -> Result<()> {
-        let bank = &mut ctx.accounts.bank;
-        require!(ctx.accounts.user.is_signer, ErrorCode::Unauthorized);
-        bank.balance = bank.balance.checked_add(amount).ok_or(error!(ErrorCode::Overflow))?;
-        Ok(())
-    }
+        require!(from_bank.owner == ctx.accounts.owner.key(), ErrorCode::Unauthorized);
+        require!(to_bank.owner == ctx.accounts.owner.key(), ErrorCode::Unauthorized);
 
-    // VULN 5: No authority check on close
-    pub fn close_account(
-        ctx: Context<CloseAccount>,
-    ) -> Result<()> {
-        let bank = &mut ctx.accounts.bank;
-        require!(bank.owner == ctx.accounts.caller.key(), ErrorCode::Unauthorized);
-        bank.balance = 0;
-        Ok(())
-    }
+        from_bank.balance = from_bank.balance.checked_sub(amount).ok_or(error!(ErrorCode::Underflow))?;
+        to_bank.balance = to_bank.balance.checked_add(amount).ok_or(error!(ErrorCode::Overflow))?;
 
-    // VULN 6: Reinitialization — no check if already initialized
-    pub fn reinitialize(
-        ctx: Context<Reinitialize>,
-        new_owner: Pubkey,
-    ) -> Result<()> {
-        let bank = &mut ctx.accounts.bank;
-        require!(bank.owner == ctx.accounts.caller.key(), ErrorCode::Unauthorized);
-        bank.owner = new_owner;
-        bank.admin = new_owner;
-        Ok(())
-    }
-
-    // VULN 7: Admin action with no admin check
-    pub fn set_locked(
-        ctx: Context<SetLocked>,
-        locked: bool,
-    ) -> Result<()> {
-        let bank = &mut ctx.accounts.bank;
-        require!(bank.owner == ctx.accounts.caller.key(), ErrorCode::Unauthorized);
-        bank.locked = locked;
-        Ok(())
-    }
-
-    // VULN 8: Arithmetic — multiply before divide missing,
-    //         loss of precision, no overflow guard
-    pub fn calculate_fee(
-        ctx: Context<CalculateFee>,
-        amount: u64,
-    ) -> Result<()> {
-        let bank = &mut ctx.accounts.bank;
-        require!(ctx.accounts.caller.is_signer, ErrorCode::Unauthorized);
-        let fee = (amount * 3) / 100; // multiply before divide to avoid precision loss
-        bank.balance = bank.balance.checked_sub(fee).ok_or(error!(ErrorCode::Underflow))?;
-        Ok(())
-    }
-
-    // VULN 9: CPI to arbitrary program — no program ID check
-    pub fn cpi_transfer(
-        ctx: Context<CpiTransfer>,
-        amount: u64,
-    ) -> Result<()> {
-        let bank = &mut ctx.accounts.bank;
-        require!(ctx.accounts.caller.is_signer, ErrorCode::Unauthorized);
-        bank.balance = bank.balance.checked_sub(amount).ok_or(error!(ErrorCode::Underflow))?;
-        // no verification that target_program is a trusted program
-        Ok(())
-    }
-
-    // VULN 10: Duplicate mutable accounts — no uniqueness check
-    pub fn transfer(
-        ctx: Context<Transfer>,
-        amount: u64,
-    ) -> Result<()> {
-        let from = &mut ctx.accounts.from;
-        let to   = &mut ctx.accounts.to;
-        require!(from.key() != to.key(), ErrorCode::SameAccountTransfer);
-        require!(ctx.accounts.caller.is_signer, ErrorCode::Unauthorized);
-        from.balance = from.balance.checked_sub(amount).ok_or(error!(ErrorCode::Underflow))?;
-        to.balance   = to.balance.checked_add(amount).ok_or(error!(ErrorCode::Overflow))?;
         Ok(())
     }
 }
 
-// ── Account structs ───────────────────────────────────────────
-
 #[derive(Accounts)]
 pub struct Initialize<'info> {
-    #[account(init, payer = owner, space = 8 + 32 + 32 + 8 + 1)]
-    pub bank: Account<'info, BankAccount>,
+    #[account(init, payer = owner, space = 8 + 32 + 1)]
+    pub bank: Account<'info, Bank>,
     #[account(mut)]
     pub owner: Signer<'info>,
     pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
-pub struct Withdraw<'info> {
-    #[account(mut)]
-    pub bank: Account<'info, BankAccount>,
-    // VULN 1: AccountInfo not Signer
-    /// CHECK: unsafe, no validation
-    pub user: AccountInfo<'info>,
-}
-
-#[derive(Accounts)]
-pub struct Deposit<'info> {
-    #[account(mut)]
-    pub bank: Account<'info, BankAccount>,
-    pub user: Signer<'info>,
-}
-
-#[derive(Accounts)]
-pub struct CloseAccount<'info> {
-    #[account(mut)]
-    pub bank: Account<'info, BankAccount>,
-    // VULN 5: no constraint that caller is owner
-    /// CHECK: unsafe, no authority check
-    pub caller: AccountInfo<'info>,
-}
-
-#[derive(Accounts)]
-pub struct Reinitialize<'info> {
-    #[account(mut)]
-    pub bank: Account<'info, BankAccount>,
-    // VULN 6: any signer can reinitialize
-    pub caller: Signer<'info>,
-}
-
-#[derive(Accounts)]
-pub struct SetLocked<'info> {
-    #[account(mut)]
-    pub bank: Account<'info, BankAccount>,
-    // VULN 7: any signer can lock — no admin check
-    pub caller: Signer<'info>,
-}
-
-#[derive(Accounts)]
-pub struct CalculateFee<'info> {
-    #[account(mut)]
-    pub bank: Account<'info, BankAccount>,
-    pub caller: Signer<'info>,
-}
-
-#[derive(Accounts)]
-pub struct CpiTransfer<'info> {
-    #[account(mut)]
-    pub bank: Account<'info, BankAccount>,
-    pub caller: Signer<'info>,
-    // VULN 9: target_program not validated
-    /// CHECK: arbitrary program, no ID check
-    pub target_program: AccountInfo<'info>,
-}
-
-#[derive(Accounts)]
 pub struct Transfer<'info> {
     #[account(mut)]
-    pub from: Account<'info, BankAccount>,
-    // VULN 10: from and to can be the same account
+    pub from_bank: Account<'info, Bank>,
     #[account(mut)]
-    pub to: Account<'info, BankAccount>,
-    pub caller: Signer<'info>,
+    pub to_bank: Account<'info, Bank>,
+    #[account(mut)]
+    pub owner: Signer<'info>,
 }
 
 #[account]
-pub struct BankAccount {
-    pub owner:   Pubkey,
-    pub admin:   Pubkey,
-    pub balance: u64,
-    pub locked:  bool,
+pub struct Bank {
+    bump: u8,
+    owner: Pubkey,
+    balance: u64,
 }
 #[error_code]
 pub enum ErrorCode {

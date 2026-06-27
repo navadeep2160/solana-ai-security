@@ -9,8 +9,10 @@ from agents.scanner.scanner_v3 import scan_contract_v3
 from agents.patcher.patch_agent import patch_contract
 from agents.validator.validator_agent import validate_contract
 from analysis.static_checks.checks import run_all_checks
+from analysis.unified_parser import UnifiedScanner
 from analysis.ast_parser.rust_ast_parser import parse_rust_ast, format_ast_findings
 from analysis.ast_parser.cfg_builder import analyze_cfg
+from analysis.ast_parser.cfg_security_analyzer import analyze_cfg_security
 from runtime_validator.checker import run_runtime_validation
 from analysis.ast_parser.kb_ast_analyzer import analyze_ast_with_kb, analyze_cfg_with_kb
 from agents.exploit.exploit_agent import run_exploit_agent
@@ -62,20 +64,31 @@ def main():
     print("\n[MAIN] Running AST parser...")
     ast_result = parse_rust_ast(original_contract)
     print(format_ast_findings(ast_result))
-    ast_findings = [
+    
+    # Unified scanner for comprehensive analysis
+    scanner = UnifiedScanner(use_llm=False)
+    unified_result = scanner.scan(original_contract, "vulnerable_bank")
+    print(f"[MAIN] Unified scan: {unified_result['stats']['total']} findings")
+    
+    unified_findings = [
         {
-            "type": f["type"],
-            "severity": f["severity"],
-            "reason": f"{f['description']} (at {f['location']})",
+            "type": f["vuln_type"],
+            "severity": f.get("severity", "MEDIUM"),
+            "reason": f"{f['description']} (line {f.get('line', 0)})",
             "line": f.get("line", 0),
-            "source": "ast"
+            "source": f.get("source", "unified"),
+            "confidence": f.get("confidence", 0.5),
         }
-        for f in ast_result.findings
+        for f in unified_result["findings"]
     ]
+    
+    ast_findings = [f for f in unified_findings if "ast" in f.get("source", "")]
+    print(f"[MAIN] AST findings: {len(ast_findings)}")
 
     print("\n[MAIN] Running CFG analysis...")
     cfg_result = analyze_cfg(original_contract)
     print(cfg_result["summary"])
+    # CFG already included in unified scan above
     cfg_findings = [
         {
             "type": f["type"],

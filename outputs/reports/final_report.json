@@ -1,1570 +1,216 @@
 {
+  "timestamp": "2026-06-25T09:33:46.755690",
   "success": true,
-  "runtime_deployed": false,
-  "devnet_deployed": true,
-  "patch_iterations": 2,
-  "patch_verified": true,
-  "security_score": 0.0,
-  "reflection_score": 7.5,
-  "findings": {
-    "static": 10,
-    "ast": 8,
-    "cfg": 9,
-    "ai": 10,
-    "v3": 12,
-    "taint": 6,
-    "total": 55
-  },
-  "exploit": {
-    "total": 46,
-    "confirmed": 41,
-    "unconfirmed": 5,
-    "false_positive": 0,
-    "findings": [
-      {
-        "vulnerability": "No signer check",
-        "function": "withdraw",
-        "result": "UNCONFIRMED",
-        "confirmed": false,
-        "confidence": 0.8,
-        "reasoning": "The transaction succeeded, but the balance before and after is the same, indicating no funds were withdrawn.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 1,
-          "who_signs": "attacker",
-          "expected_outcome": "Anyone can withdraw funds from the bank account.",
-          "exploit_type": "missing_signer"
-        },
-        "poc_tx": "2orbT4Y7H1YJRHGYvgnMbVs2evz9WSgDgWNqfDWVp8AE3DwMNdyupYicyn58gqTxUCfa3Mfc562W2JYVdwi7HKVe",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {
-          "balance": 14185928489174880151
-        },
-        "tx_success": true,
-        "error": ""
-      },
-      {
-        "vulnerability": "No owner verification",
-        "function": "withdraw",
-        "result": "UNCONFIRMED",
-        "confirmed": false,
-        "confidence": 0.8,
-        "reasoning": "The transaction succeeded, but the balance before and after is the same, indicating no funds were withdrawn.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 1,
-          "who_signs": "attacker",
-          "expected_outcome": "An attacker can withdraw funds from the bank without being the owner.",
-          "exploit_type": "missing_owner"
-        },
-        "poc_tx": "25JVRojNsiw5gnrcVJUHD4qytkDnaYJZWswsCa1HjmbdMhq1fr9dCH5hUaeTm7RizgsiQgWyztTpYRwgA2d2oVad",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {
-          "balance": 14185928489174880151
-        },
-        "tx_success": true,
-        "error": ""
-      },
-      {
-        "vulnerability": "No authority check on close",
-        "function": "close_account",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction succeeded and the account was closed without any authority check, confirming the vulnerability.",
-        "plan": {
-          "instruction": "close_account",
-          "amount": 0,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can close the account without any authority check.",
-          "exploit_type": "missing_owner"
-        },
-        "poc_tx": "3jAxc9aJCVNp1dtYR9mF92mhA9WzHBH9sWusUSNB6MUNPXKEVvwV9gRovkRXWnHawHbnhyjfgXk3Aigg8rzNa6a8",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {
-          "balance": 14185928489174880151
-        },
-        "tx_success": true,
-        "error": ""
-      },
-      {
-        "vulnerability": "Admin action with no admin check",
-        "function": "set_locked",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The exploit plan successfully locked/unlocked the bank without any authorization, confirming the finding.",
-        "plan": {
-          "instruction": "set_locked",
-          "amount": 0,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can lock/unlock the bank without any authorization.",
-          "exploit_type": "other"
-        },
-        "poc_tx": "33n7iMY7hf7FxcUNtCjF76WHpeBnH635ZPCJeS22ZBZzBp62BtBMi7aUdYhwfPBFK4ofcmuyyjCyrpQczzCD2PBf",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {
-          "balance": 14185928489174880151
-        },
-        "tx_success": true,
-        "error": ""
-      },
-      {
-        "vulnerability": "CPI to arbitrary program",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the vulnerability.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "missing_signer_check",
-        "function": "withdraw",
-        "result": "UNCONFIRMED",
-        "confirmed": false,
-        "confidence": 0.8,
-        "reasoning": "The transaction succeeded without changing the balance, which suggests that the withdraw function might have additional checks not captured in the static analysis.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 1,
-          "who_signs": "attacker",
-          "expected_outcome": "An attacker can withdraw funds from the bank without being a signer.",
-          "exploit_type": "missing_signer"
-        },
-        "poc_tx": "2sorje8sMbWwQe3yJ4Z9ZiyH2BwYgsCbsWjBFuq8wkM6csoNKhNx5DSrookTeeRHR5fbZfiZpuCZRrJWd5Pod9oz",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {
-          "balance": 14185928489174880151
-        },
-        "tx_success": true,
-        "error": ""
-      },
-      {
-        "vulnerability": "missing_owner_check",
-        "function": "withdraw",
-        "result": "UNCONFIRMED",
-        "confirmed": false,
-        "confidence": 0.8,
-        "reasoning": "The transaction succeeded without changing the balance, which suggests that the exploit may not have been successful or the funds were already withdrawn by another means.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 1,
-          "who_signs": "attacker",
-          "expected_outcome": "An attacker can withdraw funds from the bank account without being the owner.",
-          "exploit_type": "missing_owner"
-        },
-        "poc_tx": "31ivErRPY4gt39kdsvCbdgEE8hJ8mrFjuZ8hEfCNs8pdZm37a7ZSE4U3icZZmWRnzSTf4aR3LxPfFWEh39paX3tF",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {
-          "balance": 14185928489174880151
-        },
-        "tx_success": true,
-        "error": ""
-      },
-      {
-        "vulnerability": "integer_underflow",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program error, confirming the presence of an integer underflow vulnerability.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "owner",
-          "expected_outcome": "The balance will underflow, leading to incorrect balances or unexpected behavior.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "integer_overflow",
-        "function": "deposit",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the integer overflow issue.",
-        "plan": {
-          "instruction": "deposit",
-          "amount": 18446744073709551615,
-          "who_signs": "owner",
-          "expected_outcome": "The balance will overflow, leading to incorrect balances or unexpected behavior.",
-          "exploit_type": "overflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "unchecked_account_closure",
-        "function": "close_account",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The exploit plan successfully demonstrated that the close_account function can be called by an unauthorized attacker, confirming the vulnerability.",
-        "plan": {
-          "instruction": "close_account",
-          "amount": 0,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can close the account without authorization, leading to loss of funds.",
-          "exploit_type": "missing_owner"
-        },
-        "poc_tx": "5xbhaiqNMVwFE4qVqaczBtL2VLqYi8mD6cZgrbT3LJ7ivAwtYXfMQQwTksZ5at2j75NQbEZYdUcaYgu1btaemtUq",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {
-          "balance": 14185928489174880151
-        },
-        "tx_success": true,
-        "error": ""
-      },
-      {
-        "vulnerability": "reinitialization_attack",
-        "function": "reinitialize",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed with a custom program error, confirming that the reinitialize function does not allow reinitialization without proper checks.",
-        "plan": {
-          "instruction": "reinitialize",
-          "amount": 0,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can reinitialize the bank account, taking ownership and resetting the state.",
-          "exploit_type": "other"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: custom program error: 0x66\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "missing_admin_check",
-        "function": "set_locked",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The exploit plan successfully demonstrated that the set_locked function can be called by an attacker without admin verification, allowing them to lock or unlock the bank.",
-        "plan": {
-          "instruction": "set_locked",
-          "amount": 0,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can lock or unlock the bank without being an admin.",
-          "exploit_type": "missing_admin_check"
-        },
-        "poc_tx": "8DWtazuFpaf6M6wxLP5X71yF2Np7e63xvo4dEhDd92DhJ1neKy9TUJFZzF3RWkCnGt82ZJAk1cgwiZfE4KDRCik",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {
-          "balance": 14185928489174880151
-        },
-        "tx_success": true,
-        "error": ""
-      },
-      {
-        "vulnerability": "missing_signer",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the critical security issue with missing signer enforcement.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "missing_signer",
-        "function": "close_account",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The exploit plan was successfully executed, and the transaction succeeded without authorization.",
-        "plan": {
-          "instruction": "close_account",
-          "amount": 0,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can close the account without being authorized.",
-          "exploit_type": "missing_signer"
-        },
-        "poc_tx": "72jGLTkS3ER83NUJw51w9Vt9wGVEnCHVRNWWXfYoedHq62rRW2KSRDMF9wbYQ6JaV23yqAmGAaZHQvxXBHrJjgK",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {
-          "balance": 14185928489174880151
-        },
-        "tx_success": true,
-        "error": ""
-      },
-      {
-        "vulnerability": "missing_owner_check",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the critical security issue of missing owner check in the 'withdraw' function.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "unsafe_math",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the unsafe arithmetic issue in the 'withdraw' function.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker withdraws more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "integer_overflow",
-        "function": "deposit",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to an overflow error, confirming the presence of a high-severity integer overflow vulnerability.",
-        "plan": {
-          "instruction": "deposit",
-          "amount": 18446744073709551615,
-          "who_signs": "owner",
-          "expected_outcome": "The balance will overflow, potentially leading to unexpected behavior or loss of funds.",
-          "exploit_type": "overflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "missing_owner_check",
-        "function": "close_account",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The exploit plan was successfully executed, and the transaction succeeded without authorization, confirming the vulnerability.",
-        "plan": {
-          "instruction": "close_account",
-          "amount": 0,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can close the account without authorization, potentially draining funds.",
-          "exploit_type": "missing_owner"
-        },
-        "poc_tx": "3h3n98Kg1BxnPWNXEehE9vqqnptTVAiZBF5gFZqAH3DoS9HhFQZWta8GZhhYHr6aV7bviygxFrWJPK1n8eKGxA6N",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {
-          "balance": 14185928489174880151
-        },
-        "tx_success": true,
-        "error": ""
-      },
-      {
-        "vulnerability": "missing_owner_check",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the critical security issue of missing owner check in the 'transfer' function.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "unsafe_math",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the unsafe arithmetic issue.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "unchecked_arithmetic",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to an error processing the instruction, confirming the unchecked arithmetic vulnerability.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "no_security_checks",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the absence of security checks in the 'withdraw' function.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "unchecked_arithmetic",
-        "function": "deposit",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the unchecked arithmetic overflow issue.",
-        "plan": {
-          "instruction": "deposit",
-          "amount": 18446744073709551615,
-          "who_signs": "owner",
-          "expected_outcome": "The deposit amount will overflow, potentially leading to a wrap-around and unexpected behavior.",
-          "exploit_type": "overflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "no_security_checks",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the absence of security checks in the 'close_account' function.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "unchecked_arithmetic",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the unchecked arithmetic issue leading to an underflow.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "unchecked_arithmetic",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to an error processing the instruction, confirming the unchecked arithmetic issue.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "unchecked_arithmetic",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to an error processing the instruction, confirming the unchecked arithmetic vulnerability.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "operation_before_check",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the critical security issue.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "no_security_checks",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the absence of security checks in the 'transfer' function.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "Missing Signer Check",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a missing signer check, confirming the vulnerability.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "Incorrect Authority Check",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the incorrect authority check vulnerability.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "Missing Signer Checks",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the presence of a missing signer check vulnerability.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "Integer Overflow/Underflow",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the presence of an integer underflow vulnerability.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker withdraws more funds than available, leading to an underflow in the bank's balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "Account Data Matching Vulnerability",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program error, confirming the presence of an account data matching vulnerability.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "Integer Overflows & Underflows",
-        "function": "deposit",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to an arithmetic overflow, confirming the presence of the integer overflow vulnerability.",
-        "plan": {
-          "instruction": "deposit",
-          "amount": 18446744073709551615,
-          "who_signs": "owner",
-          "expected_outcome": "The deposit amount will overflow, potentially leading to unexpected behavior or loss of funds.",
-          "exploit_type": "overflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "Arbitrary CPI to SPL Token Program",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program error, confirming the critical security issue.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "Improper Validation of Associated Token Account",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program error, confirming the improper validation of associated token accounts as described in the finding.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more tokens than the bank's balance, leading to an underflow and potentially draining the bank.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "Account Confusion",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the account confusion issue.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "Missing ownership check",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the critical security issue of missing ownership check.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "Missing Discriminant Check",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program error, confirming the presence of a security vulnerability.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can withdraw more funds than available, leading to a negative balance.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "taint",
-        "function": "initialize",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed with a custom program error, confirming the presence of an overflow condition as expected.",
-        "plan": {
-          "instruction": "initialize",
-          "amount": 18446744073709551615,
-          "who_signs": "attacker",
-          "expected_outcome": "The bank balance is set to the maximum value of u64, causing an overflow.",
-          "exploit_type": "overflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: custom program error: 0xbbd\", data: RpcSimulateTransactionResult(RpcSimulateTransactio"
-      },
-      {
-        "vulnerability": "taint",
-        "function": "withdraw",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program error, confirming the potential underflow issue.",
-        "plan": {
-          "instruction": "withdraw",
-          "amount": 999999999999,
-          "who_signs": "attacker",
-          "expected_outcome": "The bank balance will underflow, potentially leading to incorrect state or unexpected behavior.",
-          "exploit_type": "underflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "taint",
-        "function": "deposit",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed due to a program failure, confirming the critical taint issue with the deposit function.",
-        "plan": {
-          "instruction": "deposit",
-          "amount": 18446744073709551615,
-          "who_signs": "attacker",
-          "expected_outcome": "The bank balance will overflow, potentially leading to incorrect state or unexpected behavior.",
-          "exploit_type": "overflow"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: Program failed to complete\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "taint",
-        "function": "close_account",
-        "result": "UNCONFIRMED",
-        "confirmed": false,
-        "confidence": 0.8,
-        "reasoning": "The exploit plan did not result in any change to the state, suggesting that the function may have checks or safeguards not identified by the taint analysis.",
-        "plan": {
-          "instruction": "close_account",
-          "amount": 0,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can repeatedly call close_account without any checks, allowing for potential reinitialization and state corruption.",
-          "exploit_type": "other"
-        },
-        "poc_tx": "3bkyygcz7R3sdJNGcaW8zCMVbVj1WvPZQskh7iYstr3MgDDVnfsArHU4ENbPhyQrsgC1jhzqQGTXgyz2bssEhcQH",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {
-          "balance": 14185928489174880151
-        },
-        "tx_success": true,
-        "error": ""
-      },
-      {
-        "vulnerability": "taint",
-        "function": "reinitialize",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The transaction failed with a custom program error, confirming that the reinitialization attempt was blocked as expected due to missing validation.",
-        "plan": {
-          "instruction": "reinitialize",
-          "amount": 0,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can reinitialize the bank contract, setting themselves as both the owner and admin without any validation.",
-          "exploit_type": "missing_owner"
-        },
-        "poc_tx": "",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {},
-        "tx_success": false,
-        "error": "SendTransactionPreflightFailureMessage { message: \"Transaction simulation failed: Error processing Instruction 0: custom program error: 0x66\", data: RpcSimulateTransactionResult(RpcSimulateTransaction"
-      },
-      {
-        "vulnerability": "taint",
-        "function": "set_locked",
-        "result": "CONFIRMED",
-        "confirmed": true,
-        "confidence": 1.0,
-        "reasoning": "The exploit plan successfully changed the bank's lock state without authorization, confirming the critical security vulnerability.",
-        "plan": {
-          "instruction": "set_locked",
-          "amount": 0,
-          "who_signs": "attacker",
-          "expected_outcome": "The attacker can lock/unlock the bank without any authorization.",
-          "exploit_type": "missing_owner"
-        },
-        "poc_tx": "5HvvSTaSXAwg3AkHHGmLpFzqBXkbkwngnfxePQYA4oissBkuuT2CgQWnTQfUrwNAPArSDKe1FgXDK7Tp4pitNUDs",
-        "state_before": {
-          "balance": 14185928489174880151
-        },
-        "state_after": {
-          "balance": 14185928489174880151
-        },
-        "tx_success": true,
-        "error": ""
-      }
-    ],
-    "program_id": "Ak49KJAr32qbxt3whtzpLB69Xz1mTT4MGDSXNuaF6AL"
-  },
-  "scoring": {
-    "total": 38,
-    "critical": 30,
-    "high": 5,
-    "medium": 3,
-    "low": 0,
-    "false_positives_removed": 0,
-    "removed": [],
-    "findings": [
-      {
-        "vulnerability": "No owner verification",
-        "score": 9.5,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 10,
-        "confidence": 10,
-        "reasoning": "High severity with confirmed PoC and critical kb_severity.",
-        "confirmed": false,
-        "poc_tx": "25JVRojNsiw5gnrcVJUHD4qytkDnaYJZWswsCa1HjmbdMhq1fr9dCH5hUaeTm7RizgsiQgWyztTpYRwgA2d2oVad",
-        "source": "static",
-        "description": "Withdraw function does not verify the owner."
-      },
-      {
-        "vulnerability": "Admin action with no admin check",
-        "score": 9.5,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 10,
-        "confidence": 10,
-        "reasoning": "High severity with confirmed PoC and critical kb_severity.",
-        "confirmed": true,
-        "poc_tx": "33n7iMY7hf7FxcUNtCjF76WHpeBnH635ZPCJeS22ZBZzBp62BtBMi7aUdYhwfPBFK4ofcmuyyjCyrpQczzCD2PBf",
-        "source": "static",
-        "description": "Anyone can lock/unlock the bank."
-      },
-      {
-        "vulnerability": "missing_owner_check",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=critical, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "static",
-        "description": "The withdraw function does not verify if the caller is the owner of the bank account, allowing unauthorized withdrawals."
-      },
-      {
-        "vulnerability": "integer_underflow",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=critical, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "static",
-        "description": "The withdraw function does not check for underflow when subtracting from the balance, which could lead to incorrect balances or unexpected behavior."
-      },
-      {
-        "vulnerability": "integer_overflow",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=critical, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "static",
-        "description": "The deposit function does not check for overflow when adding to the balance, which could lead to incorrect balances or unexpected behavior."
-      },
-      {
-        "vulnerability": "unchecked_account_closure",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=high, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "5xbhaiqNMVwFE4qVqaczBtL2VLqYi8mD6cZgrbT3LJ7ivAwtYXfMQQwTksZ5at2j75NQbEZYdUcaYgu1btaemtUq",
-        "source": "static",
-        "description": "The close_account function does not verify if the caller has authority to close the account, allowing unauthorized closure."
-      },
-      {
-        "vulnerability": "reinitialization_attack",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=critical, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "static",
-        "description": "The reinitialize function does not check if the bank has already been initialized, allowing it to be reinitialized multiple times."
-      },
-      {
-        "vulnerability": "missing_admin_check",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=critical, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "8DWtazuFpaf6M6wxLP5X71yF2Np7e63xvo4dEhDd92DhJ1neKy9TUJFZzF3RWkCnGt82ZJAk1cgwiZfE4KDRCik",
-        "source": "static",
-        "description": "The set_locked function does not verify if the caller is an admin, allowing anyone to lock or unlock the bank."
-      },
-      {
-        "vulnerability": "missing_signer",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=high, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "72jGLTkS3ER83NUJw51w9Vt9wGVEnCHVRNWWXfYoedHq62rRW2KSRDMF9wbYQ6JaV23yqAmGAaZHQvxXBHrJjgK",
-        "source": "ast",
-        "description": "Field 'user' uses AccountInfo \u2014 no signer enforced. (at struct Withdraw, field user, line 128)"
-      },
-      {
-        "vulnerability": "unsafe_math",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=critical, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "ast",
-        "description": "'withdraw' uses unsafe arithmetic. (at fn withdraw, line 25)"
-      },
-      {
-        "vulnerability": "unchecked_arithmetic",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=medium, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "cfg",
-        "description": "Unchecked math in withdraw() lines 24-31"
-      },
-      {
-        "vulnerability": "no_security_checks",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=high, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "cfg",
-        "description": "Function 'withdraw' has NO security checks"
-      },
-      {
-        "vulnerability": "operation_before_check",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=critical, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "cfg",
-        "description": "Transfer in transfer() block transfer:bb0 with no signer check"
-      },
-      {
-        "vulnerability": "Missing Signer Check",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=high, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "ast_kb_v3",
-        "description": "withdraw at line 40 type=function"
-      },
-      {
-        "vulnerability": "Incorrect Authority Check",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=high, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "ast_kb_v3",
-        "description": "withdraw at line 40 type=function"
-      },
-      {
-        "vulnerability": "Missing Signer Checks",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=high, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "ast_kb_v3",
-        "description": "withdraw at line 40 type=function"
-      },
-      {
-        "vulnerability": "Integer Overflow/Underflow",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=critical, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "ast_kb_v3",
-        "description": "withdraw at line 40 type=function"
-      },
-      {
-        "vulnerability": "Account Data Matching Vulnerability",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=high, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "ast_kb_v3",
-        "description": "withdraw at line 40 type=function"
-      },
-      {
-        "vulnerability": "Integer Overflows & Underflows",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=critical, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "ast_kb_v3",
-        "description": "calculate_fee at line 77 type=function"
-      },
-      {
-        "vulnerability": "Arbitrary CPI to SPL Token Program",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=critical, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "ast_kb_v3",
-        "description": "cpi_transfer at line 89 type=function"
-      },
-      {
-        "vulnerability": "Improper Validation of Associated Token Account",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=high, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "ast_kb_v3",
-        "description": "bank at line 116 type=Account<'info"
-      },
-      {
-        "vulnerability": "Account Confusion",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=high, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "ast_kb_v3",
-        "description": "bank at line 116 type=Account<'info"
-      },
-      {
-        "vulnerability": "Missing ownership check",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=critical, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "ast_kb_v3",
-        "description": "user at line 128 type=AccountInfo<'info>"
-      },
-      {
-        "vulnerability": "Missing Discriminant Check",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=high, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "ast_kb_v3",
-        "description": "user at line 135 type=Signer<'inf"
-      },
-      {
-        "vulnerability": "taint",
-        "score": 9.0,
-        "level": "CRITICAL",
-        "exploitability": 8,
-        "impact": 9,
-        "confidence": 9,
-        "reasoning": "KB severity=high, runtime=confirmed",
-        "confirmed": true,
-        "poc_tx": "5HvvSTaSXAwg3AkHHGmLpFzqBXkbkwngnfxePQYA4oissBkuuT2CgQWnTQfUrwNAPArSDKe1FgXDK7Tp4pitNUDs",
-        "source": "taint_analysis",
-        "description": "User-controlled input 'amount' directly sets the bank balance without any validation, allowing for potential overflow or incorrect state."
-      },
-      {
-        "vulnerability": "No signer check",
-        "score": 8.5,
-        "level": "CRITICAL",
-        "exploitability": 9,
-        "impact": 10,
-        "confidence": 10,
-        "reasoning": "High severity with confirmed PoC and critical kb_severity.",
-        "confirmed": false,
-        "poc_tx": "2orbT4Y7H1YJRHGYvgnMbVs2evz9WSgDgWNqfDWVp8AE3DwMNdyupYicyn58gqTxUCfa3Mfc562W2JYVdwi7HKVe",
-        "source": "static",
-        "description": "Anyone can withdraw funds."
-      },
-      {
-        "vulnerability": "No authority check on close",
-        "score": 8.5,
-        "level": "CRITICAL",
-        "exploitability": 9,
-        "impact": 10,
-        "confidence": 10,
-        "reasoning": "High severity with confirmed PoC and critical kb_severity.",
-        "confirmed": true,
-        "poc_tx": "3jAxc9aJCVNp1dtYR9mF92mhA9WzHBH9sWusUSNB6MUNPXKEVvwV9gRovkRXWnHawHbnhyjfgXk3Aigg8rzNa6a8",
-        "source": "static",
-        "description": "Anyone can close the account."
-      },
-      {
-        "vulnerability": "CPI to arbitrary program",
-        "score": 8.5,
-        "level": "CRITICAL",
-        "exploitability": 9,
-        "impact": 10,
-        "confidence": 10,
-        "reasoning": "High severity with confirmed PoC and critical kb_severity.",
-        "confirmed": true,
-        "poc_tx": "",
-        "source": "static",
-        "description": "No check on the target program ID."
-      },
-      {
-        "vulnerability": "Duplicate mutable accounts",
-        "score": 8.5,
-        "level": "HIGH",
-        "exploitability": 6,
-        "impact": 6,
-        "confidence": 5,
-        "reasoning": "KB severity=critical, runtime=static",
-        "confirmed": false,
-        "poc_tx": "",
-        "source": "static",
-        "description": "From and to accounts can be the same."
-      },
-      {
-        "vulnerability": "arbitrary_cpi",
-        "score": 8.5,
-        "level": "HIGH",
-        "exploitability": 6,
-        "impact": 6,
-        "confidence": 5,
-        "reasoning": "KB severity=critical, runtime=static",
-        "confirmed": false,
-        "poc_tx": "",
-        "source": "static",
-        "description": "The cpi_transfer function does not verify if the target_program is a trusted program, allowing arbitrary CPI calls."
-      },
-      {
-        "vulnerability": "duplicate_mutable_accounts",
-        "score": 8.5,
-        "level": "HIGH",
-        "exploitability": 6,
-        "impact": 6,
-        "confidence": 5,
-        "reasoning": "KB severity=critical, runtime=static",
-        "confirmed": false,
-        "poc_tx": "",
-        "source": "static",
-        "description": "The transfer function does not check for uniqueness of mutable accounts, allowing duplicate mutable accounts."
-      },
-      {
-        "vulnerability": "No underflow check",
-        "score": 7.5,
-        "level": "CRITICAL",
-        "exploitability": 6,
-        "impact": 8,
-        "confidence": 10,
-        "reasoning": "Medium severity with critical kb_severity and no confirmed PoC.",
-        "confirmed": false,
-        "poc_tx": "",
-        "source": "static",
-        "description": "Withdraw function can cause underflow."
-      },
-      {
-        "vulnerability": "Reinitialization without check",
-        "score": 7.5,
-        "level": "CRITICAL",
-        "exploitability": 6,
-        "impact": 8,
-        "confidence": 10,
-        "reasoning": "Medium severity with critical kb_severity and no confirmed PoC.",
-        "confirmed": false,
-        "poc_tx": "",
-        "source": "static",
-        "description": "Bank can be reinitialized without checks."
-      },
-      {
-        "vulnerability": "No overflow check",
-        "score": 7.0,
-        "level": "HIGH",
-        "exploitability": 6,
-        "impact": 8,
-        "confidence": 10,
-        "reasoning": "Medium severity with high kb_severity and no confirmed PoC.",
-        "confirmed": false,
-        "poc_tx": "",
-        "source": "static",
-        "description": "Deposit function can cause overflow."
-      },
-      {
-        "vulnerability": "missing_signer_check",
-        "score": 7.0,
-        "level": "HIGH",
-        "exploitability": 6,
-        "impact": 6,
-        "confidence": 5,
-        "reasoning": "KB severity=high, runtime=static",
-        "confirmed": false,
-        "poc_tx": "2sorje8sMbWwQe3yJ4Z9ZiyH2BwYgsCbsWjBFuq8wkM6csoNKhNx5DSrookTeeRHR5fbZfiZpuCZRrJWd5Pod9oz",
-        "source": "static",
-        "description": "The withdraw function does not check if the caller is a signer, allowing anyone to withdraw funds."
-      },
-      {
-        "vulnerability": "Arithmetic precision loss",
-        "score": 6.5,
-        "level": "MEDIUM",
-        "exploitability": 4,
-        "impact": 7,
-        "confidence": 10,
-        "reasoning": "Medium severity with medium kb_severity and no confirmed PoC.",
-        "confirmed": false,
-        "poc_tx": "",
-        "source": "static",
-        "description": "Calculate fee function loses precision."
-      },
-      {
-        "vulnerability": "precision_loss",
-        "score": 5.0,
-        "level": "MEDIUM",
-        "exploitability": 6,
-        "impact": 6,
-        "confidence": 5,
-        "reasoning": "KB severity=medium, runtime=static",
-        "confirmed": false,
-        "poc_tx": "",
-        "source": "static",
-        "description": "The calculate_fee function divides before multiplying, which can lead to precision loss and incorrect fee calculations."
-      },
-      {
-        "vulnerability": "Precision Loss in Arithmetic Operations",
-        "score": 5.0,
-        "level": "MEDIUM",
-        "exploitability": 6,
-        "impact": 6,
-        "confidence": 5,
-        "reasoning": "KB severity=medium, runtime=static",
-        "confirmed": false,
-        "poc_tx": "",
-        "source": "ast_kb_v3",
-        "description": "calculate_fee at line 77 type=function"
-      }
-    ]
-  },
-  "invariants_count": 9,
-  "network": {}
+  "iterations": 2,
+  "vulnerabilities_found": [
+    {
+      "type": "No signer check",
+      "severity": "high",
+      "reason": "Anyone can withdraw funds."
+    },
+    {
+      "type": "No owner verification",
+      "severity": "high",
+      "reason": "Withdraw function lacks owner verification."
+    },
+    {
+      "type": "No underflow check",
+      "severity": "medium",
+      "reason": "Withdraw function does not check for underflow."
+    },
+    {
+      "type": "No overflow check",
+      "severity": "medium",
+      "reason": "Deposit function does not check for overflow."
+    },
+    {
+      "type": "No authority check on close",
+      "severity": "high",
+      "reason": "CloseAccount function lacks authority check."
+    },
+    {
+      "type": "Reinitialization without check",
+      "severity": "medium",
+      "reason": "Reinitialize function allows reinitialization without checking if already initialized."
+    },
+    {
+      "type": "Admin action with no admin check",
+      "severity": "high",
+      "reason": "SetLocked function allows any signer to lock/unlock the bank."
+    },
+    {
+      "type": "Arithmetic vulnerability",
+      "severity": "medium",
+      "reason": "CalculateFee function divides before multiply, causing precision loss and no overflow guard."
+    },
+    {
+      "type": "CPI to arbitrary program without check",
+      "severity": "high",
+      "reason": "CpiTransfer function lacks target_program ID verification."
+    },
+    {
+      "type": "Duplicate mutable accounts",
+      "severity": "medium",
+      "reason": "Transfer function allows from and to to be the same account, lacking uniqueness check."
+    },
+    {
+      "type": "Missing Signer Check",
+      "severity": "high",
+      "reason": "withdraw at line 40 type=function",
+      "line": 40,
+      "fix": "pub fn log_message(ctx: Context<LogMessage>) -> ProgramResult { if !ctx.accounts.authority.is_signer { return Err(Progra",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Incorrect Authority Check",
+      "severity": "high",
+      "reason": "withdraw at line 40 type=function",
+      "line": 40,
+      "fix": "if ctx.accounts.token.owner != &spl_token::ID {",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Missing Signer Checks",
+      "severity": "high",
+      "reason": "withdraw at line 40 type=function",
+      "line": 40,
+      "fix": "",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Integer Overflow/Underflow",
+      "severity": "critical",
+      "reason": "withdraw at line 40 type=function",
+      "line": 40,
+      "fix": "Use safe arithmetic libraries; ensure proper bounds checking",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Account Data Matching Vulnerability",
+      "severity": "high",
+      "reason": "withdraw at line 40 type=function",
+      "line": 40,
+      "fix": "if ctx.accounts.authority.key != &token.owner { return Err(ProgramError::InvalidAccountData); }",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Precision Loss in Arithmetic Operations",
+      "severity": "medium",
+      "reason": "calculate_fee at line 77 type=function",
+      "line": 77,
+      "fix": "let result = (a * PRECISION) / b;",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Integer Overflows & Underflows",
+      "severity": "high",
+      "reason": "calculate_fee at line 77 type=function",
+      "line": 77,
+      "fix": "let result = a.checked_add(b).ok_or(ErrorCode::ArithmeticOverflow)?;",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Arbitrary CPI to SPL Token Program",
+      "severity": "critical",
+      "reason": "cpi_transfer at line 89 type=function",
+      "line": 89,
+      "fix": "if &spl_token::ID != ctx.accounts.token_program.key { return Err(ProgramError::IncorrectProgramId); }",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Improper Validation of Associated Token Account",
+      "severity": "high",
+      "reason": "bank at line 116 type=Account<'info",
+      "line": 116,
+      "fix": "Use `get_associated_token_address` for validating associated token accounts.",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Account Confusion",
+      "severity": "high",
+      "reason": "bank at line 116 type=Account<'info",
+      "line": 116,
+      "fix": "",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Missing ownership check",
+      "severity": "critical",
+      "reason": "user at line 128 type=AccountInfo<'info>",
+      "line": 128,
+      "fix": "Create a helper function that takes an untrusted `AccountInfo`, checks the owner and returns an object of a different, t",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "Missing Discriminant Check",
+      "severity": "high",
+      "reason": "user at line 135 type=Signer<'inf",
+      "line": 135,
+      "fix": "if user.discriminant != AccountDiscriminant::User { return Err(ProgramError::InvalidAccountData); }",
+      "source": "ast_kb_v3"
+    },
+    {
+      "type": "missing_signer_check",
+      "severity": "critical",
+      "reason": "Anyone can withdraw from the bank without proper authorization.",
+      "source": "static"
+    },
+    {
+      "type": "missing_owner_check",
+      "severity": "critical",
+      "reason": "No owner verification is performed during withdrawal, allowing unauthorized access.",
+      "source": "static"
+    },
+    {
+      "type": "integer_underflow",
+      "severity": "high",
+      "reason": "No underflow check during withdrawal, which could lead to incorrect balance calculations.",
+      "source": "static"
+    },
+    {
+      "type": "integer_overflow",
+      "severity": "high",
+      "reason": "No overflow check during deposit, which could lead to incorrect balance calculations.",
+      "source": "static"
+    },
+    {
+      "type": "unchecked_account_closure",
+      "severity": "high",
+      "reason": "No authority check on close, allowing anyone to close the bank account.",
+      "source": "static"
+    },
+    {
+      "type": "reinitialization_attack",
+      "severity": "high",
+      "reason": "No check if the bank is already initialized, allowing reinitialization by anyone.",
+      "source": "static"
+    },
+    {
+      "type": "missing_admin_check",
+      "severity": "high",
+      "reason": "No admin check on set_locked, allowing anyone to lock or unlock the bank.",
+      "source": "static"
+    },
+    {
+      "type": "precision_loss",
+      "severity": "medium",
+      "reason": "Arithmetic operations in calculate_fee could lead to precision loss due to division before multiplication.",
+      "source": "static"
+    },
+    {
+      "type": "arbitrary_cpi",
+      "severity": "medium",
+      "reason": "No program ID check on cpi_transfer, allowing calls to arbitrary programs.",
+      "source": "static"
+    },
+    {
+      "type": "duplicate_mutable_accounts",
+      "severity": "medium",
+      "reason": "No uniqueness check on mutable accounts in transfer, allowing duplicate mutable accounts.",
+      "source": "static"
+    }
+  ],
+  "total_vulnerabilities": 32,
+  "patched_contract_path": "outputs/patched/patched_contract.rs",
+  "status": "SECURED"
 }

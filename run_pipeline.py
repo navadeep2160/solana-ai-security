@@ -1,3 +1,9 @@
+import os
+# Ensure Solana CLI is in PATH for subprocess calls
+_solana_bin = os.path.expanduser("~/.local/share/solana/install/active_release/bin")
+if os.path.exists(_solana_bin) and _solana_bin not in os.environ.get("PATH", ""):
+    os.environ["PATH"] = _solana_bin + ":" + os.environ.get("PATH", "")
+
 import json
 from agents.network.network_router import collect_metrics
 from rag.context_builder import build_rag_context

@@ -1,3 +1,10 @@
+import os
+import sys
+# Ensure Solana CLI is in PATH for subprocess calls
+_solana_bin = os.path.expanduser("~/.local/share/solana/install/active_release/bin")
+if os.path.exists(_solana_bin) and _solana_bin not in os.environ.get("PATH", ""):
+    os.environ["PATH"] = _solana_bin + ":" + os.environ.get("PATH", "")
+
 import time
 import json
 import shutil
