@@ -1,7 +1,7 @@
 {
   "program_id": "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
   "so_path": "downloaded_programs/675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8.so",
-  "timestamp": 1782576166.4339886,
+  "timestamp": 1782995832.9388714,
   "instruction_count": 80819,
   "function_count": 2,
   "block_count": 187,
@@ -2007,7 +2007,7 @@
   ],
   "critical_findings": [],
   "metadata": {
-    "scan_duration": 0.23588943481445312,
+    "scan_duration": 0.2098526954650879,
     "use_capstone": false,
     "node_statistics": {
       "Program": 1,

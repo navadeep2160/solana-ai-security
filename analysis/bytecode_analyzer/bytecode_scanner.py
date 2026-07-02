@@ -105,211 +105,40 @@ class BytecodeScanner:
         self.feature_encoder: Optional[FeatureEncoder] = None
     
     def _bridge_to_langgraph(self, program_id: str, patterns: list, outdir: str):
-        """Direct LLM pipeline using kb_router.query_vuln_nodes()."""
         try:
+            from agents.scanner.scanner_v3 import scan_contract_v3
+            from agents.patcher.patch_agent import patch_contract
             from agents.validator.validator_agent import validate_contract
-            from kb.kb_router import query_vuln_nodes
-            import requests
+            from analysis.bytecode_analyzer.agents.pseudo_source_generator import (
+                bridge_bytecode_to_pipeline
+            )
             
-            print("\n[BRIDGE] KB-driven LLM pipeline starting...")
+            print("\n[BRIDGE] Converting bytecode findings to pseudo-source...")
+            pattern_dicts = [p.to_dict() for p in patterns]
             
-            print(f"[BRIDGE] Querying KB for {len(patterns)} patterns...")
-            matched_vulns = []
-            seen = set()
+            print("[BRIDGE] Generating pseudo-source via bridge...")
+            bridge_result = bridge_bytecode_to_pipeline(pattern_dicts, program_id, outdir)
+            pseudo_source_path = bridge_result["pseudo_source"]
+            with open(pseudo_source_path, "r") as f:
+                pseudo_source = f.read()
+            print(f"[BRIDGE] Pseudo-source generated: {len(pseudo_source)} chars")
             
-            for pattern in patterns:
-                p_dict = pattern.to_dict() if hasattr(pattern, "to_dict") else pattern
-                name = p_dict.get("name", "")
-                desc = p_dict.get("description", "")
-                
-                try:
-                    kb_results = query_vuln_nodes(name, top_k=3)
-                    for r in kb_results:
-                        vuln_name = r.get("name", "")
-                        if vuln_name and vuln_name not in seen:
-                            seen.add(vuln_name)
-                            matched_vulns.append({
-                                "pattern_name": name,
-                                "kb_match": vuln_name,
-                                "severity": r.get("severity", "medium"),
-                                "description": r.get("description", ""),
-                                "fix": r.get("fix", ""),
-                                "category": r.get("category", "other"),
-                            })
-                except Exception:
-                    if name not in seen:
-                        seen.add(name)
-                        matched_vulns.append({
-                            "pattern_name": name,
-                            "kb_match": name,
-                            "severity": "medium",
-                            "description": desc,
-                            "fix": "",
-                            "category": "other",
-                        })
-            
-            print(f"[BRIDGE] Found {len(matched_vulns)} unique KB-matched vulnerabilities")
-            
-            print("[BRIDGE] Building LLM prompt from KB findings...")
-            prompt = self._build_kb_prompt(program_id, matched_vulns)
-            
-            print("[BRIDGE] Calling qwen2.5-coder:14b via Ollama...")
-            try:
-                response = requests.post(
-                    "http://localhost:11434/api/generate",
-                    json={
-                        "model": "qwen2.5-coder:14b",
-                        "prompt": prompt,
-                        "stream": False,
-                        "options": {"temperature": 0.3, "num_predict": 4096}
-                    },
-                    timeout=300
-                )
-                response.raise_for_status()
-                result = response.json()
-                generated_code = result.get("response", "").strip()
-            except Exception as e:
-                print(f"[BRIDGE] Ollama error: {e}")
-                return None
-            
-            if generated_code.startswith("```"):
-                lines_code = generated_code.split("\n")
-                if lines_code[0].startswith("```"):
-                    lines_code = lines_code[1:]
-                if lines_code and lines_code[-1].startswith("```"):
-                    lines_code = lines_code[:-1]
-                generated_code = "\n".join(lines_code).strip()
-            
-            if not generated_code:
-                print("[BRIDGE] LLM returned empty response")
-                return None
-                
-            print(f"[BRIDGE] Generated {len(generated_code)} chars of Rust code")
-            
-            print("[BRIDGE] Sanitizing generated code...")
-            generated_code = self._sanitize_rust_code(generated_code)
-            print(f"[BRIDGE] Sanitized code: {len(generated_code)} chars")
+            print("[BRIDGE] Running patch_agent...")
+            patched = patch_contract(pseudo_source)
             
             print("[BRIDGE] Running validator_agent...")
-            validation = validate_contract(generated_code)
+            validation = validate_contract(patched)
             
             if validation.get("success"):
-                print("[BRIDGE] Full pipeline complete! Contract compiles.")
+                print("[BRIDGE] ✅ Full pipeline complete!")
             else:
-                print("[BRIDGE] Generated contract failed validation.")
-                stderr = validation.get("stderr", "")
-                if stderr:
-                    print(f"[BRIDGE] Error preview: {stderr[:500]}")
+                print("[BRIDGE] ⚠️ Patch failed validation.")
             
-            return {
-                "generated_code": generated_code,
-                "validation": validation,
-                "vulnerabilities": matched_vulns,
-                "patterns_count": len(patterns)
-            }
+            return {"findings": findings, "validation": validation}
             
         except Exception as e:
             print(f"[BRIDGE] Error: {e}")
-            import traceback
-            traceback.print_exc()
             return None
-    
-    def _sanitize_rust_code(self, code: str) -> str:
-        """Fix common LLM mistakes in generated Rust code."""
-        import re
-        
-        # Fix 1: Remove * before .key() — .key() returns Pubkey directly
-        code = re.sub(r'\*ctx\.accounts\.(\w+)\.key\(\)', r'ctx.accounts.\1.key()', code)
-        code = re.sub(r'\*([a-zA-Z_][a-zA-Z0-9_]*)\.key\(\)', r'\1.key()', code)
-        
-        # Fix 2: Add pub to Bank struct fields if missing
-        code = re.sub(
-            r'(#\[account\]\s*\n\s*pub struct Bank \{)([^}]+)(\})',
-            lambda m: m.group(1) + re.sub(r'^(\s+)(bump|authority|balance|owner)(:)', r'\1pub \2\3', m.group(2), flags=re.M) + m.group(3),
-            code,
-            flags=re.DOTALL
-        )
-        
-        # Fix 3: Replace has_one with proper seeds if seeds are missing
-        if 'has_one = authority' in code and 'seeds' not in code:
-            code = code.replace('has_one = authority', 'seeds = [b"bank", authority.key().as_ref()],\n           bump = bank.bump')
-        
-        # Fix 4: Ensure Initialize uses proper PDA pattern
-        if 'pub struct Initialize' in code and 'seeds' not in code:
-            code = re.sub(
-                r'(pub struct Initialize<\'info> \{[^}]*?\[account\(\s*init,\s*payer = authority,\s*space = [^)]+)(\)\])',
-                r'\1,\n           seeds = [b"bank", authority.key().as_ref()],\n           bump\2',
-                code,
-                flags=re.DOTALL
-            )
-        
-        # Fix 5: Add seeds/bump to Deposit/Withdraw if missing
-        for struct_name in ['Deposit', 'Withdraw']:
-            if f'pub struct {struct_name}' in code:
-                struct_section = code.split(f'pub struct {struct_name}')[1].split('pub struct')[0] if 'pub struct' in code.split(f'pub struct {struct_name}')[1] else code.split(f'pub struct {struct_name}')[1]
-                if 'seeds' not in struct_section:
-                    code = re.sub(
-                        rf'(pub struct {struct_name}<\'info> \{{[^}}]*?#\[account\(\s*mut,)([^}}]*?pub bank:)',
-                        r'\1\n           seeds = [b"bank", authority.key().as_ref()],\n           bump = bank.bump,\2',
-                        code,
-                        flags=re.DOTALL
-                    )
-        
-        # Fix 6: Add bump parameter to initialize if missing
-        if 'pub fn initialize(ctx: Context<Initialize>' in code and 'bump: u8' not in code:
-            code = code.replace(
-                'pub fn initialize(ctx: Context<Initialize>) -> Result<()> {',
-                'pub fn initialize(ctx: Context<Initialize>, bump: u8) -> Result<()> {'
-            )
-        
-        # Fix 7: Store bump in initialize
-        if 'bank.bump = bump;' not in code and 'pub fn initialize' in code:
-            code = re.sub(
-                r'(pub fn initialize\(ctx: Context<Initialize>[^}]+?let bank = &mut ctx\.accounts\.bank;)([^}]+?)(Ok\(\))',
-                r'\1\n        bank.bump = bump;\2\3',
-                code,
-                flags=re.DOTALL
-            )
-        
-        # Fix 8: Ensure space is correct
-        code = re.sub(
-            r'space = 8 \+ 32 \+ 8',
-            r'space = 8 + std::mem::size_of::<Bank>()',
-            code
-        )
-        
-        return code
-    
-    
-    def _build_kb_prompt(self, program_id: str, vulnerabilities: list) -> str:
-        """Build prompt from KB-matched vulnerabilities."""
-        vuln_text = []
-        for v in vulnerabilities[:20]:
-            fix_str = f"\nFix: {v['fix']}" if v.get('fix') else ""
-            vuln_text.append(f"VULNERABILITY: {v['kb_match']}\nSeverity: {v['severity']}\nCategory: {v['category']}\nDescription: {v['description']}{fix_str}")
-        
-        vuln_str = "\n\n".join(vuln_text) if vuln_text else "No specific vulnerabilities detected."
-        
-        return f"""You are a Solana smart contract security expert. Generate a complete, compilable Anchor (v0.30.1) Rust smart contract.
-
-PROGRAM ID: {program_id}
-
-VULNERABILITIES ({len(vulnerabilities)} total):
-{vuln_str}
-
-RULES:
-1. Use ONLY anchor-lang v0.30.1 - NO anchor_spl
-2. Signer account MUST come BEFORE PDA accounts in struct
-3. Store bump: bank.bump = ctx.bumps.bank
-4. Use ctx.bumps.bank NOT ctx.bumps.get("bank")
-5. Use account.key() NOT account.key
-6. Use checked arithmetic
-7. Include ErrorCode enum with: ArithmeticOverflow, ArithmeticUnderflow, InsufficientFunds, Unauthorized
-8. Return Result<()> from all handlers
-
-OUTPUT ONLY the complete Rust code. Start with use anchor_lang::prelude::*;.
-"""
-
 
     def scan_program(self,
                      program_id: str,
