@@ -1,7 +1,8 @@
 """
 LLM Confirmer
 =============
-Uses LLM to confirm uncertain findings and reduce false positives.
+Uses LLM to confirm and enrich vulnerability findings.
+Reduces false positives by having the LLM reason about exploitability.
 """
 import os
 import sys
@@ -21,16 +22,16 @@ try:
 except ImportError:
     load_model = None
 
-
 class LLMConfirmer:
     """Confirms vulnerability findings using LLM reasoning."""
-
+    
     def __init__(self, model_name: str = "qwen2.5-coder:14b"):
         self.model_name = model_name
         self.llm = None
         self._init_llm()
-
+    
     def _init_llm(self):
+        """Initialize LLM (cached)."""
         if load_model:
             try:
                 self.llm = load_model(self.model_name)
@@ -38,110 +39,89 @@ class LLMConfirmer:
                 print(f"[LLM-Confirmer] Could not load LLM: {e}")
         else:
             print("[LLM-Confirmer] No LLM client available")
-
-    def confirm_batch(self, findings, source_code):
-        """Confirm findings. Only LLM-checks top 3 borderline findings."""
+    
+    def confirm_finding(self, finding: Dict[str, Any], source_code: str) -> Dict[str, Any]:
+        """Confirm a finding with LLM."""
         if not self.llm:
-            return findings
+            finding["llm_confirmed"] = False
+            finding["llm_confidence"] = 0.0
+            return finding
         
-        confirmed = []
-        checked = 0
-        
-        for finding in findings:
-            conf = finding.get("confidence", 0)
-            
-            # High confidence: auto-confirm
-            if conf >= 0.7:
-                finding["llm_confirmed"] = True
-                finding["llm_confidence"] = conf
-                confirmed.append(finding)
-                continue
-            
-            # Low confidence: skip
-            if conf <= 0.3:
-                finding["llm_confirmed"] = False
-                finding["llm_confidence"] = conf
-                confirmed.append(finding)
-                continue
-            
-            # Borderline: LLM check (max 3)
-            checked += 1
-            if checked > 3:
-                finding["llm_confirmed"] = True
-                finding["llm_confidence"] = conf
-                confirmed.append(finding)
-                continue
-            
-            print(f"  [LLM] Checking {finding.get('vuln_type', '?')} in {finding.get('function', '?')}...")
-            result = self._confirm_one(finding, source_code)
-            finding["llm_confirmed"] = result.get("is_vulnerable", False)
-            finding["llm_confidence"] = result.get("confidence", 0)
-            if finding["llm_confirmed"]:
-                finding["confidence"] = (conf * 0.4) + (result.get("confidence", 0) * 0.6)
-            confirmed.append(finding)
-        
-        return confirmed
-
-    def _confirm_one(self, finding: Dict, source_code: str) -> Dict:
-        """Ask LLM to confirm a single finding."""
         func_name = finding.get("function", "unknown")
         vuln_type = finding.get("vuln_type", "unknown")
         description = finding.get("description", "")
-
+        evidence = finding.get("evidence", "")
+        
         line = finding.get("line", 0)
-        snippet = self._extract_snippet(source_code, line)
-
-        prompt = self._build_prompt(vuln_type, description, func_name, snippet)
-
-        try:
-            response = self.llm.invoke(prompt)
-            content = response.content if hasattr(response, "content") else str(response)
-            return self._parse_response(content)
-        except Exception as e:
-            print(f"[LLM-Confirmer] Error: {e}")
-            return {"is_vulnerable": True, "confidence": 0.5}
-
-    def _build_prompt(self, vuln_type: str, description: str, func_name: str, snippet: str) -> str:
-        return f"""You are a Solana smart contract security expert.
-
-Analyze this potential vulnerability:
+        code_snippet = self._extract_snippet(source_code, line)
+        
+        prompt = f"""You are a Solana smart contract security expert. Analyze this potential vulnerability:
 
 VULNERABILITY: {vuln_type}
 DESCRIPTION: {description}
-FUNCTION: {func_name}
+EVIDENCE: {evidence}
 
 CODE SNIPPET:
 ```rust
-{snippet}
-```
-
+{code_snippet}
 Answer with ONLY a JSON object:
 {{
-  "is_vulnerable": true or false,
-  "confidence": 0.0 to 1.0,
-  "explanation": "brief reason",
-  "severity": "low/medium/high/critical",
-  "fix_suggestion": "specific fix"
+"is_vulnerable": true/false,
+"confidence": 0.0-1.0,
+"explanation": "brief reason",
+"severity": "low/medium/high/critical",
+"fix_suggestion": "specific fix"
 }}
+"""
 
-Rules:
-- Be strict - only flag real exploitable issues
-- Missing signer/owner checks on transfers/CPI are real bugs
-- Arithmetic without checked_* is a real bug
-- CPI without program validation is a real bug"""
+    try:
+        response = self.llm.invoke(prompt)
+        content = response.content if hasattr(response, 'content') else str(response)
+        
+        json_match = self._extract_json(content)
+        if json_match:
+            result = json.loads(json_match)
+            finding["llm_confirmed"] = result.get("is_vulnerable", False)
+            finding["llm_confidence"] = result.get("confidence", 0.0)
+            finding["llm_explanation"] = result.get("explanation", "")
+            finding["llm_severity"] = result.get("severity", finding.get("severity", "medium"))
+            finding["llm_fix"] = result.get("fix_suggestion", finding.get("fix", ""))
+            
+            kb_conf = finding.get("confidence", 0.5)
+            llm_conf = finding["llm_confidence"]
+            finding["confidence"] = (kb_conf * 0.4) + (llm_conf * 0.6)
+        else:
+            finding["llm_confirmed"] = False
+            finding["llm_confidence"] = 0.0
+            
+    except Exception as e:
+        print(f"[LLM-Confirmer] Confirmation failed: {e}")
+        finding["llm_confirmed"] = False
+        finding["llm_confidence"] = 0.0
+    
+    return finding
 
-    def _extract_snippet(self, source_code: str, line: int, context: int = 10) -> str:
-        lines = source_code.split("\n")
-        start = max(0, line - context - 1)
-        end = min(len(lines), line + context)
-        return "\n".join(lines[start:end])
+def confirm_batch(self, findings: List[Dict[str, Any]], source_code: str) -> List[Dict[str, Any]]:
+    """Confirm multiple findings efficiently."""
+    confirmed = []
+    for finding in findings:
+        confirmed.append(self.confirm_finding(finding, source_code))
+    return confirmed
 
-    def _parse_response(self, text: str) -> Dict:
-        try:
-            start = text.find("{")
-            end = text.rfind("}")
-            if start != -1 and end != -1 and end > start:
-                return json.loads(text[start:end+1])
-        except Exception:
-            pass
-        return {"is_vulnerable": True, "confidence": 0.5}
+def _extract_snippet(self, source_code: str, line: int, context: int = 10) -> str:
+    """Extract code snippet around a line."""
+    lines = source_code.split('\n')
+    start = max(0, line - context - 1)
+    end = min(len(lines), line + context)
+    return '\n'.join(lines[start:end])
+
+def _extract_json(self, text: str) -> Optional[str]:
+    """Extract JSON object from text."""
+    try:
+        start = text.find('{')
+        end = text.rfind('}')
+        if start != -1 and end != -1 and end > start:
+            return text[start:end+1]
+    except Exception:
+        pass
+    return None

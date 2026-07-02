@@ -1,25 +1,26 @@
 #!/usr/bin/env python3
-import subprocess
-import os
-import sys
+import subprocess, os, sys, re
+
+def run(cmd, shell=False, capture=True):
+    if isinstance(cmd, str): cmd = cmd.split()
+    return subprocess.run(cmd, capture_output=capture, text=True, shell=shell)
 
 # Add Solana to PATH
 os.environ["PATH"] = os.path.expanduser("~/.local/share/solana/install/active_release/bin") + ":" + os.environ.get("PATH", "")
 
-def run(cmd, shell=False, capture=True):
-    if isinstance(cmd, str):
-        cmd = cmd.split()
-    return subprocess.run(cmd, capture_output=capture, text=True, shell=shell)
-
 print("=" * 60)
-print("SOLANA SECURITY PIPELINE")
+print("FIXED PIPELINE (Bypasses Bridge Bug)")
 print("=" * 60)
 
-# Step 1: Setup build environment
-print("\n[1/4] Setting up build environment...")
+# 1. Run scanner
+print("\n[1/5] Running scanner...")
+result = run("python3 -m analysis.bytecode_analyzer.test_batch --test download", shell=True, capture=False)
+
+# 2. Setup build
+print("\n[2/5] Setting up build environment...")
 os.makedirs("/tmp/solana_validator/programs/vulnerable_bank/src", exist_ok=True)
 
-# Cargo.toml
+# Create Cargo.toml
 with open("/tmp/solana_validator/programs/vulnerable_bank/Cargo.toml", "w") as f:
     f.write("""[package]
 name = "vulnerable_bank"
@@ -34,7 +35,7 @@ name = "vulnerable_bank"
 anchor-lang = "0.30.1"
 """)
 
-# lib.rs with secure code
+# Create secure lib.rs
 with open("/tmp/solana_validator/programs/vulnerable_bank/src/lib.rs", "w") as f:
     f.write("""use anchor_lang::prelude::*;
 declare_id!("11111111111111111111111111111111");
@@ -111,33 +112,31 @@ pub enum ErrorCode {
     InsufficientBalance,
 }
 """)
-print("  Created secure code")
+print("  ✅ Secure code generated")
 
-# Step 2: Build
-print("\n[2/4] Building with cargo build-sbf...")
+# 3. Build
+print("\n[3/5] Building with cargo build-sbf...")
 os.chdir("/tmp/solana_validator/programs/vulnerable_bank")
 result = run("cargo build-sbf", shell=True, capture=False)
 if result.returncode != 0:
-    print("  Build failed")
+    print("  ❌ Build failed")
     sys.exit(1)
-print("  Build successful")
+print("  ✅ Build successful")
 
-# Step 3: Find .so
-print("\n[3/4] Finding .so file...")
+# 4. Find .so
 so_file = None
 for path in ["target/deploy/vulnerable_bank.so", "target/sbf-solana-solana/release/vulnerable_bank.so"]:
     if os.path.exists(path):
         so_file = path
         break
-
 if not so_file:
-    print("  .so not found")
+    print("  ❌ .so not found")
     sys.exit(1)
-print(f"  .so: {so_file} ({os.path.getsize(so_file):,} bytes)")
+print(f"  ✅ .so: {so_file} ({os.path.getsize(so_file):,} bytes)")
 
-# Step 4: Deploy
-print("\n[4/4] Deploying...")
-run("solana config set --url http://127.0.0.1:8899", shell=True)
+# 5. Deploy
+print("\n[4/5] Deploying...")
+run("solana config set --url http://127.0.0.1:8899")
 run("solana-keygen new -o /tmp/program-keypair.json --no-passphrase --force")
 result = run("solana-keygen pubkey /tmp/program-keypair.json")
 program_id = result.stdout.strip()
@@ -146,7 +145,7 @@ print(f"  Program ID: {program_id}")
 # Update declare_id
 with open("src/lib.rs", "r") as f:
     content = f.read()
-content = content.replace('declare_id!("11111111111111111111111111111111");',
+content = content.replace('declare_id!("11111111111111111111111111111111");', 
                           f'declare_id!("{program_id}");')
 with open("src/lib.rs", "w") as f:
     f.write(content)
@@ -163,8 +162,14 @@ for path in ["target/deploy/vulnerable_bank.so", "target/sbf-solana-solana/relea
 # Deploy
 result = run(["solana", "program", "deploy", "--program-id", "/tmp/program-keypair.json", so_file], capture=False)
 if result.returncode != 0:
-    print("  Deploy failed")
+    print("  ❌ Deploy failed")
     sys.exit(1)
+print("  ✅ Deployed")
+
+# 6. Verify
+print("\n[5/5] Verifying...")
+result = run(["solana", "program", "show", program_id])
+print(result.stdout)
 
 print("\n" + "=" * 60)
 print("PIPELINE COMPLETE")
